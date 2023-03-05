@@ -87,14 +87,14 @@ export class Client {
   async get_artist(artistId: string) {
     if (artistId.startsWith("MPLA")) artistId = artistId.slice(4);
 
-    const json = await this.request_json("browse", {
-      data: {
-        browseId: artistId,
-      },
-    });
-    Deno.writeTextFileSync("store/artist.json", JSON.stringify(json, null, 2));
+    // const json = await this.request_json("browse", {
+    //   data: {
+    //     browseId: artistId,
+    //   },
+    // });
+    // Deno.writeTextFileSync("store/artist.json", JSON.stringify(json, null, 2));
 
-    // const json = await Deno.readTextFile("store/artist.json").then(JSON.parse);
+    const json = await Deno.readTextFile("store/artist.json").then(JSON.parse);
 
     const results = j(json, `${SINGLE_COLUMN_TAB}.${SECTION_LIST}`);
     // console.log("results", results);
@@ -167,15 +167,4 @@ export class Client {
 
     // return artist;
   }
-}
-
-// sha1 (returns string) [not arraybuffer]
-async function sha1(message: string) {
-  const msgUint8 = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-1", msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join(
-    "",
-  );
-  return hashHex;
 }
