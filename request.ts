@@ -16,6 +16,11 @@ export interface RequestInit {
   params?: Record<string, string>;
 }
 
+export type RequestFunction = (
+  url: string,
+  options: RequestInit,
+) => Promise<Response>;
+
 export abstract class RequestClient {
   abstract request(url: string, options: RequestInit): Promise<Response>;
   auth_header: string | null = null;

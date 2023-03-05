@@ -17,8 +17,13 @@ import {
   TITLE,
   TITLE_TEXT,
 } from "./nav.ts";
-import { parse_artist_contents } from "./parsers/browsing.ts";
+import {
+  parse_artist_contents,
+  parse_mixed_content,
+} from "./parsers/browsing.ts";
 import { parse_playlist_items } from "./parsers/playlists.ts";
+import { exists } from "./deps.ts";
+import { get_continuations } from "./continuations.ts";
 
 interface ClientOptions {
   auth?: PureAuthenticatorOptions;
@@ -71,30 +76,87 @@ export class Client {
   }
 
   async request_json(endpoint: string, options: RequestInit) {
+    const cache = Object.keys(options.params || {}).length == 0;
+
+    // caching
+    const path = `store/${
+      new URLSearchParams({ ...options.data } as any || {})
+        .toString()
+    }.json`;
+
+    const cached = await Deno.readTextFile(path)
+      .then(JSON.parse).catch(() => null);
+
+    if (cache && cached) return cached;
+
     const response = await this.request(endpoint, options);
-    return response.json();
+    const json = await response.json();
+
+    if (cache) await Deno.writeTextFile(path, JSON.stringify(json, null, 2));
+
+    return json;
   }
 
-  get_playlist(playlistId: string) {
-    return this.request("browse", {
-      data: {
-        browseId: playlistId,
-      },
-      method: "POST",
-    });
+  async get_home(limit = 3, continuation?: string) {
+    const endpoint = "browse";
+    const data = { browseId: "FEmusic_home" };
+
+    const home: { continuation: string | null; results: any[] } = {
+      continuation: null,
+      results: [],
+    };
+
+    let section_list;
+
+    if (continuation) {
+      home.continuation = continuation;
+      home.results = [];
+    } else {
+      const json = await this.request_json(endpoint, { data });
+
+      const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
+
+      section_list = j(json, SINGLE_COLUMN_TAB, "sectionListRenderer");
+
+      home.continuation = j(
+        section_list,
+        "continuations[0].nextContinuationData.continuation",
+      );
+
+      home.results = parse_mixed_content(results);
+    }
+
+    if (home.continuation) {
+      const continued_data = await get_continuations(
+        home.continuation,
+        "sectionListContinuation",
+        limit - home.results.length,
+        (params) => {
+          return this.request_json(endpoint, {
+            data,
+            params,
+          });
+        },
+        (contents) => {
+          return parse_mixed_content(contents);
+        },
+      );
+
+      home.continuation = continued_data.continuation;
+      home.results.push(...continued_data.items);
+    }
+
+    return home;
   }
 
   async get_artist(artistId: string) {
     if (artistId.startsWith("MPLA")) artistId = artistId.slice(4);
 
-    // const json = await this.request_json("browse", {
-    //   data: {
-    //     browseId: artistId,
-    //   },
-    // });
-    // Deno.writeTextFileSync("store/artist.json", JSON.stringify(json, null, 2));
-
-    const json = await Deno.readTextFile("store/artist.json").then(JSON.parse);
+    const json = await this.request_json("browse", {
+      data: {
+        browseId: artistId,
+      },
+    });
 
     const results = j(json, `${SINGLE_COLUMN_TAB}.${SECTION_LIST}`);
     // console.log("results", results);

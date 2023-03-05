@@ -1,4 +1,7 @@
 // commonly used navigation paths
+
+export const THUMBNAIL = "thumbnail.thumbnails";
+export const THUMBNAILS = `thumbnail.musicThumbnailRenderer.${THUMBNAIL}`;
 export const CONTENT = "contents[0]";
 export const RUN_TEXT = "runs[0].text";
 export const TAB_CONTENT = "tabs[0].tabRenderer.content";
@@ -40,6 +43,8 @@ export const CAROUSEL_CONTENTS = `${CAROUSEL}.contents`;
 export const CAROUSEL_CONTAINER =
   "header.musicCarouselShelfBasicHeaderRenderer";
 export const CAROUSEL_TITLE = `${CAROUSEL_CONTAINER}.title.runs[0]`;
+export const CAROUSEL_SUBTITLE = `${CAROUSEL_CONTAINER}.strapline.runs[0]`;
+export const CAROUSEL_THUMBNAILS = `${CAROUSEL_CONTAINER}.${THUMBNAILS}`;
 export const FRAMEWORK_MUTATIONS =
   "frameworkUpdates.entityBatchUpdate.mutations";
 export const TITLE = "title.runs[0]";
@@ -50,8 +55,6 @@ export const TEXT_RUN_TEXT = `${TEXT_RUN}.text`;
 export const SUBTITLE = `subtitle.${RUN_TEXT}`;
 export const SUBTITLE2 = "subtitle.runs[2].text";
 export const SUBTITLE3 = "subtitle.runs[4].text";
-export const THUMBNAIL = "thumbnail.thumbnails";
-export const THUMBNAILS = `thumbnail.musicThumbnailRenderer.${THUMBNAIL}`;
 export const THUMBNAIL_RENDERER =
   `thumbnailRenderer.musicThumbnailRenderer.${THUMBNAIL}`;
 export const THUMBNAIL_CROPPED =

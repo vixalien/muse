@@ -49,7 +49,10 @@ export function parse_song_runs(runs: any[]) {
       // artist or album
       const item = { name: text, id: j(run, NAVIGATION_BROWSE_ID) };
 
-      if (item?.id.startsWith("MPRE") || "release_detail" in item.id) {
+      if (
+        item.id &&
+        (item.id.startsWith("MPRE") || item.id.includes("release_detail"))
+      ) {
         // album
         parsed.album = item;
       } else {
@@ -65,7 +68,7 @@ export function parse_song_runs(runs: any[]) {
         parsed.duration_seconds = parse_duration(text);
       } else if (text.match(/^\d{4}$/)) {
         parsed.year = text;
-      } else {
+      } else if (text.toLowerCase() != "song") {
         // artist without id
         parsed.artists.push({
           name: text,

@@ -1,4 +1,7 @@
 {
+  "CLIENT_ID": "861556708454-d6dlm3lh05idd8npek18k6be8ba3oc68.apps.googleusercontent.com",
+  "CLIENT_SECRET": "SboVhoG9s0rNafixCSGGKXAT",
+  "SCOPE": "https://www.googleapis.com/auth/youtube",
   "HEADERS": {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Cobalt/Version",
     "Accept": "*/*",
