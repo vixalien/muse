@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-write ./mod.ts"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any"]
+    }
+  }
+}

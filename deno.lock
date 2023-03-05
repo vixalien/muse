@@ -1,0 +1,29 @@
+{
+  "version": "2",
+  "remote": {
+    "https://esm.sh/cookie@0.5.0": "91fe0005bd31150b1854f9cb08c34d3e15bcc3782348991204880a973795a4e9",
+    "https://esm.sh/jsonpath-plus@7.2.0": "05c20ad600722f56ce1f4fc0fedba39674e7ed0d258f4ba109cd455d6990783a",
+    "https://esm.sh/set-cookie-parser@2.5.1": "710e8159c30b3c4b430fdd746a70ae271d52c67c5fd9755fa3f4d49c73b864e7",
+    "https://esm.sh/v110/@types/cookie@0.5.1/index.d.ts": "4a547783c826c1dec10d96734687ae4db2e89d40261e91b5c327b60748315dc1",
+    "https://esm.sh/v110/@types/node@16.18.12/buffer.d.ts": "7907f07261a198729d0b3d5216cffe3473787ee783e670c0e8cd699ab1986a51",
+    "https://esm.sh/v110/@types/node@16.18.12/crypto.d.ts": "ac5f7888ba17c7d6ab0e7a4715ec5ca83047b2702066d22a80483de2b750dbc3",
+    "https://esm.sh/v110/@types/node@16.18.12/dns.d.ts": "5c325a10c6038f9facb48a171a776150207ab62d4d4dfa9b6da4a691a6bbb084",
+    "https://esm.sh/v110/@types/node@16.18.12/dns/promises.d.ts": "dddfe6ac65f52037572b4408577191a4975e9a1a475459144059640caae684b6",
+    "https://esm.sh/v110/@types/node@16.18.12/events.d.ts": "d4aa6ab37fa7b02a738a61a9f6119f4bc3d6e35a447f555ceff9e21ea390b38a",
+    "https://esm.sh/v110/@types/node@16.18.12/http.d.ts": "362629f2b0f935a4e655e9f518fd8500d522116de2c600bcb082ec59b3f27643",
+    "https://esm.sh/v110/@types/node@16.18.12/net.d.ts": "e1015edb4e337617b2cd9a91245ba2c3830d9be86fbb9fd3447ef65994f01d34",
+    "https://esm.sh/v110/@types/node@16.18.12/querystring.d.ts": "cc6d8965781b923d47b6c164294a6975bb8936c96917765ac9e9ddd3152d689c",
+    "https://esm.sh/v110/@types/node@16.18.12/stream.d.ts": "fe36c1a7129175dacf59eaec905b6f0f892b0eedf076d4e0fb4d3f25dc670a61",
+    "https://esm.sh/v110/@types/node@16.18.12/stream/consumers.d.ts": "7fa74b88b42012adc229de66392376d4fef00d5852a272f2930d8b52cda90075",
+    "https://esm.sh/v110/@types/node@16.18.12/stream/promises.d.ts": "0dc3641e48eaba7eafb72533661098cc95227318d8dba65a0f843d240a8c86a4",
+    "https://esm.sh/v110/@types/node@16.18.12/stream/web.d.ts": "e4ea60b851d4dc4bb42b162c9031724bc8b19ac2940ea41b4b34f63a1f143c3c",
+    "https://esm.sh/v110/@types/node@16.18.12/tls.d.ts": "3432aa868bb22f2a7e427c58c1c59917aa22859b5b107babe64bd6ded92167e9",
+    "https://esm.sh/v110/@types/node@16.18.12/url.d.ts": "9dbaf73c55e787d1ae3d9aefc3f308e29e2ae82e4b6973d0a3ef5592803100e4",
+    "https://esm.sh/v110/@types/set-cookie-parser@2.4.2/index.d.ts": "5246987f869945a7c997b9a8e09382958c43ab42fe1966cb2073c72200f23209",
+    "https://esm.sh/v110/cookie@0.5.0/deno/cookie.js": "87edb50b4d463ab0196a80362ed97ef328e802f70349f059bbfad1916e36d073",
+    "https://esm.sh/v110/jsonpath-plus@7.2.0/deno/jsonpath-plus.js": "ff119f68e17fcca318dec7bfc4bd2bfcc0857c763c03e69dc9066d31929f5399",
+    "https://esm.sh/v110/jsonpath-plus@7.2.0/src/jsonpath.d.ts": "12e131b5f9ecafe5d0d3386cd33ce57842ecad58a486e7e5e242f4e3b1ec404b",
+    "https://esm.sh/v110/node.ns.d.ts": "0fb081f0cd2150931bd54baa04f31466abd9ca701fd9060d07931402cf8367ba",
+    "https://esm.sh/v110/set-cookie-parser@2.5.1/deno/set-cookie-parser.js": "38ff648d63fabcab0ea1b896845e75b160df5ddecd5c1bbf408667d367085022"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "HEADERS": {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Cobalt/Version",
+    "Accept": "*/*",
+    "Accept-Language": "en-US,en;q=0.5",
+    "X-YouTube-Page-CL": "513403406",
+    "X-YouTube-Client-Version": "7.20230301.06.00",
+    "X-YouTube-Page-Label": "youtube.kabuki.web_20230301_06_RC00",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin",
+    "Origin": "https://www.youtube.com/tv?is_account_switch=1&hrld=1&fltor=1"
+  },
+  "DATA": {
+    "context": {
+      "client": {
+        "screenWidthPoints": 689,
+        "screenHeightPoints": 963,
+        "screenPixelDensity": 1,
+        "utcOffsetMinutes": 120,
+        "hl": "en",
+        "gl": "GB",
+        "remoteHost": "1.1.1.1",
+        "deviceMake": "",
+        "deviceModel": "",
+        "visitorData": "CgtrWDZDeG1xU2tRMCjRyYegBg%3D%3D",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Cobalt/Version,gzip(gfe)",
+        "clientName": "WEB_REMIX",
+        "clientVersion": "1.20230213.01.00",
+        "osName": "Windows",
+        "osVersion": "10.0",
+        "originalUrl": "https://www.youtube.com/tv?is_account_switch=1&hrld=1&fltor=1",
+        "theme": "CLASSIC",
+        "platform": "DESKTOP",
+        "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+        "webpSupport": false,
+        "tvAppInfo": {
+          "appQuality": "TV_APP_QUALITY_FULL_ANIMATION",
+          "certificationScope": "",
+          "voiceCapability": { "hasSoftMicSupport": false },
+          "zylonLeftNav": true
+        },
+        "timeZone": "Africa/Kigali",
+        "browserName": "Chrome",
+        "browserVersion": "110.0.0.0",
+        "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "deviceExperimentId": "ChxOekl3TmpJM01EZ3pNVGN5TmpnMU9UTXpNZz09ENHJh6AGGKSih6AG"
+      },
+      "user": { "enableSafetyMode": false },
+      "request": {
+        "internalExperimentFlags": [],
+        "consistencyTokenJars": []
+      }
+    }
+  },
+  "API_URL": "https://music.youtube.com/youtubei/v1"
+}
