@@ -15,14 +15,14 @@ export function get_flex_column_item(item: any, index: number) {
   if (
     item.flexColumns.length <= index ||
     !("text" in
-      item.flexColumns[0].musicResponsiveListItemFlexColumnRenderer) ||
+      item.flexColumns[index].musicResponsiveListItemFlexColumnRenderer) ||
     !("runs" in
-      item.flexColumns[0].musicResponsiveListItemFlexColumnRenderer.text)
+      item.flexColumns[index].musicResponsiveListItemFlexColumnRenderer.text)
   ) {
     return null;
   }
 
-  return item.flexColumns[0].musicResponsiveListItemFlexColumnRenderer;
+  return item.flexColumns[index].musicResponsiveListItemFlexColumnRenderer;
 }
 
 export function get_fixed_column_item(item: any, index: number) {

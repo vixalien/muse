@@ -1,18 +1,25 @@
 import {
-BADGE_LABEL,
+  BADGE_LABEL,
   MENU_ITEMS,
   MENU_LIKE_STATUS,
   MENU_SERVICE,
   MRLIR,
   NAVIGATION_VIDEO_TYPE,
   PLAY_BUTTON,
-  THUMBNAIL,
   THUMBNAILS,
   TOGGLE_MENU,
 } from "../nav.ts";
 import { j } from "../util.ts";
-import { parse_song_album, parse_song_artists, parse_song_menu_tokens } from "./songs.ts";
-import { get_fixed_column_item, get_item_text, parse_duration } from "./util.ts";
+import {
+  parse_song_album,
+  parse_song_artists,
+  parse_song_menu_tokens,
+} from "./songs.ts";
+import {
+  get_fixed_column_item,
+  get_item_text,
+  parse_duration,
+} from "./util.ts";
 
 export const parse_playlist_items = (
   results: any,
@@ -92,13 +99,17 @@ export const parse_playlist_items = (
     }
 
     let isAvailable = true;
-    if ('musicItemRendererDisplayPolicy' in data) {
-      isAvailable = data.musicItemRendererDisplayPolicy != 'MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT'
+    if ("musicItemRendererDisplayPolicy" in data) {
+      isAvailable = data.musicItemRendererDisplayPolicy !=
+        "MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT";
     }
 
     const isExplicit = j(data, BADGE_LABEL) != null;
 
-    const videoType = j(data, `${MENU_ITEMS}[0].menuNavigationItemRenderer.navigationEndpoint.${NAVIGATION_VIDEO_TYPE}`);
+    const videoType = j(
+      data,
+      `${MENU_ITEMS}[0].menuNavigationItemRenderer.navigationEndpoint.${NAVIGATION_VIDEO_TYPE}`,
+    );
 
     const song: any = {
       videoId,
@@ -109,8 +120,8 @@ export const parse_playlist_items = (
       thumbnails,
       isAvailable,
       isExplicit,
-      videoType
-    }
+      videoType,
+    };
 
     if (duration) {
       song.duration = duration;
@@ -128,7 +139,7 @@ export const parse_playlist_items = (
     if (menu_entries) {
       for (const menu_entry of menu_entries) {
         const lastId = menu_entry[menu_entry.length - 1];
-        song[lastId] = j(data, `${MENU_ITEMS}.${menu_entry.join(".")}`)
+        song[lastId] = j(data, `${MENU_ITEMS}.${menu_entry.join(".")}`);
       }
     }
 

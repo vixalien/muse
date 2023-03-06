@@ -46,7 +46,7 @@ if (client.auth.requires_login()) {
 //     console.log(await data.text());
 //   });
 
-client.get_home(20)
+client.get_artist("UC_x4LxqOApIT5QAi-m-oXJw")
   .then((data) =>
     Deno.writeTextFile(
       "store/artist-parsed.json",
