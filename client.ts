@@ -20,9 +20,9 @@ import {
 import {
   parse_artist_contents,
   parse_mixed_content,
+  parse_moods,
 } from "./parsers/browsing.ts";
 import { parse_playlist_items } from "./parsers/playlists.ts";
-import { exists } from "./deps.ts";
 import { get_continuations } from "./continuations.ts";
 
 interface ClientOptions {
@@ -104,10 +104,12 @@ export class Client {
     const endpoint = "browse";
     const data = { browseId: "FEmusic_home" };
 
-    const home: { continuation: string | null; results: any[] } = {
-      continuation: null,
-      results: [],
-    };
+    const home: { continuation: string | null; moods: any[]; results: any[] } =
+      {
+        continuation: null,
+        results: [],
+        moods: [],
+      };
 
     let section_list;
 
@@ -117,9 +119,13 @@ export class Client {
     } else {
       const json = await this.request_json(endpoint, { data });
 
-      const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
+      const tab = j(json, SINGLE_COLUMN_TAB);
 
-      section_list = j(json, SINGLE_COLUMN_TAB, "sectionListRenderer");
+      const results = j(tab, SECTION_LIST);
+
+      section_list = j(tab, "sectionListRenderer");
+
+      home.moods.push(...parse_moods(tab));
 
       home.continuation = j(
         section_list,

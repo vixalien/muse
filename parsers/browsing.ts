@@ -1,7 +1,6 @@
 import {
   BADGE_LABEL,
   CAROUSEL,
-  CAROUSEL_CONTAINER,
   CAROUSEL_SUBTITLE,
   CAROUSEL_THUMBNAILS,
   CAROUSEL_TITLE,
@@ -33,6 +32,27 @@ import {
   parse_song_runs,
 } from "./songs.ts";
 import { get_dot_separator_index, get_flex_column_item } from "./util.ts";
+
+export function parse_moods(results: any[]) {
+  console.log("results", results);
+  const moods: { name: string; params: string }[] = [];
+
+  const chips = j(
+    results,
+    "sectionListRenderer.header.chipCloudRenderer.chips",
+  );
+
+  chips.forEach((chip: any) => {
+    const renderer = j(chip, "chipCloudChipRenderer");
+
+    moods.push({
+      name: j(renderer, TEXT_RUN_TEXT),
+      params: j(renderer, "navigationEndpoint.browseEndpoint.params"),
+    });
+  });
+
+  return moods;
+}
 
 export function parse_mixed_content(rows: any[]) {
   const items = [];

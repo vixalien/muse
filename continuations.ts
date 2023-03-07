@@ -1,4 +1,3 @@
-import { RequestFunction } from "./request.ts";
 import { j } from "./util.ts";
 
 export async function get_continuations(
@@ -7,7 +6,7 @@ export async function get_continuations(
   limit: number | null,
   request: (additional_params: Record<string, string>) => Promise<any>,
   parse: (data: any) => any[],
-  ctoken_path = "",
+  _ctoken_path = "",
   reloadable = false,
 ) {
   const items = [];
