@@ -79,7 +79,7 @@ export class Client {
     const cache = Object.keys(options.params || {}).length == 0;
 
     // caching
-    const path = `store/${
+    const path = `store/cache/${
       new URLSearchParams({ ...options.data } as any || {})
         .toString()
     }.json`;
@@ -92,7 +92,10 @@ export class Client {
     const response = await this.request(endpoint, options);
     const json = await response.json();
 
-    if (cache) await Deno.writeTextFile(path, JSON.stringify(json, null, 2));
+    if (cache) {
+      await Deno.mkdir("store/cache", { recursive: true });
+      await Deno.writeTextFile(path, JSON.stringify(json, null, 2));
+    }
 
     return json;
   }
