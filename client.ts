@@ -24,6 +24,7 @@ import {
 } from "./parsers/browsing.ts";
 import { parse_playlist_items } from "./parsers/playlists.ts";
 import { get_continuations } from "./continuations.ts";
+import { parse_format } from "./parsers/songs.ts";
 
 interface ClientOptions {
   auth?: PureAuthenticatorOptions;
@@ -237,5 +238,31 @@ export class Client {
     // };
 
     // return artist;
+  }
+
+  async get_song(
+    video_id: string,
+  ) {
+    const response = await this.request_json("player", {
+      data: {
+        ...CONSTANTS2.ANDROID.DATA,
+        contentCheckOk: true,
+        racyCheckOk: true,
+        video_id,
+      },
+    });
+
+    return {
+      formats: response.streamingData.formats.map(parse_format),
+      adaptive_formats: response.streamingData.adaptiveFormats.map(
+        parse_format,
+      ),
+      expires: new Date(
+        new Date().getTime() +
+          (Number(response.streamingData.expiresInSeconds) * 1000),
+      ),
+      videoDetails: response.videoDetails,
+      playerConfig: response.playerConfig,
+    };
   }
 }

@@ -1,5 +1,6 @@
 import { FEEDBACK_TOKEN, NAVIGATION_BROWSE_ID, TOGGLE_MENU } from "../nav.ts";
 import { j } from "../util.ts";
+import type { AudioFormat, Format, VideoFormat } from "./types.d.ts";
 import {
   get_browse_id,
   get_flex_column_item,
@@ -115,4 +116,62 @@ export function parse_song_menu_tokens(item: any) {
     add: library_add_token,
     remove: library_remove_token,
   };
+}
+
+export function parse_format(format: any) {
+  const has_video = format.width && format.height;
+  const has_audio = format.bitrate;
+
+  const parse_ranges = (ranges: any) => {
+    if (!ranges) return ranges;
+    return {
+      start: Number(ranges.start),
+      end: Number(ranges.end),
+    };
+  };
+
+  const codecs = format.mimeType
+    ? format.mimeType.match(/codecs="(.*)"/)[1]
+    : null;
+
+  const n: Format = {
+    codecs,
+    itag: format.itag as number,
+    url: format.url as string,
+    bitrate: format.bitrate,
+    modified: new Date(Number(format.lastModified) / 1000),
+    content_length: Number(format.contentLength) ?? null,
+    average_bitrate: Number(format.averageBitrate) ?? null,
+    init_range: parse_ranges(format.initRange),
+    index_range: parse_ranges(format.indexRange),
+    duration_ms: Number(format.approxDurationMs) ?? null,
+    projection_type: format.projectionType.toLowerCase() ?? null,
+    mime_type: format.mimeType,
+    quality: format.quality,
+    has_audio: false,
+    has_video: false,
+    container: format.mimeType.split(";")[0].split("/")[1],
+  };
+
+  if (has_video) {
+    Object.assign(n, {
+      has_video: true,
+      width: format.width,
+      height: format.height,
+      fps: format.fps,
+      quality_label: format.qualityLabel,
+      video_codec: codecs ? codecs.split(", ")[0] : null,
+    } as VideoFormat);
+  }
+  if (has_audio) {
+    Object.assign(n, {
+      has_audio: true,
+      sample_rate: format.audioSampleRate,
+      audio_quality: format.audioQuality?.slice(14).toLowerCase(),
+      channels: format.audioChannels,
+      audio_codec: codecs ? codecs.split(", ").slice(-1)[0] : null,
+    } as AudioFormat);
+  }
+
+  return n;
 }

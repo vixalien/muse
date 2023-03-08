@@ -46,10 +46,10 @@ if (client.auth.requires_login()) {
 //     console.log(await data.text());
 //   });
 
-client.get_home()
-  .then((data) =>
+client.request_json("account", {})
+  .then((data) => {
     Deno.writeTextFile(
-      "store/home.json",
+      "store/rickroll.json",
       JSON.stringify(data, null, 2),
-    )
-  );
+    );
+  });
