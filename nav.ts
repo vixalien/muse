@@ -76,6 +76,7 @@ export const SECTION_LIST_CONTINUATION =
   `continuationContents.sectionListContinuation`;
 export const MENU_PLAYLIST_ID =
   `${MENU_ITEMS}.0.menuNavigationItemRenderer.${NAVIGATION_WATCH_PLAYLIST_ID}`;
+export const MRLITFC = "musicResponsiveListItemFlexColumnRenderer.text";
 
 interface ObjectWithNested {
   [key: string]: any;

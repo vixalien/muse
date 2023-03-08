@@ -5,14 +5,19 @@ import { get_default_store, Store } from "./store.ts";
 import CONSTANTS2 from "./constants-ng.json" assert { type: "json" };
 import { j } from "./util.ts";
 import {
+  BADGE_LABEL,
   DESCRIPTION,
   DESCRIPTION_SHELF,
   find_object_by_key,
   GRID,
+  MRLIR,
+  MRLITFC,
   MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PLAYLIST_ID,
+  NAVIGATION_VIDEO_ID,
+  RUN_TEXT,
   SECTION_LIST,
   SINGLE_COLUMN_TAB,
   THUMBNAILS,
@@ -20,6 +25,7 @@ import {
   TITLE_TEXT,
 } from "./nav.ts";
 import {
+  _,
   parse_artist_contents,
   parse_mixed_content,
   parse_mixed_item,
@@ -94,6 +100,7 @@ export class Client {
     if (cache && cached) return cached;
 
     const response = await this.request(endpoint, options);
+
     const json = await response.json();
 
     if (cache) {
@@ -304,7 +311,6 @@ export class Client {
         "continuations[0].nextContinuationData.continuation",
       );
     }
-    console.log("library.results.length", library.results.length);
 
     if (library.continuation) {
       const continued_data = await get_continuations(
@@ -329,5 +335,106 @@ export class Client {
     }
 
     return library;
+  }
+
+  async get_search_suggestions(query: string) {
+    const json = await this.request_json("music/get_search_suggestions", {
+      params: {
+        input: query,
+      },
+    });
+
+    const results = j(json, "contents");
+
+    const suggestions = [], quick_links = [], history = [];
+
+    Deno.writeTextFileSync(
+      "store/quick_links.json",
+      JSON.stringify(results, null, 2),
+    );
+
+    if (results[0]) {
+      const items = j(results[0], "searchSuggestionsSectionRenderer.contents");
+
+      for (const item of items) {
+        if ("historySuggestionRenderer" in item) {
+          const query = j(item, "historySuggestionRenderer");
+
+          history.push({
+            search: j(query, "suggestion.runs"),
+            feedback_token: j(
+              query,
+              "serviceEndpoint.feedbackEndpoint.feedbackToken",
+            ),
+            query: j(query, "navigationEndpoint.searchEndpoint.query"),
+          });
+        } else if ("searchSuggestionRenderer" in item) {
+          const query = j(item, "searchSuggestionRenderer");
+
+          suggestions.push({
+            query: j(query, "suggestion.runs"),
+            search: j(query, "navigationEndpoint.searchEndpoint.query"),
+          });
+        }
+      }
+    }
+
+    if (results[1]) {
+      const items = j(results[1], "searchSuggestionsSectionRenderer.contents");
+
+      for (const item of items) {
+        const data = j(item, MRLIR);
+        const flex_items = j(data, "flexColumns");
+
+        if (flex_items.length === 2) {
+          const first = j(flex_items[0], MRLITFC);
+
+          // artist
+          quick_links.push({
+            type: "artist",
+            thumbnails: j(data, THUMBNAILS),
+            name: j(first, RUN_TEXT),
+            id: j(data, NAVIGATION_BROWSE_ID),
+          });
+        } else if (flex_items.length === 3) {
+          // song or video
+
+          const first = j(flex_items[0], MRLITFC, "runs[0]");
+          const second = j(flex_items[1], MRLITFC);
+
+          const artist = j(second, "runs[2]");
+
+          const type = _(j(second, RUN_TEXT).toLowerCase());
+
+          switch (type) {
+            case "video":
+            case "song":
+              quick_links.push({
+                type,
+                title: j(first, "text"),
+                videoId: j(first, NAVIGATION_VIDEO_ID),
+                artists: [
+                  {
+                    name: j(artist, "text"),
+                    id: j(artist, NAVIGATION_BROWSE_ID),
+                  },
+                ],
+                isExplicit: j(data, BADGE_LABEL) != null,
+              });
+              break;
+            default:
+              console.warn("Unknown search suggestion return type", type);
+              break;
+          }
+        }
+        // quick_links.push(item);
+      }
+    }
+
+    return {
+      suggestions,
+      quick_links,
+      history,
+    };
   }
 }

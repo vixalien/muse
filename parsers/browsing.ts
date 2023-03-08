@@ -74,8 +74,10 @@ export function parse_mixed_item(data: any) {
       content = parse_album(data);
       break;
     case "MUSIC_PAGE_TYPE_USER_CHANNEL":
+      type = "channel";
+      /**  falls through */
     case "MUSIC_PAGE_TYPE_ARTIST":
-      type = "artist";
+      type ??= "artist";
       content = parse_related_artist(data);
       break;
     case "MUSIC_PAGE_TYPE_PLAYLIST":
