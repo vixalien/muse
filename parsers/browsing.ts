@@ -34,7 +34,6 @@ import {
 import { get_dot_separator_index, get_flex_column_item } from "./util.ts";
 
 export function parse_moods(results: any[]) {
-  console.log("results", results);
   const moods: { name: string; params: string }[] = [];
 
   const chips = j(
@@ -52,6 +51,42 @@ export function parse_moods(results: any[]) {
   });
 
   return moods;
+}
+
+export function parse_mixed_item(data: any) {
+  let type: string | null = null, content: any;
+
+  const page_type = j(data, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
+  switch (page_type) {
+    case null:
+    case undefined:
+      // song or watch playlist
+      if (j(data, NAVIGATION_WATCH_PLAYLIST_ID) != null) {
+        type = "watch-playlist";
+        content = parse_watch_playlist(data);
+      } else {
+        content = parse_song(data);
+        type = content.views != null ? "video" : "song";
+      }
+      break;
+    case "MUSIC_PAGE_TYPE_ALBUM":
+      type = "album";
+      content = parse_album(data);
+      break;
+    case "MUSIC_PAGE_TYPE_USER_CHANNEL":
+    case "MUSIC_PAGE_TYPE_ARTIST":
+      type = "artist";
+      content = parse_related_artist(data);
+      break;
+    case "MUSIC_PAGE_TYPE_PLAYLIST":
+      type = "playlist";
+      content = parse_playlist(data);
+      break;
+    default:
+      console.error("Unknown page type", page_type);
+  }
+
+  return type ? { type, content } : null;
 }
 
 export function parse_mixed_content(rows: any[]) {
@@ -83,31 +118,10 @@ export function parse_mixed_content(rows: any[]) {
         let content = null, type;
 
         if (data != null) {
-          const page_type = j(data, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
-          switch (page_type) {
-            case null:
-            case undefined:
-              // song or watch playlist
-              if (j(data, NAVIGATION_WATCH_PLAYLIST_ID) != null) {
-                type = "watch-playlist";
-                content = parse_watch_playlist(data);
-              } else {
-                type = "song";
-                content = parse_song(data);
-              }
-              break;
-            case "MUSIC_PAGE_TYPE_ALBUM":
-              type = "song";
-              content = parse_album(data);
-              break;
-            case "MUSIC_PAGE_TYPE_ARTIST":
-              type = "artist";
-              content = parse_related_artist(data);
-              break;
-            case "MUSIC_PAGE_TYPE_PLAYLIST":
-              type = "playlist";
-              content = parse_playlist(data);
-              break;
+          const item = parse_mixed_item(data);
+          if (item != null) {
+            type = item.type;
+            content = item.content;
           }
         } else {
           type = "song";
@@ -210,12 +224,18 @@ export function parse_content_list(
 }
 
 export function parse_album(result: any) {
+  const SUBTITLE_RUNS = "subtitle.runs";
+
+  const subtitles = j(result, SUBTITLE_RUNS);
+
   return {
     title: j(result, TITLE_TEXT),
-    year: j(result, SUBTITLE2),
+    year: j(subtitles[subtitles.length - 1], "text"),
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: j(result, SUBTITLE_BADGE_LABEL) != null,
+    type: j(result, SUBTITLE),
+    artists: parse_song_artists_runs(subtitles.slice(2, -1)),
   };
 }
 
@@ -282,10 +302,23 @@ export function parse_video(result: any) {
 }
 
 export function parse_playlist(data: any) {
+  const subtitles = j(data, "subtitle.runs");
+
+  const has_data = subtitles[0]?.text.toLowerCase() === _("playlist");
+  const has_songs = subtitles.length > 3;
+
   const playlist: any = {
     title: j(data, TITLE_TEXT),
     playlistId: j(data, TITLE, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),
+    songs: has_data && has_songs
+      ? j(subtitles[subtitles.length - 1], "text")?.split(" ")[0]
+      : null,
+    authors: has_data
+      ? parse_song_artists_runs(
+        subtitles.slice(2, has_songs ? -1 : undefined),
+      )
+      : null,
   };
 
   const subtitle = data.subtitle;
@@ -306,7 +339,7 @@ export function parse_playlist(data: any) {
 }
 
 export function parse_related_artist(data: any) {
-  const subscribers = j(data, SUBTITLE)?.split(" ")[0];
+  const subscribers = j(data, SUBTITLE2)?.split(" ")[0];
 
   return {
     title: j(data, TITLE_TEXT),

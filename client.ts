@@ -8,6 +8,8 @@ import {
   DESCRIPTION,
   DESCRIPTION_SHELF,
   find_object_by_key,
+  GRID,
+  MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PLAYLIST_ID,
@@ -20,6 +22,7 @@ import {
 import {
   parse_artist_contents,
   parse_mixed_content,
+  parse_mixed_item,
   parse_moods,
 } from "./parsers/browsing.ts";
 import { parse_playlist_items } from "./parsers/playlists.ts";
@@ -116,7 +119,6 @@ export class Client {
 
     if (continuation) {
       home.continuation = continuation;
-      home.results = [];
     } else {
       const json = await this.request_json(endpoint, { data });
 
@@ -264,5 +266,68 @@ export class Client {
       videoDetails: response.videoDetails,
       playerConfig: response.playerConfig,
     };
+  }
+
+  /**
+   * Library
+   */
+
+  async get_library(limit = 20, continuation?: string) {
+    const endpoint = "browse";
+    const data = {
+      browseId: "FEmusic_library_landing",
+    };
+
+    const library: {
+      continuation: string | null;
+      results: any[];
+    } = {
+      continuation: null,
+      results: [],
+    };
+
+    if (continuation) {
+      library.continuation = continuation;
+    } else {
+      const json = await this.request_json(endpoint, { data });
+
+      const grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST, "[0]", GRID);
+
+      const results = j(grid, "items");
+
+      library.results = results.map((result: any) =>
+        parse_mixed_item(j(result, MTRIR))
+      );
+
+      library.continuation = j(
+        grid,
+        "continuations[0].nextContinuationData.continuation",
+      );
+    }
+    console.log("library.results.length", library.results.length);
+
+    if (library.continuation) {
+      const continued_data = await get_continuations(
+        library.continuation,
+        "gridContinuation",
+        limit - library.results.length,
+        (params) => {
+          return this.request_json(endpoint, {
+            data,
+            params,
+          });
+        },
+        (contents) => {
+          return contents.map((result: any) =>
+            parse_mixed_item(j(result, MTRIR))
+          );
+        },
+      );
+
+      library.continuation = continued_data.continuation;
+      library.results.push(...continued_data.items);
+    }
+
+    return library;
   }
 }

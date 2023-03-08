@@ -46,7 +46,7 @@ if (client.auth.requires_login()) {
 //     console.log(await data.text());
 //   });
 
-client.request_json("account", {})
+client.get_library()
   .then((data) => {
     Deno.writeTextFile(
       "store/rickroll.json",

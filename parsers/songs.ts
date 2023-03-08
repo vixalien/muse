@@ -24,9 +24,13 @@ export function parse_song_artists_runs(runs: any) {
   ) => index);
 
   for (const i of result) {
+    const run = runs[i * 2];
+
+    if (run == null) continue;
+
     artists.push({
-      name: runs[i * 2].text,
-      id: j(runs[i * 2], NAVIGATION_BROWSE_ID),
+      name: run.text,
+      id: j(run, NAVIGATION_BROWSE_ID),
     });
   }
 
