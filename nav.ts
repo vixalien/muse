@@ -99,3 +99,15 @@ export function find_object_by_key(
   }
   return null;
 }
+
+export function find_objects_by_key(object_list: any, key: string, nested?: string) {
+  const objects = [];
+  for (const item of object_list) {
+    const obj = nested ? item[nested] : item;
+    if (key in obj) {
+      objects.push(obj);
+    }
+  }
+
+  return objects;
+}

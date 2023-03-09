@@ -1,5 +1,38 @@
-import { NAVIGATION_BROWSE_ID } from "../nav.ts";
+import {
+  find_objects_by_key,
+  MENU_ITEMS,
+  NAVIGATION_BROWSE_ID,
+} from "../nav.ts";
 import { j } from "../util.ts";
+
+export function parse_menu_playlists(data: any, results: any) {
+  const watch_menu = find_objects_by_key(
+    j(data, MENU_ITEMS),
+    "menuNavigationItemRenderer",
+  ) as any;
+
+  for (
+    const item of watch_menu.map((menu: any) => menu.menuNavigationItemRenderer)
+  ) {
+    const icon = j(item, "icon.iconType");
+    let watch_key;
+    if (icon == "MUSIC_SHUFFLE") {
+      watch_key = "shuffleId";
+    } else if (icon == "MIX") {
+      watch_key = "radioId";
+    } else {
+      continue;
+    }
+
+    const watch_id =
+      j(item, "navigationEndpoint.watchPlaylistEndpoint.playlistId") ??
+        j(item, "navigationEndpoint.watchEndpoint.playlistId");
+
+    if (watch_id) {
+      results[watch_key] = watch_id;
+    }
+  }
+}
 
 export function get_item_text(item: any, index: number, run_index = 0) {
   const column = get_flex_column_item(item, index);

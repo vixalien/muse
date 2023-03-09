@@ -30,10 +30,17 @@ import {
   parse_mixed_content,
   parse_mixed_item,
   parse_moods,
+  parse_search_results,
 } from "./parsers/browsing.ts";
 import { parse_playlist_items } from "./parsers/playlists.ts";
 import { get_continuations } from "./continuations.ts";
 import { parse_format } from "./parsers/songs.ts";
+import {
+  filters,
+  get_search_params,
+  scopes,
+  SearchOptions,
+} from "./parsers/search.ts";
 
 interface ClientOptions {
   auth?: PureAuthenticatorOptions;
@@ -436,5 +443,104 @@ export class Client {
       quick_links,
       history,
     };
+  }
+
+  async search(query: string, options: SearchOptions = {}) {
+    const { filter, scope, ignore_spelling = true } = options;
+
+    const data = { query } as any;
+    const endpoint = "search";
+    const search_results = { categories: [] as any[] };
+
+    if (filter != null && !filters.includes(filter)) {
+      throw new Error(
+        `Invalid filter provided. Please use one of the following filters or leave out the parameter: ${
+          filters.join(", ")
+        }`,
+      );
+    }
+
+    if (scope != null && !scopes.includes(scope)) {
+      throw new Error(
+        `Invalid scope provided. Please use one of the following scopes or leave out the parameter: ${
+          scopes.join(", ")
+        }`,
+      );
+    }
+
+    if (scope == "uploads" && filter != null) {
+      throw new Error(
+        "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to uploads",
+      );
+    }
+
+    const params = get_search_params(filter, scope, ignore_spelling);
+
+    if (params) {
+      data.params = params;
+    }
+
+    const response = await this.request_json(endpoint, { data });
+
+    await Deno.writeTextFile(
+      "store/search.json",
+      JSON.stringify(response, null, 2),
+    );
+
+    let results;
+
+    // no results
+    if (!("contents" in response)) {
+      return search_results;
+    } else if ("tabbedSearchResultsRenderer" in response.contents) {
+      const tab_index = (scope || filter)
+        ? scopes.indexOf(scope as any) + 1
+        : 0;
+      results = response.contents.tabbedSearchResultsRenderer.tabs[tab_index]
+        .tabRenderer.content;
+    } else {
+      results = response.contents;
+    }
+
+    const section_list = j(results, SECTION_LIST);
+
+    // no results
+    if (section_list.leave == 1 && ("itemSectionRenderer" in results)) {
+      return search_results;
+    }
+
+    // set filter for parser
+    let parser_filter = filter as string;
+
+    if (filter && filter.includes("playlist")) {
+      parser_filter = "playlist";
+    } else if (scope == "uploads") {
+      parser_filter = "uploads";
+    }
+
+    for (const res of section_list) {
+      if ("musicShelfRenderer" in res) {
+        const results = j(res, "musicShelfRenderer.contents");
+        let new_filter = filter;
+        const category = j(res, MUSIC_SHELF, TITLE_TEXT);
+
+        if (!filter && scope == scopes[0]) {
+          new_filter = category;
+        }
+
+        const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
+
+        const category_search_results = parse_search_results(results, type);
+
+        if (category_search_results.length > 0) {
+          search_results.categories.push({
+            category,
+            items: category_search_results,
+          });
+        }
+      }
+    }
+
+    return search_results;
   }
 }
