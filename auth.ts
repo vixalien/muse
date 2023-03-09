@@ -2,6 +2,7 @@ import CONSTANTS from "./constants-ng.json" assert { type: "json" };
 import { RequestClient } from "./request.ts";
 import { wait } from "./util.ts";
 import { Store } from "./store.ts";
+import { ERROR_CODE, MuseError } from "./errors.ts";
 
 export interface Token {
   access_token: string;
@@ -45,7 +46,7 @@ export class Authenticator {
   set token(token: Token | null) {
     if (token) token.expires_date = new Date(token.expires_date);
     this._token = token;
-    if (token) this.store?.set("token", token);
+    this.store?.set("token", token);
   }
 
   /**
@@ -72,7 +73,13 @@ export class Authenticator {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(text);
+      throw new MuseError(
+        ERROR_CODE.AUTH_CANT_GET_LOGIN_CODE,
+        "Can't get login code",
+        {
+          cause: text,
+        },
+      );
     }
 
     const data = response.json() as Promise<LoginCode>;
@@ -89,17 +96,24 @@ export class Authenticator {
 
     while (!res || !res.refresh_token) {
       try {
-        res = await this.client.request("https://oauth2.googleapis.com/token", {
-          method: "post",
-          data: {
-            client_id: CONSTANTS.CLIENT_ID,
-            client_secret: CONSTANTS.CLIENT_SECRET,
-            code: code,
-            grant_type: "http://oauth.net/grant_type/device/1.0",
+        const response = await this.client.request(
+          "https://oauth2.googleapis.com/token",
+          {
+            method: "post",
+            data: {
+              client_id: CONSTANTS.CLIENT_ID,
+              client_secret: CONSTANTS.CLIENT_SECRET,
+              code: code,
+              grant_type: "http://oauth.net/grant_type/device/1.0",
+            },
           },
-        }).then((res) => res.json());
+        );
 
-        if (!res) await wait(interval * 1000);
+        res = await response.json() as Token;
+
+        if (!response.ok) await wait(interval * 1000);
+
+        tries++;
       } catch (e) {
         if (tries++ > 10) throw e;
         await wait(interval * 1000);
@@ -117,7 +131,14 @@ export class Authenticator {
    * If a token is present, it will check if it is expired
    */
   async get_token() {
-    const token = this._token!;
+    const token = this._token;
+
+    if (!token) {
+      throw new MuseError(
+        ERROR_CODE.AUTH_NO_TOKEN,
+        "No token present, use `get_login_code` to get a new token",
+      );
+    }
 
     if (token.expires_date < new Date()) {
       const res = await this.client.request(
@@ -133,9 +154,21 @@ export class Authenticator {
         },
       );
 
+      if (!res.ok) {
+        // throw the error, but also set the token to null
+        this.token = null;
+        const text = await res.text();
+        throw new MuseError(
+          ERROR_CODE.AUTH_INVALID_REFRESH_TOKEN,
+          `Can't refresh token, refresh token is invalid or expired`,
+          { cause: text },
+        );
+      }
+
       const new_token = await res.json() as Token;
 
       this.token = {
+        ...token,
         ...new_token,
         expires_date: new Date(Date.now() + new_token.expires_in * 1000),
       };
