@@ -450,7 +450,10 @@ export class Client {
 
     const data = { query } as any;
     const endpoint = "search";
-    const search_results = { categories: [] as any[] };
+    const search_results = {
+      did_you_mean: null as any,
+      categories: [] as any[],
+    };
 
     if (filter != null && !filters.includes(filter)) {
       throw new Error(
@@ -507,7 +510,7 @@ export class Client {
     // no results
     if (
       !section_list ||
-      (section_list.length == 1 && ("itemSectionRenderer" in results))
+      (section_list.length == 1 && ("itemSectionRenderer" in results[0]))
     ) {
       return search_results;
     }
@@ -540,6 +543,21 @@ export class Client {
             category,
             items: category_search_results,
           });
+        }
+      } else if ("itemSectionRenderer" in res) {
+        const did_you_mean = j(
+          res,
+          "itemSectionRenderer.contents[0].didYouMeanRenderer",
+        );
+
+        if (did_you_mean) {
+          search_results.did_you_mean = {
+            query: j(did_you_mean, "correctedQuery.runs"),
+            search: j(
+              did_you_mean,
+              "correctedQueryEndpoint.searchEndpoint.query",
+            ),
+          };
         }
       }
     }

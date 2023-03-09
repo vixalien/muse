@@ -15,7 +15,6 @@ export const scopes = ["library", "uploads"] as const;
 type Scope = typeof scopes[number];
 
 export interface SearchOptions {
-  limit?: number;
   filter?: Filter;
   scope?: Scope;
   ignore_spelling?: boolean;

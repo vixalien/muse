@@ -46,7 +46,7 @@ if (client.auth.requires_login()) {
 //     console.log(await data.text());
 //   });
 
-client.search("songs", { scope: "uploads" })
+client.search("sengizwile", { ignore_spelling: false })
   .then((data) => {
     Deno.writeTextFile(
       "store/rickroll.json",
