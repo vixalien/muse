@@ -9,6 +9,7 @@ import {
   find_object_by_key,
   MENU_ITEMS,
   MRLIR,
+  MRLITFC,
   MTRIR,
   NAVIGATION_BROWSE,
   NAVIGATION_BROWSE_ID,
@@ -201,6 +202,8 @@ export function parse_search_results(
 
     if (result_type == "artist") {
       search_result.artist = get_item_text(data, 0);
+      search_result.subscribers =
+        j(data, "flexColumns[1]", MRLITFC, "runs[2].text")?.split(" ")[0];
       parse_menu_playlists(data, search_result);
     } else if (result_type == "album") {
       search_result.type = get_item_text(data, 1).toLowerCase();
@@ -260,20 +263,21 @@ export function parse_search_results(
         // artist or album result
         search_result.browseId = browse_id;
 
-        if ("artist" in search_result.browseId) {
+        if (search_result.browseId.includes("artist")) {
           search_result.type = "artist";
         } else {
-          const flex_item = get_flex_column_item(data, 2);
+          const flex_item = get_flex_column_item(data, 1);
           const runs = flex_item.text.runs
             .filter((_: any, i: number) => i % 2 == 0)
             .map((run: any) => run.text);
 
           if (runs.length > 1) {
-            search_result.artist = runs[1];
+            // TODO: validate this
+            search_result.release_date = runs[1];
           }
           if (runs.length > 2) {
-            // date may be missing
-            search_result.release_date = runs[2];
+            // artist may be missing
+            search_result.artist = runs[2];
           }
 
           search_result.type = "album";

@@ -493,9 +493,9 @@ export class Client {
     if (!("contents" in response)) {
       return search_results;
     } else if ("tabbedSearchResultsRenderer" in response.contents) {
-      const tab_index = (scope || filter)
-        ? scopes.indexOf(scope as any) + 1
-        : 0;
+      const tab_index = (!scope || filter)
+        ? 0
+        : scopes.indexOf(scope as any) + 1;
       results = response.contents.tabbedSearchResultsRenderer.tabs[tab_index]
         .tabRenderer.content;
     } else {
@@ -505,7 +505,10 @@ export class Client {
     const section_list = j(results, SECTION_LIST);
 
     // no results
-    if (section_list.leave == 1 && ("itemSectionRenderer" in results)) {
+    if (
+      !section_list ||
+      (section_list.length == 1 && ("itemSectionRenderer" in results))
+    ) {
       return search_results;
     }
 
@@ -513,7 +516,7 @@ export class Client {
     let parser_filter = filter as string;
 
     if (filter && filter.includes("playlist")) {
-      parser_filter = "playlist";
+      parser_filter = "playlists";
     } else if (scope == "uploads") {
       parser_filter = "uploads";
     }
@@ -521,7 +524,7 @@ export class Client {
     for (const res of section_list) {
       if ("musicShelfRenderer" in res) {
         const results = j(res, "musicShelfRenderer.contents");
-        let new_filter = filter;
+        let new_filter = parser_filter;
         const category = j(res, MUSIC_SHELF, TITLE_TEXT);
 
         if (!filter && scope == scopes[0]) {
