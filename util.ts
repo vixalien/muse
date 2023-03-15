@@ -23,3 +23,14 @@ export const j = (json: unknown, path: string, ...others: string[]) => {
   const result = JSONPath({ path: [path, ...others].join("."), json });
   return result.length ? result[0] : null;
 };
+
+export function sum_total_duration(item: any) {
+  if (!("tracks" in item)) {
+    return 0;
+  } else {
+    return item.tracks.reduce(
+      (acc: number, track: any) => acc + track.duration_seconds || 0,
+      0,
+    );
+  }
+}

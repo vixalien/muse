@@ -179,3 +179,8 @@ export function parse_format(format: any) {
 
   return n;
 }
+
+export function parse_like_status(service: any) {
+  const status = ["LIKE", "INDIFFERENT"];
+  return status[(status.indexOf(service) + 1) % status.length];
+}

@@ -5,7 +5,9 @@ import {
 } from "../nav.ts";
 import { j } from "../util.ts";
 
-export function parse_menu_playlists(data: any, results: any) {
+export function get_menu_playlists(data: any) {
+  const ids: Record<string, string> = {};
+
   const watch_menu = find_objects_by_key(
     j(data, MENU_ITEMS),
     "menuNavigationItemRenderer",
@@ -29,8 +31,18 @@ export function parse_menu_playlists(data: any, results: any) {
         j(item, "navigationEndpoint.watchEndpoint.playlistId");
 
     if (watch_id) {
-      results[watch_key] = watch_id;
+      ids[watch_key] = watch_id;
     }
+  }
+
+  return ids;
+}
+
+export function parse_menu_playlists(data: any, results: any) {
+  const ids = get_menu_playlists(data);
+
+  for (const id in ids) {
+    results[id] = ids[id];
   }
 }
 
@@ -62,7 +74,7 @@ export function get_fixed_column_item(item: any, index: number) {
   if (
     !("text" in
       item.fixedColumns[index].musicResponsiveListItemFixedColumnRenderer) ||
-    ("runs" in
+    !("runs" in
       item.fixedColumns[index].musicResponsiveListItemFixedColumnRenderer.text)
   ) {
     return null;

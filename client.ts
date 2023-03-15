@@ -3,9 +3,10 @@ import { FetchClient, RequestClient, RequestInit } from "./request.ts";
 import { get_default_store, Store } from "./store.ts";
 
 import CONSTANTS2 from "./constants-ng.json" assert { type: "json" };
-import { j } from "./util.ts";
+import { j, sum_total_duration } from "./util.ts";
 import {
   BADGE_LABEL,
+  CAROUSEL,
   DESCRIPTION,
   DESCRIPTION_SHELF,
   find_object_by_key,
@@ -19,6 +20,7 @@ import {
   NAVIGATION_VIDEO_ID,
   RUN_TEXT,
   SECTION_LIST,
+  SECTION_LIST_ITEM,
   SINGLE_COLUMN_TAB,
   THUMBNAILS,
   TITLE,
@@ -26,7 +28,9 @@ import {
 } from "./nav.ts";
 import {
   _,
+  parse_album,
   parse_artist_contents,
+  parse_content_list,
   parse_mixed_content,
   parse_mixed_item,
   parse_moods,
@@ -41,6 +45,7 @@ import {
   scopes,
   SearchOptions,
 } from "./parsers/search.ts";
+import { parse_album_header } from "./parsers/albums.ts";
 
 interface ClientOptions {
   auth?: PureAuthenticatorOptions;
@@ -254,6 +259,51 @@ export class Client {
     // };
 
     // return artist;
+  }
+
+  async get_album(
+    browseId: string,
+  ) {
+    const response = await this.request_json("browse", {
+      data: {
+        browseId,
+      },
+    });
+
+    const album = parse_album_header(response);
+    const results = j(
+      response,
+      SINGLE_COLUMN_TAB,
+      SECTION_LIST_ITEM,
+      MUSIC_SHELF,
+    );
+
+    album.tracks = parse_playlist_items(results.contents);
+
+    const carousel = j(
+      response,
+      SINGLE_COLUMN_TAB,
+      SECTION_LIST,
+      "1",
+      CAROUSEL,
+    );
+
+    if (carousel != null) {
+      album.other_versions = parse_content_list(results.contents, parse_album);
+    }
+
+    album.duration_seconds = sum_total_duration(album);
+
+    for (const i in album.tracks) {
+      const track = album.tracks[i];
+      album.tracks[i] = {
+        ...track,
+        album: album.title,
+        artists: album.artists,
+      };
+    }
+
+    return album;
   }
 
   async get_song(
