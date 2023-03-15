@@ -56,7 +56,7 @@ if (client.auth.requires_login()) {
 
 In the future, I plan to add support for other auth methods, such as cookies and Youtube TV login codes.
 
-## storage
+## Storage
 
 You can pass in a storage object to the client to persist the auth token.
 
@@ -104,17 +104,17 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [ ] get tasteprofile
 - [ ] set tasteprofile
 
-# explore
+### explore
 
 - [ ] get mood categories
 - [ ] get mood playlists
 - [ ] get charts
 
-# watch
+### watch
 
 - [ ] get watch playlist
 
-# library
+### library
 
 - [x] get library
 - [ ] get library playlists
@@ -131,7 +131,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [ ] rate playlist
 - [ ] subscribe artists
 
-# playlists
+### playlists
 
 - [ ] get playlist
 - [ ] create playlist
@@ -140,7 +140,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [ ] add playlist items
 - [ ] remove playlist items
 
-# uploads
+### uploads
 
 - [ ] get library upload songs
 - [ ] get library upload artists
@@ -150,10 +150,11 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [ ] upload song
 - [ ] delete upload entity
 
-# Acknowledgements
+## Acknowledgements
 
 - [ytmusicapi] - The inspiration for this library
 - [Youtube Internal Clients][internal-clients] - The source of the client names and versions
+- many random gists and blog posts whose links I've lost
 
 [ytmusicapi]: https://ytmusicapi.readthedocs.io/en/stable/reference.html
-[inner-clients]: https://github.com/zerodytrash/YouTube-Internal-Clients
+[internal-clients]: https://github.com/zerodytrash/YouTube-Internal-Clients
