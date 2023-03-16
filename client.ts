@@ -4,6 +4,7 @@ import {
   get_artist,
   get_artist_albums,
   get_library,
+  get_user,
   init,
   search,
 } from "./mod.ts";
@@ -59,9 +60,8 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_artist_albums(
-  "UCiGs21G3KeE2tpbbMPzn9Qg",
-  "6gPoAUdxc0JXcHNCQ3BnQkNpUjVkRjl3WVdkbFgzTnVZWEJ6YUc5MFgyMTFjMmxqWDNCaFoyVmZjbVZuYVc5dVlXd1NIekF0WmxWRk1FNUpaRlp6WTFWRE9HTTBMWEZyWkdsUFdYSmtkV3BpYUdjYVR3QUFaVzR0UjBJQUFVZENBQUZIUWdBQkFFWkZiWFZ6YVdOZlpHVjBZV2xzWDJGeWRHbHpkQUFCQVVNQUFBRUFBUUFBQVFFQVZVTnBSM015TVVjelMyVkZNblJ3WW1KTlVIcHVPVkZuQUFIeTJyT3FDZ2RBQVVnQVVMUUI%3D",
+get_user(
+  "UCSdIilrkpBqG01hzOU6pOTg",
 )
   .then((data) => {
     Deno.writeTextFile(

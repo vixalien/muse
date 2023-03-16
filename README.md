@@ -131,7 +131,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get artist albums
 - [x] get album
 - [ ] get album browse id
-- [ ] get user
+- [x] get user
 - [ ] get user playlists
 - [x] get song
 - [ ] get song related
