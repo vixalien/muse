@@ -36,12 +36,13 @@ export async function request(endpoint: string, options: RequestInit) {
 export async function request_json(endpoint: string, options: RequestInit) {
   // caching
   const path = `store/cache/${
-    new URLSearchParams({ ...options.data } as any || {})
-      .toString()
+    await hash(
+      new URLSearchParams({ ...options.data, ...options.params } as any || {})
+        .toString(),
+    )
   }.json`;
 
-  const cache = Object.keys(options.params || {}).length == 0 &&
-    path.length < 200;
+  const cache = true;
 
   const cached = await Deno.readTextFile(path)
     .then(JSON.parse).catch(() => null);
@@ -58,4 +59,19 @@ export async function request_json(endpoint: string, options: RequestInit) {
   }
 
   return json;
+}
+
+const encoder = new TextEncoder();
+
+function hash(string: string) {
+  // use the subtle crypto API to generate a 512 bit hash
+  // return the hash as a hex string
+  const data = encoder.encode(string);
+  return crypto.subtle
+    .digest("SHA-256", data)
+    .then((hash) => {
+      return Array.from(new Uint8Array(hash))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    });
 }
