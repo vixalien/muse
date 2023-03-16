@@ -2,9 +2,11 @@ import { get_continuations } from "../continuations.ts";
 import { GRID, MTRIR, SECTION_LIST, SINGLE_COLUMN_TAB } from "../nav.ts";
 import { parse_mixed_item } from "../parsers/browsing.ts";
 import { j } from "../util.ts";
+import { check_auth } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export async function get_library(limit = 20, continuation?: string) {
+  await check_auth();
   const endpoint = "browse";
   const data = {
     browseId: "FEmusic_library_landing",

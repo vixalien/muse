@@ -20,7 +20,11 @@ export function setup(options: ClientOptions = {}) {
   return { auth, client, store };
 }
 
-let { auth, client, store } = setup();
+let auth: Authenticator;
+let client: RequestClient;
+let store: Store;
+
+init();
 
 export function init(options: ClientOptions = {}) {
   const data = setup(options);

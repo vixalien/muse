@@ -31,14 +31,20 @@ Here's the flow:
 
 ```ts
 import { auth } from "https://deno.land/x/muse/mod.ts";
+import { RequiresLoginEvent } from "https://deno.land/x/muse/auth.ts";
 
-if (auth.requires_login()) {
+// this is the authentication flow
+const auth_flow = async () => {
+  if (auth.has_token()) return;
   console.log("Getting login code...");
 
   const loginCode = await auth.get_login_code();
 
   console.log(
-    `Go to ${loginCode.verification_url} and enter the code ${loginCode.user_code}`,
+    `Go to %c${loginCode.verification_url}%c and enter the code %c${loginCode.user_code}`,
+    css.underline,
+    css.normal,
+    css.bold,
   );
 
   // not necessary, but saves some requests
@@ -52,7 +58,15 @@ if (auth.requires_login()) {
   );
 
   console.log("Logged in!", auth._token);
-}
+};
+
+// listen to the `requires-login` event, then resolve pass on a function that
+// returns a promise that will resolve when the auth flow is complete
+auth.addEventListener("requires-login", (event) => {
+  const resolve = (event as RequiresLoginEvent).detail;
+
+  resolve(auth_flow);
+});
 ```
 
 In the future, I plan to add support for other auth methods, such as cookies and
@@ -90,6 +104,15 @@ class MyStore extends Store {
 
 // then use it accordingly
 const client = init({ store: new MyStore() });
+
+// Do note that init() can be called multiple times, but it's not recommended. 
+// this is because init overrides the global store, so if you call init()
+// multiple times, other options set before will be ignored. example:
+
+init({ auth: { /* custom auth options */ } });
+init({ store: /* custom store */ });
+
+// the above will only use the custom store, and ignore the custom auth options
 ```
 
 ## Operations

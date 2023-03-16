@@ -1,3 +1,5 @@
+import { auth } from "../setup.ts";
+
 /**
  * Get number of days since the unix epoch
  */
@@ -6,4 +8,10 @@ export function get_timestamp() {
 
   return Math.round((new Date().getTime() - new Date(0).getTime()) / one_day) -
     7;
+}
+
+export async function check_auth() {
+  if (await auth.requires_login()) {
+    throw new Error("Please provide authentication before using this function");
+  }
 }

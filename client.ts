@@ -1,4 +1,5 @@
-import { auth, get_home, init, search } from "./mod.ts";
+import { RequiresLoginEvent } from "./auth.ts";
+import { auth, get_library, init, search } from "./mod.ts";
 import { DenoFileStore } from "./store.ts";
 
 init({
@@ -11,7 +12,8 @@ const css = {
   underline: "text-decoration: underline",
 };
 
-if (auth.requires_login()) {
+const auth_flow = async () => {
+  if (auth.has_token()) return;
   console.log("Getting login code...");
 
   const loginCode = await auth.get_login_code();
@@ -33,7 +35,13 @@ if (auth.requires_login()) {
   );
 
   console.log("Logged in!", auth._token);
-}
+};
+
+auth.addEventListener("requires-login", (event) => {
+  const resolve = (event as RequiresLoginEvent).detail;
+
+  resolve(auth_flow);
+});
 
 // request("browse", {
 //   data: {
@@ -44,7 +52,7 @@ if (auth.requires_login()) {
 //     console.log(await data.text());
 //   });
 
-search("rolling in the depp", { ignore_spelling: false })
+get_library()
   .then((data) => {
     Deno.writeTextFile(
       "store/rickroll.json",

@@ -29,15 +29,20 @@ interface AuthenticatorOptions extends PureAuthenticatorOptions {
   store: Store;
 }
 
+export type RequiresLoginEvent = CustomEvent<
+  (_fn: () => Promise<void>) => void
+>;
+
 /**
  * Authenticates with youtube's API
  */
-export class Authenticator {
+export class Authenticator extends EventTarget {
   _token: Token | null = null;
   store: Store;
   client: RequestClient;
 
   constructor(options: AuthenticatorOptions) {
+    super();
     this.token = options.token ?? options.store.get("token") ?? null;
     this.store = options.store;
     this.client = options.client;
@@ -49,11 +54,31 @@ export class Authenticator {
     this.store?.set("token", token);
   }
 
+  get token() {
+    return this._token;
+  }
+
   /**
    * Get if the API requires a login
    */
-  requires_login() {
-    return this._token == null;
+  async requires_login() {
+    if (!this.has_token()) {
+      let fn: () => Promise<void> = () => Promise.resolve();
+      this.dispatchEvent(
+        new CustomEvent("requires-login", {
+          detail: (_fn: () => Promise<void>) => {
+            fn = _fn;
+          },
+        }) as RequiresLoginEvent,
+      );
+
+      await fn();
+    }
+    return !this.has_token();
+  }
+
+  has_token() {
+    return this.token != null;
   }
 
   /**
@@ -95,29 +120,24 @@ export class Authenticator {
     let tries = 0;
 
     while (!res || !res.refresh_token) {
-      try {
-        const response = await this.client.request(
-          "https://oauth2.googleapis.com/token",
-          {
-            method: "post",
-            data: {
-              client_id: CONSTANTS.CLIENT_ID,
-              client_secret: CONSTANTS.CLIENT_SECRET,
-              code: code,
-              grant_type: "http://oauth.net/grant_type/device/1.0",
-            },
+      const response = await this.client.request(
+        "https://oauth2.googleapis.com/token",
+        {
+          method: "post",
+          data: {
+            client_id: CONSTANTS.CLIENT_ID,
+            client_secret: CONSTANTS.CLIENT_SECRET,
+            code: code,
+            grant_type: "http://oauth.net/grant_type/device/1.0",
           },
-        );
+        },
+      );
 
-        res = await response.json() as Token;
+      res = await response.json() as Token;
 
-        if (!response.ok) await wait(interval * 1000);
+      if (!response.ok) await wait(interval * 1000);
 
-        tries++;
-      } catch (e) {
-        if (tries++ > 10) throw e;
-        await wait(interval * 1000);
-      }
+      tries++;
     }
 
     this.token = {
@@ -131,7 +151,7 @@ export class Authenticator {
    * If a token is present, it will check if it is expired
    */
   async get_token() {
-    const token = this._token;
+    const token = this.token;
 
     if (!token) {
       throw new MuseError(
@@ -173,17 +193,21 @@ export class Authenticator {
         expires_date: new Date(Date.now() + new_token.expires_in * 1000),
       };
 
-      return this._token!;
+      return this.token!;
     }
 
     return token;
   }
 
   async get_headers() {
-    const token = await this.get_token();
+    if (this.has_token()) {
+      const token = await this.get_token();
 
-    return {
-      Authorization: `${token.token_type} ${token.access_token}`,
-    };
+      return {
+        Authorization: `${token.token_type} ${token.access_token}`,
+      };
+    } else {
+      return {};
+    }
   }
 }
