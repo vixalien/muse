@@ -34,13 +34,14 @@ export async function request(endpoint: string, options: RequestInit) {
 }
 
 export async function request_json(endpoint: string, options: RequestInit) {
-  const cache = Object.keys(options.params || {}).length == 0;
-
   // caching
   const path = `store/cache/${
     new URLSearchParams({ ...options.data } as any || {})
       .toString()
   }.json`;
+
+  const cache = Object.keys(options.params || {}).length == 0 &&
+    path.length < 200;
 
   const cached = await Deno.readTextFile(path)
     .then(JSON.parse).catch(() => null);

@@ -128,7 +128,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 
 - [x] home
 - [x] get artist
-- [ ] get artist albums
+- [x] get artist albums
 - [x] get album
 - [ ] get album browse id
 - [ ] get user

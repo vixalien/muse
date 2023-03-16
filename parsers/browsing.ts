@@ -242,7 +242,7 @@ export function parse_search_results(
         // song result
         const flex_items = [...Array(2).keys()].map((i) =>
           jo(get_flex_column_item(data, i), "text.runs")
-        )
+        );
 
         if (flex_items[0]) {
           search_result.videoId = jo(flex_items[0][0], NAVIGATION_VIDEO_ID);
@@ -385,7 +385,7 @@ export function parse_artist_contents(results: any[]) {
           `${CAROUSEL_TITLE}.${NAVIGATION_BROWSE_ID}`,
         );
 
-        if (["albumns", "singles", "playlists"].includes(category)) {
+        if (["albums", "singles", "playlists"].includes(category)) {
           artist[category].params =
             j(data[0], CAROUSEL_TITLE).navigationEndpoint.browseEndpoint.params;
         }

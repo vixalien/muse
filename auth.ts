@@ -199,7 +199,7 @@ export class Authenticator extends EventTarget {
     return token;
   }
 
-  async get_headers() {
+  async get_headers(): Promise<{ Authorization?: string }> {
     if (this.has_token()) {
       const token = await this.get_token();
 

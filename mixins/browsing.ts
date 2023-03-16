@@ -1,9 +1,31 @@
 import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 
 import { get_continuations } from "../continuations.ts";
-import { SINGLE_COLUMN_TAB,SECTION_LIST, DESCRIPTION, DESCRIPTION_SHELF, find_object_by_key, MUSIC_SHELF, NAVIGATION_BROWSE_ID, NAVIGATION_PLAYLIST_ID, THUMBNAILS, TITLE, TITLE_TEXT, CAROUSEL, SECTION_LIST_ITEM } from "../nav.ts";
+import {
+  CAROUSEL,
+  DESCRIPTION,
+  DESCRIPTION_SHELF,
+  find_object_by_key,
+  GRID_ITEMS,
+  MTRIR,
+  MUSIC_SHELF,
+  NAVIGATION_BROWSE_ID,
+  NAVIGATION_PLAYLIST_ID,
+  SECTION_LIST,
+  SECTION_LIST_ITEM,
+  SINGLE_COLUMN_TAB,
+  THUMBNAILS,
+  TITLE,
+  TITLE_TEXT,
+} from "../nav.ts";
 import { parse_album_header } from "../parsers/albums.ts";
-import { parse_moods,parse_mixed_content, parse_artist_contents, parse_album, parse_content_list } from "../parsers/browsing.ts";
+import {
+  parse_album,
+  parse_artist_contents,
+  parse_content_list,
+  parse_mixed_content,
+  parse_moods,
+} from "../parsers/browsing.ts";
 import { parse_playlist_items } from "../parsers/playlists.ts";
 import { parse_format } from "../parsers/songs.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
@@ -65,7 +87,6 @@ export async function get_home(limit = 3, continuation?: string) {
   return home;
 }
 
-
 export async function get_artist(artistId: string) {
   if (artistId.startsWith("MPLA")) artistId = artistId.slice(4);
 
@@ -97,7 +118,7 @@ export async function get_artist(artistId: string) {
       `startRadioButton.buttonRenderer.${NAVIGATION_PLAYLIST_ID}`,
     ),
     subscribers: jo(subscription_button, "subscriberCountText.runs[0].text"),
-    subscribed: j(subscription_button, "subscribed"),
+    subscribed: subscription_button.subscribed,
     thumbnails: jo(header, THUMBNAILS),
     songs: { browseId: null, results: [] as any[] },
     ...parse_artist_contents(results),
@@ -216,4 +237,22 @@ export async function get_song(
     videoDetails: response.videoDetails,
     playerConfig: response.playerConfig,
   };
+}
+
+export async function get_artist_albums(channelId: string, params: string) {
+  const json = await request_json("browse", {
+    data: {
+      browseId: channelId,
+      params,
+    },
+  });
+
+  const results = j(
+    json,
+    SINGLE_COLUMN_TAB,
+    SECTION_LIST_ITEM,
+    GRID_ITEMS,
+  );
+
+  return results.map((result: any) => parse_album(result[MTRIR]));
 }
