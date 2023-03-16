@@ -1,4 +1,4 @@
-import { j } from "./util.ts";
+import { jo } from "./util.ts";
 
 export async function get_continuations(
   results: any,
@@ -10,24 +10,24 @@ export async function get_continuations(
   reloadable = false,
 ) {
   const items = [];
-  let continuation =
-    (reloadable ? get_reloadable_params(results) : get_params(results))
-      .continuation;
+  let params = reloadable
+      ? get_reloadable_params(results)
+      : get_params(results),
+    continuation = params.continuation;
 
   while (
     (typeof results === "string" || "continuations" in results) &&
     (limit == null || items.length < limit)
   ) {
-    const params = reloadable
-      ? get_reloadable_params(results)
-      : get_params(results);
-
-    continuation = params.continuation;
-
     const response = await request(params);
 
     if ("continuationContents" in response) {
       results = response.continuationContents[continuation_type];
+      params = reloadable
+        ? get_reloadable_params(results)
+        : get_params(results);
+
+      continuation = params.continuation;
     } else {
       break;
     }
@@ -43,7 +43,7 @@ export async function get_continuations(
 }
 
 function get_params(results: any, ctoken_path = "") {
-  const ctoken = typeof results === "string" ? results : j(
+  const ctoken = typeof results === "string" ? results : jo(
     results,
     `continuations[0].next${ctoken_path}ContinuationData.continuation`,
   );
@@ -51,7 +51,7 @@ function get_params(results: any, ctoken_path = "") {
 }
 
 function get_reloadable_params(results: any) {
-  const ctoken = typeof results === "string" ? results : j(
+  const ctoken = typeof results === "string" ? results : jo(
     results,
     `continuations[0].reloadContinuationData.continuation`,
   );

@@ -2,18 +2,17 @@
 
 A library to interact with the YouTube Music (InnerTube) api.
 
-> Note: This library is still in development, and is not ready for production use.
+> Note: This library is still in development, and is not ready for production
+> use.
 
 ## Usage
 
 Requires Deno.
 
 ```ts
-import { Muse } from "https://deno.land/x/muse/mod.ts";
+import { get_album, search } from "https://deno.land/x/muse/mod.ts";
 
-const client = new Muse();
-
-client.search("drake")
+search("drake")
   .then((data) => {
     console.log("search results", data);
   });
@@ -31,10 +30,12 @@ Here's the flow:
 3. Get the OAuth token & refresh tokens
 
 ```ts
-if (client.auth.requires_login()) {
+import { auth } from "https://deno.land/x/muse/mod.ts";
+
+if (auth.requires_login()) {
   console.log("Getting login code...");
 
-  const loginCode = await client.auth.get_login_code();
+  const loginCode = await auth.get_login_code();
 
   console.log(
     `Go to ${loginCode.verification_url} and enter the code ${loginCode.user_code}`,
@@ -45,31 +46,39 @@ if (client.auth.requires_login()) {
 
   console.log("Loading token...");
 
-  await client.auth.load_token_with_code(
+  await auth.load_token_with_code(
     loginCode.device_code,
     loginCode.interval,
   );
 
-  console.log("Logged in!", client.auth._token);
+  console.log("Logged in!", auth._token);
 }
 ```
 
-In the future, I plan to add support for other auth methods, such as cookies and Youtube TV login codes.
+In the future, I plan to add support for other auth methods, such as cookies and
+Youtube TV login codes.
 
 ## Storage
 
 You can pass in a storage object to the client to persist the auth token.
 
 ```ts
-import { Store, DenoFileStore, MemoryStore, LocalStorageStore, get_default_store } from "https://deno.land/x/muse/mod.ts";
+import { init } from "https://deno.land/x/muse/mod.ts";
+import {
+  DenoFileStore,
+  get_default_store,
+  LocalStorageStore,
+  MemoryStore,
+  Store,
+} from "https://deno.land/x/muse/store.ts";
 
 // you can use the default store, which is DenoFileStore if available, then LocalStorageStore, then MemoryStore
-const client = new Muse({ store: get_default_store() });
+const client = init({ store: get_default_store() });
 
 // or you can use any of the built-in stores
-const client = new Muse({ store: new DenoFileStore("/path/to/file.json") });
-const client = new Muse({ store: new LocalStorageStore() });
-const client = new Muse({ store: new MemoryStore() });
+const client = init({ store: new DenoFileStore("/path/to/file.json") });
+const client = init({ store: new LocalStorageStore() });
+const client = init({ store: new MemoryStore() });
 
 // or you can implement your own store
 // by extending the Store abstract class
@@ -78,6 +87,9 @@ class MyStore extends Store {
   set(key: string, value: unknown): void;
   delete(key: string): void;
 }
+
+// then use it accordingly
+const client = init({ store: new MyStore() });
 ```
 
 ## Operations
@@ -153,7 +165,8 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 ## Acknowledgements
 
 - [ytmusicapi] - The inspiration for this library
-- [Youtube Internal Clients][internal-clients] - The source of the client names and versions
+- [Youtube Internal Clients][internal-clients] - The source of the client names
+  and versions
 - many random gists and blog posts whose links I've lost
 
 [ytmusicapi]: https://ytmusicapi.readthedocs.io/en/stable/reference.html

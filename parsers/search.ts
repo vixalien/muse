@@ -8,17 +8,11 @@ export const filters = [
   "videos",
 ] as const;
 
-type Filter = typeof filters[number];
+export type Filter = typeof filters[number];
 
 export const scopes = ["library", "uploads"] as const;
 
-type Scope = typeof scopes[number];
-
-export interface SearchOptions {
-  filter?: Filter;
-  scope?: Scope;
-  ignore_spelling?: boolean;
-}
+export type Scope = typeof scopes[number];
 
 const FILTERED_PARAM1 = "EgWKAQI";
 
