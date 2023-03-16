@@ -132,7 +132,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get album
 - [ ] get album browse id
 - [x] get user
-- [ ] get user playlists
+- [x] get user playlists
 - [x] get song
 - [ ] get song related
 - [ ] get lyrics

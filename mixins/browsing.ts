@@ -25,6 +25,7 @@ import {
   parse_content_list,
   parse_mixed_content,
   parse_moods,
+  parse_playlist,
 } from "../parsers/browsing.ts";
 import { parse_playlist_items } from "../parsers/playlists.ts";
 import { parse_format } from "../parsers/songs.ts";
@@ -268,4 +269,22 @@ export async function get_user(channelId: string) {
   };
 
   return user;
+}
+
+export async function get_user_playlists(channelId: string, params: string) {
+  const json = await request_json("browse", {
+    data: {
+      browseId: channelId,
+      params,
+    },
+  });
+
+  const results = j(
+    json,
+    SINGLE_COLUMN_TAB,
+    SECTION_LIST_ITEM,
+    GRID_ITEMS,
+  );
+
+  return parse_content_list(results, parse_playlist);
 }
