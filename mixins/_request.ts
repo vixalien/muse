@@ -35,12 +35,9 @@ export async function request(endpoint: string, options: RequestInit) {
 
 export async function request_json(endpoint: string, options: RequestInit) {
   // caching
-  const path = `store/cache/${
-    await hash(
-      new URLSearchParams({ ...options.data, ...options.params } as any || {})
-        .toString(),
-    )
-  }.json`;
+  const path = `store/cache/${await hash(
+    JSON.stringify({ ...options.data, ...options.params } || {}),
+  )}.json`;
 
   const cache = true;
 
