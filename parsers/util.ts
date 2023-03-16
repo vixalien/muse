@@ -3,7 +3,7 @@ import {
   MENU_ITEMS,
   NAVIGATION_BROWSE_ID,
 } from "../nav.ts";
-import { j } from "../util.ts";
+import { j, jo } from "../util.ts";
 
 export function get_menu_playlists(data: any) {
   const ids: Record<string, string> = {};
@@ -27,8 +27,8 @@ export function get_menu_playlists(data: any) {
     }
 
     const watch_id =
-      j(item, "navigationEndpoint.watchPlaylistEndpoint.playlistId") ??
-        j(item, "navigationEndpoint.watchEndpoint.playlistId");
+      jo(item, "navigationEndpoint.watchPlaylistEndpoint.playlistId") ??
+        jo(item, "navigationEndpoint.watchEndpoint.playlistId");
 
     if (watch_id) {
       ids[watch_key] = watch_id;

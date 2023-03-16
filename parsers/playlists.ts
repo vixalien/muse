@@ -9,7 +9,7 @@ import {
   THUMBNAILS,
   TOGGLE_MENU,
 } from "../nav.ts";
-import { j } from "../util.ts";
+import { j, jo } from "../util.ts";
 import {
   parse_song_album,
   parse_song_artists,
@@ -61,13 +61,13 @@ export const parse_playlist_items = (
       }
     }
 
-    const play = j(data, PLAY_BUTTON);
+    const play = jo(data, PLAY_BUTTON);
     if (play != null) {
       if ("playNavigationEndpoint" in play) {
         videoId = j(play, "playNavigationEndpoint.watchEndpoint.videoId");
 
         if ("menu" in data) {
-          like = j(data, MENU_LIKE_STATUS);
+          like = jo(data, MENU_LIKE_STATUS);
         }
       }
     }
@@ -104,9 +104,9 @@ export const parse_playlist_items = (
         "MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT";
     }
 
-    const isExplicit = j(data, BADGE_LABEL) != null;
+    const isExplicit = jo(data, BADGE_LABEL) != null;
 
-    const videoType = j(
+    const videoType = jo(
       data,
       `${MENU_ITEMS}[0].menuNavigationItemRenderer.navigationEndpoint.${NAVIGATION_VIDEO_TYPE}`,
     );

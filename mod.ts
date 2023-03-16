@@ -46,7 +46,7 @@ if (client.auth.requires_login()) {
 //     console.log(await data.text());
 //   });
 
-client.get_album("MPREb_G5WlCAsgDsE")
+client.get_library(Infinity)
   .then((data) => {
     Deno.writeTextFile(
       "store/rickroll.json",

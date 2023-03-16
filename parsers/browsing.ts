@@ -31,7 +31,7 @@ import {
   TITLE_TEXT,
   TOGGLE_MENU,
 } from "../nav.ts";
-import { j } from "../util.ts";
+import { j, jo } from "../util.ts";
 import {
   parse_song_artists,
   parse_song_artists_runs,
@@ -68,12 +68,12 @@ export function parse_moods(results: any[]) {
 export function parse_mixed_item(data: any) {
   let type: string | null = null, content: any;
 
-  const page_type = j(data, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
+  const page_type = jo(data, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
   switch (page_type) {
     case null:
     case undefined:
       // song or watch playlist
-      if (j(data, NAVIGATION_WATCH_PLAYLIST_ID) != null) {
+      if (jo(data, NAVIGATION_WATCH_PLAYLIST_ID) != null) {
         type = "watch-playlist";
         content = parse_watch_playlist(data);
       } else {
@@ -122,13 +122,13 @@ export function parse_mixed_content(rows: any[]) {
       const carousel_title = j(results, CAROUSEL_TITLE);
 
       title = j(carousel_title, "text");
-      browseId = j(carousel_title, NAVIGATION_BROWSE_ID);
-      subtitle = j(results, CAROUSEL_SUBTITLE, "text");
-      thumbnails = j(results, CAROUSEL_THUMBNAILS);
+      browseId = jo(carousel_title, NAVIGATION_BROWSE_ID);
+      subtitle = jo(results, CAROUSEL_SUBTITLE, "text");
+      thumbnails = jo(results, CAROUSEL_THUMBNAILS);
 
       contents = [];
       for (const result of results["contents"]) {
-        const data = j(result, MTRIR);
+        const data = jo(result, MTRIR);
         let content = null, type;
 
         if (data != null) {
@@ -234,19 +234,19 @@ export function parse_search_results(
       }
     } else if (result_type == "video") {
       search_result.views = null;
-      search_result.videoType = j(data, PLAY_BUTTON, NAVIGATION_VIDEO_TYPE);
+      search_result.videoType = jo(data, PLAY_BUTTON, NAVIGATION_VIDEO_TYPE);
     } else if (result_type == "upload") {
-      const browse_id = j(data, NAVIGATION_BROWSE_ID);
+      const browse_id = jo(data, NAVIGATION_BROWSE_ID);
 
       if (!browse_id) {
         // song result
         const flex_items = [...Array(2).keys()].map((i) =>
-          j(get_flex_column_item(data, i), "text.runs")
-        );
+          jo(get_flex_column_item(data, i), "text.runs")
+        )
 
         if (flex_items[0]) {
-          search_result.videoId = j(flex_items[0][0], NAVIGATION_VIDEO_ID);
-          search_result.playlistId = j(
+          search_result.videoId = jo(flex_items[0][0], NAVIGATION_VIDEO_ID);
+          search_result.playlistId = jo(
             flex_items[0][0],
             NAVIGATION_PLAYLIST_ID,
           );
@@ -286,12 +286,12 @@ export function parse_search_results(
     }
 
     if (["song", "video"].includes(result_type)) {
-      search_result.videoId = j(
+      search_result.videoId = jo(
         data,
         PLAY_BUTTON,
         "playNavigationEndpoint.watchEndpoint.videoId",
       );
-      search_result.videoType = j(
+      search_result.videoType = jo(
         data,
         PLAY_BUTTON,
         "playNavigationEndpoint",
@@ -304,7 +304,7 @@ export function parse_search_results(
       search_result.year = null;
 
       const flex_item = get_flex_column_item(data, 1);
-      const first_run = j(flex_item, "text.runs[0]");
+      const first_run = jo(flex_item, "text.runs[0]");
 
       const has_offset = result_type == "album" ||
         (default_offset && search_result.videoId != null &&
@@ -319,7 +319,7 @@ export function parse_search_results(
     }
 
     if (["artist", "album", "playlist"].includes(result_type)) {
-      search_result.browseId = j(data, NAVIGATION_BROWSE_ID);
+      search_result.browseId = jo(data, NAVIGATION_BROWSE_ID);
 
       if (!search_result.browseId) {
         continue;
@@ -327,10 +327,10 @@ export function parse_search_results(
     }
 
     if (["song", "album"].includes(result_type)) {
-      search_result.isExplicit = j(data, BADGE_LABEL) != null;
+      search_result.isExplicit = jo(data, BADGE_LABEL) != null;
     }
 
-    search_result.thumbnails = j(data, THUMBNAILS);
+    search_result.thumbnails = jo(data, THUMBNAILS);
     search_results.push(search_result);
   }
 
@@ -425,7 +425,7 @@ export function parse_album(result: any) {
     year: j(subtitles[subtitles.length - 1], "text"),
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
-    isExplicit: j(result, SUBTITLE_BADGE_LABEL) != null,
+    isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     type: j(result, SUBTITLE),
     artists: parse_song_artists_runs(subtitles.slice(2, -1)),
   };
@@ -444,7 +444,7 @@ export function parse_song(result: any) {
   return {
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
-    playlistId: j(result, NAVIGATION_PLAYLIST_ID),
+    playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     ...parse_song_runs(result.subtitle.runs),
   };
@@ -458,10 +458,10 @@ export function parse_song_flat(data: any) {
 
   const song: any = {
     title: j(columns[0], TEXT_RUN_TEXT),
-    videoId: j(columns[0], TEXT_RUN, NAVIGATION_VIDEO_ID),
+    videoId: jo(columns[0], TEXT_RUN, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists(data, 1),
     thumbnails: j(data, THUMBNAILS),
-    isExplicit: j(data, BADGE_LABEL) != null,
+    isExplicit: jo(data, BADGE_LABEL) != null,
   };
 
   if (
@@ -487,7 +487,7 @@ export function parse_video(result: any) {
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),
-    playlistId: j(result, NAVIGATION_PLAYLIST_ID),
+    playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     views: runs[runs.length - 1].text.split(" ")[0],
   };
@@ -531,10 +531,10 @@ export function parse_playlist(data: any) {
 }
 
 export function parse_related_artist(data: any) {
-  const subscribers = j(data, SUBTITLE2)?.split(" ")[0];
+  const subscribers = jo(data, SUBTITLE2)?.split(" ")[0];
 
   return {
-    title: j(data, TITLE_TEXT),
+    title: jo(data, TITLE_TEXT),
     browseId: j(data, TITLE, NAVIGATION_BROWSE_ID),
     subscribers,
     thumbnails: j(data, THUMBNAIL_RENDERER),
@@ -552,7 +552,7 @@ export function parse_watch_playlist(data: any) {
 export function parse_featured(data: any) {
   return {
     title: j(data, TITLE_TEXT),
-    playlistId: j(data, NAVIGATION_BROWSE_ID).slice(2),
+    playlistId: jo(data, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),
     author: j(data, SUBTITLE2),
   };

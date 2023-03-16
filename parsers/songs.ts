@@ -1,5 +1,5 @@
 import { FEEDBACK_TOKEN, NAVIGATION_BROWSE_ID, TOGGLE_MENU } from "../nav.ts";
-import { j } from "../util.ts";
+import { jo } from "../util.ts";
 import type { AudioFormat, Format, VideoFormat } from "./types.d.ts";
 import {
   get_browse_id,
@@ -30,7 +30,7 @@ export function parse_song_artists_runs(runs: any) {
 
     artists.push({
       name: run.text,
-      id: j(run, NAVIGATION_BROWSE_ID),
+      id: jo(run, NAVIGATION_BROWSE_ID),
     });
   }
 
@@ -52,7 +52,7 @@ export function parse_song_runs(runs: any[]) {
 
     if ("navigationEndpoint" in run) {
       // artist or album
-      const item = { name: text, id: j(run, NAVIGATION_BROWSE_ID) };
+      const item = { name: text, id: jo(run, NAVIGATION_BROWSE_ID) };
 
       if (
         item.id &&
@@ -99,11 +99,11 @@ export function parse_song_album(data: any, index: number) {
 export function parse_song_menu_tokens(item: any) {
   const toggle_menu = item[TOGGLE_MENU],
     service_type = toggle_menu.defaultIcon.iconType;
-  let library_add_token = j(
+  let library_add_token = jo(
       toggle_menu,
       `defaultServiceEndpoint.${FEEDBACK_TOKEN}`,
     ),
-    library_remove_token = j(
+    library_remove_token = jo(
       toggle_menu,
       `toggledServiceEndpoint.${FEEDBACK_TOKEN}`,
     );

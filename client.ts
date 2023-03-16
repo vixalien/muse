@@ -3,7 +3,7 @@ import { FetchClient, RequestClient, RequestInit } from "./request.ts";
 import { get_default_store, Store } from "./store.ts";
 
 import CONSTANTS2 from "./constants-ng.json" assert { type: "json" };
-import { j, sum_total_duration } from "./util.ts";
+import { j, jo, sum_total_duration } from "./util.ts";
 import {
   BADGE_LABEL,
   CAROUSEL,
@@ -202,17 +202,17 @@ export class Client {
       description: null,
       name: j(header, TITLE_TEXT),
       channelId: j(subscription_button, "channelId"),
-      shuffleId: j(
+      shuffleId: jo(
         header,
         `playButton.buttonRenderer.${NAVIGATION_PLAYLIST_ID}`,
       ),
-      radioId: j(
+      radioId: jo(
         header,
         `startRadioButton.buttonRenderer.${NAVIGATION_PLAYLIST_ID}`,
       ),
-      subscribers: j(subscription_button, "subscriberCountText.runs[0].text"),
+      subscribers: jo(subscription_button, "subscriberCountText.runs[0].text"),
       subscribed: j(subscription_button, "subscribed"),
-      thumbnails: j(header, THUMBNAILS),
+      thumbnails: jo(header, THUMBNAILS),
       songs: { browseId: null, results: [] as any[] },
       ...parse_artist_contents(results),
     };
@@ -280,7 +280,7 @@ export class Client {
 
     album.tracks = parse_playlist_items(results.contents);
 
-    const carousel = j(
+    const carousel = jo(
       response,
       SINGLE_COLUMN_TAB,
       SECTION_LIST,

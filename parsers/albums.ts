@@ -8,7 +8,7 @@ import {
   THUMBNAIL_CROPPED,
   TITLE_TEXT,
 } from "../nav.ts";
-import { j } from "../util.ts";
+import { j, jo } from "../util.ts";
 import { parse_like_status, parse_song_runs } from "./songs.ts";
 import { get_menu_playlists } from "./util.ts";
 
@@ -42,10 +42,10 @@ export function parse_album_header(response: any) {
   const toplevel = menu.topLevelButtons;
 
   album.audioPlaylistId =
-    j(toplevel, "0.buttonRenderer", NAVIGATION_WATCH_PLAYLIST_ID) ??
-      j(toplevel, "0.buttonRenderer", NAVIGATION_PLAYLIST_ID);
+    jo(toplevel, "0.buttonRenderer", NAVIGATION_WATCH_PLAYLIST_ID) ??
+      jo(toplevel, "0.buttonRenderer", NAVIGATION_PLAYLIST_ID);
 
-  const service = j(toplevel, "1.toggleButtonRenderer.defaultServiceEndpoint");
+  const service = jo(toplevel, "1.toggleButtonRenderer.defaultServiceEndpoint");
 
   if (service) {
     album.likeStatus = parse_like_status(service);

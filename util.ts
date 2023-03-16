@@ -19,9 +19,24 @@ export const set_debug = (value: boolean) => {
   ENABLE_DEBUG = value;
 };
 
-export const j = (json: unknown, path: string, ...others: string[]) => {
+export const jo = (
+  json: unknown,
+  path: string,
+  ...others: string[]
+): any => {
   const result = JSONPath({ path: [path, ...others].join("."), json });
   return result.length ? result[0] : null;
+};
+export const j = (json: unknown, path: string, ...others: string[]) => {
+  const result = jo(json, path, ...others);
+
+  if (!result) {
+    throw new TypeError(
+      `JSONPath expression "${[path, ...others]}" returned nothing`,
+    );
+  }
+
+  return result;
 };
 
 export function sum_total_duration(item: any) {
