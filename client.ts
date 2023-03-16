@@ -1,4 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
+import { get_queue } from "./mixins/queue.ts";
 import {
   auth,
   get_artist,
@@ -61,10 +62,10 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_user_playlists(
-  "UCSdIilrkpBqG01hzOU6pOTg",
-  "6gPnAUdxb0JXcHNCQ3BnQkNpUjVkRjl3WVdkbFgzTnVZWEJ6YUc5MFgyMTFjMmxqWDNCaFoyVmZjbVZuYVc5dVlXd1NIekF0WmxWRk1FNUpaRlp6WTFWRE9HTTBMWEZyWkdsTmIwWlNWMjFpYUdjYVR3QUFaVzR0UjBJQUFVZENBQUZIUWdBQkFFWkZiWFZ6YVdOZlpHVjBZV2xzWDJGeWRHbHpkQUFCQVVNQUFBRUFBUUFBQVFFQVZVTlRaRWxwYkhKcmNFSnhSekF4YUhwUFZUWndUMVJuQUFIeTJyT3FDZ1pBQVVnQVVBdw%3D%3D",
-)
+get_queue(null, "VLRDCLAK5uy_mSn-M-lIm2IdR8jiJpnYnbwO8BUCTAjX0")
+  // .then((data) => {
+  //   return get_queue(null, data.playlistId, { autoplay: true });
+  // })
   .then((data) => {
     Deno.writeTextFile(
       "store/rickroll.json",

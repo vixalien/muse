@@ -240,6 +240,20 @@ export async function get_song(
   };
 }
 
+export async function get_song_related(browseId: string) {
+  if (!browseId) throw new Error("No browseId provided");
+
+  const json = await request_json("browse", {
+    data: {
+      browseId,
+    },
+  });
+
+  const sections = j(json, "contents", SECTION_LIST);
+
+  return parse_mixed_content(sections);
+}
+
 export async function get_artist_albums(channelId: string, params: string) {
   const json = await request_json("browse", {
     data: {

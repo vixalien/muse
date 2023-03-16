@@ -148,3 +148,7 @@ export const parse_playlist_items = (
 
   return songs;
 };
+
+export function validate_playlist_id(playlistId: string) {
+  return playlistId.startsWith("VL") ? playlistId.slice(2) : playlistId;
+}

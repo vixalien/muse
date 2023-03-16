@@ -12,7 +12,7 @@ export async function get_continuations(
   const items = [];
   let params = reloadable
       ? get_reloadable_params(results)
-      : get_params(results),
+      : get_params(results, _ctoken_path),
     continuation = params.continuation;
 
   while (
