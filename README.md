@@ -134,7 +134,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get user
 - [x] get user playlists
 - [x] get song
-- [ ] get song related
+- [x] get song related
 - [ ] get lyrics
 - [ ] get tasteprofile
 - [ ] set tasteprofile
