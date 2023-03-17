@@ -62,9 +62,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_queue("xPYCtAl7iq8", "RDCLAK5uy_mSn-M-lIm2IdR8jiJpnYnbwO8BUCTAjX0", {
-  // autoplay: true,
-})
+search("Drake", { filter: "songs", limit: 50 })
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

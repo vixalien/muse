@@ -1,3 +1,4 @@
+import { get_continuations } from "../continuations.ts";
 import {
   BADGE_LABEL,
   MRLIR,
@@ -126,16 +127,27 @@ export interface SearchOptions {
   filter?: Filter;
   scope?: Scope;
   ignore_spelling?: boolean;
+  limit?: number;
+  continuation?: string;
 }
 
 export async function search(query: string, options: SearchOptions = {}) {
-  const { filter, scope, ignore_spelling = true } = options;
+  const {
+    filter,
+    scope,
+    ignore_spelling = true,
+    limit = 20,
+    continuation: _continuation = null,
+  } = options;
+
+  let continuation: any = _continuation;
 
   const data = { query } as any;
   const endpoint = "search";
   const search_results = {
     did_you_mean: null as any,
     categories: [] as any[],
+    continuation: null as string | null,
   };
 
   if (filter != null && !filters.includes(filter)) {
@@ -166,81 +178,115 @@ export async function search(query: string, options: SearchOptions = {}) {
     data.params = params;
   }
 
-  const response = await request_json(endpoint, { data });
+  if (!continuation) {
+    const response = await request_json(endpoint, { data });
 
-  await Deno.writeTextFile(
-    "store/search.json",
-    JSON.stringify(response, null, 2),
-  );
+    let results;
 
-  let results;
+    // no results
+    if (!("contents" in response)) {
+      return search_results;
+    } else if ("tabbedSearchResultsRenderer" in response.contents) {
+      const tab_index = (!scope || filter)
+        ? 0
+        : scopes.indexOf(scope as any) + 1;
+      results = response.contents.tabbedSearchResultsRenderer.tabs[tab_index]
+        .tabRenderer.content;
+    } else {
+      results = response.contents;
+    }
 
-  // no results
-  if (!("contents" in response)) {
-    return search_results;
-  } else if ("tabbedSearchResultsRenderer" in response.contents) {
-    const tab_index = (!scope || filter) ? 0 : scopes.indexOf(scope as any) + 1;
-    results = response.contents.tabbedSearchResultsRenderer.tabs[tab_index]
-      .tabRenderer.content;
-  } else {
-    results = response.contents;
-  }
+    const section_list = j(results, SECTION_LIST);
 
-  const section_list = j(results, SECTION_LIST);
+    // no results
+    if (
+      !section_list ||
+      (section_list.length == 1 && ("itemSectionRenderer" in section_list[0]))
+    ) {
+      return search_results;
+    }
 
-  // no results
-  if (
-    !section_list ||
-    (section_list.length == 1 && ("itemSectionRenderer" in results[0]))
-  ) {
-    return search_results;
-  }
+    // set filter for parser
+    let parser_filter = filter as string;
 
-  // set filter for parser
-  let parser_filter = filter as string;
+    if (filter && filter.includes("playlist")) {
+      parser_filter = "playlists";
+    } else if (scope == "uploads") {
+      parser_filter = "uploads";
+    }
 
-  if (filter && filter.includes("playlist")) {
-    parser_filter = "playlists";
-  } else if (scope == "uploads") {
-    parser_filter = "uploads";
-  }
+    for (const res of section_list) {
+      if ("musicShelfRenderer" in res) {
+        const results = j(res, "musicShelfRenderer.contents");
+        let new_filter = parser_filter;
+        const category = j(res, MUSIC_SHELF, TITLE_TEXT);
 
-  for (const res of section_list) {
-    if ("musicShelfRenderer" in res) {
-      const results = j(res, "musicShelfRenderer.contents");
-      let new_filter = parser_filter;
-      const category = j(res, MUSIC_SHELF, TITLE_TEXT);
+        if (!filter && scope == scopes[0]) {
+          new_filter = category;
+        }
 
-      if (!filter && scope == scopes[0]) {
-        new_filter = category;
-      }
+        const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
 
-      const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
+        const category_search_results = parse_search_results(results, type);
 
-      const category_search_results = parse_search_results(results, type);
+        if (category_search_results.length > 0) {
+          search_results.categories.push({
+            name: category.toLowerCase(),
+            items: category_search_results,
+          });
+        }
 
-      if (category_search_results.length > 0) {
-        search_results.categories.push({
-          category,
-          items: category_search_results,
-        });
-      }
-    } else if ("itemSectionRenderer" in res) {
-      const did_you_mean = jo(
-        res,
-        "itemSectionRenderer.contents[0].didYouMeanRenderer",
-      );
+        if ("continuations" in res["musicShelfRenderer"]) {
+          continuation = res.musicShelfRenderer;
+        }
+      } else if ("itemSectionRenderer" in res) {
+        const did_you_mean = jo(
+          res,
+          "itemSectionRenderer.contents[0].didYouMeanRenderer",
+        );
 
-      if (did_you_mean) {
-        search_results.did_you_mean = {
-          query: j(did_you_mean, "correctedQuery.runs"),
-          search: j(
-            did_you_mean,
-            "correctedQueryEndpoint.searchEndpoint.query",
-          ),
-        };
+        if (did_you_mean) {
+          search_results.did_you_mean = {
+            query: j(did_you_mean, "correctedQuery.runs"),
+            search: j(
+              did_you_mean,
+              "correctedQueryEndpoint.searchEndpoint.query",
+            ),
+          };
+        }
       }
     }
+  }
+
+  // limit only works when there's a filter
+  if (continuation && filter) {
+    const continued_data = await get_continuations(
+      continuation,
+      "musicShelfContinuation",
+      limit -
+        search_results.categories.reduce(
+          (acc, curr) => acc + curr.items.length,
+          0,
+        ),
+      (params) => {
+        return request_json(endpoint, { data, params });
+      },
+      (contents) => {
+        return parse_search_results(contents);
+      },
+    );
+
+    const category = search_results.categories.find((category) =>
+      category.name === filter
+    ) ?? search_results.categories[
+      search_results.categories.push({
+        name: filter,
+        items: [],
+      })
+    ];
+
+    search_results.continuation = continued_data.continuation;
+    category.items.push(...continued_data.items);
   }
 
   return search_results;
