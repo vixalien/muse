@@ -25,7 +25,7 @@ export async function get_continuations(
       results = response.continuationContents[continuation_type];
       params = reloadable
         ? get_reloadable_params(results)
-        : get_params(results);
+        : get_params(results, _ctoken_path);
 
       continuation = params.continuation;
     } else {

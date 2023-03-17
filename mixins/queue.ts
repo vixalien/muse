@@ -1,5 +1,5 @@
 import { get_continuations } from "../continuations.ts";
-import { NAVIGATION_PLAYLIST_ID, TAB_CONTENT, TEXT_RUN_TEXT } from "../nav.ts";
+import { NAVIGATION_BROWSE_ID, TAB_CONTENT, TEXT_RUN_TEXT } from "../nav.ts";
 import { validate_playlist_id } from "../parsers/playlists.ts";
 import { get_tab_browse_id, parse_queue_playlist } from "../parsers/queue.ts";
 import { j, jo } from "../util.ts";
@@ -11,6 +11,7 @@ export interface QueueOptions {
   radio?: boolean;
   shuffle?: boolean;
   autoplay?: boolean;
+  params?: string;
 }
 
 export async function get_queue(
@@ -19,11 +20,12 @@ export async function get_queue(
   options: QueueOptions = {},
 ) {
   const {
-    limit = 20,
+    limit = 10,
     continuation: _continuation = null,
     radio = false,
     shuffle = false,
     autoplay = false,
+    params,
   } = options;
 
   let continuation = _continuation as any;
@@ -34,13 +36,14 @@ export async function get_queue(
     enablePersistentPlaylistPanel: true,
     isAudioOnly: true,
     tunerSettingValue: "AUTOMIX_SETTING_NORMAL",
+    params: params ?? undefined,
   } as any;
 
   if (!videoId && !playlistId) {
     throw new Error("Must provide videoId or playlistId or both");
   }
 
-  if (videoId != null && !autoplay) {
+  if (videoId != null) {
     data.videoId = videoId;
 
     if (!playlistId) {
@@ -59,8 +62,9 @@ export async function get_queue(
 
   data.playlistId = playlistId ? validate_playlist_id(playlistId) : undefined;
 
-  const is_playlist = (data.playlistId?.startsWith("PL") ||
-    data.playlistId?.startsWith("OLA")) ?? false;
+  if (videoId && playlistId) {
+    data.params = "8gEAmgMDCNgE";
+  }
 
   if (shuffle && playlistId) {
     data.params = "wAEB8gECKAE%3D";
@@ -71,11 +75,34 @@ export async function get_queue(
   }
 
   if (autoplay) {
-    data.params = "wAEB8gECeAE%3D";
-    data.playlistId = "RDAMPL" + data.playlistId;
+    if (!params) {
+      // if (videoId) {
+      //   data.params = "OAHyAQQIAXgB";
+      if (data.playlistId.startsWith("RDAT")) {
+        data.params = "8gECeAE%3D";
+      } else {
+        data.params = "wAEB8gECeAE%3D";
+      }
+    }
+
+    // RDAMPL is for the radio of any playlist
+    // RDAT is for a specific radio of a playlist (All, R&B, Familiar etc...)
+    if (
+      !data.playlistId.startsWith("RDAMPL") &&
+      !data.playlistId.startsWith("RDAT")
+    ) {
+      data.playlistId = "RDAMPL" + data.playlistId;
+    }
   }
 
-  const queue: any = { tracks: [], chips: [] };
+  const is_playlist = data.playlistId.match(/^(PL|OLA|RD)/) ? true : false;
+
+  const queue: any = {
+    chips: [],
+    playlist: null,
+    playlistId: null,
+    tracks: [],
+  };
 
   if (!continuation) {
     const json = await request_json(endpoint, { data });
@@ -99,12 +126,13 @@ export async function get_queue(
       "content.playlistPanelRenderer",
     );
 
-    queue.playlistId = results.contents
-      .map((x: any) =>
-        jo(x, "playlistPanelVideoRenderer", NAVIGATION_PLAYLIST_ID)
-      )
-      .filter(Boolean)
-      .shift();
+    queue.playlist = jo(results, "title");
+    queue.playlistId = jo(results, "playlistId");
+
+    queue.author = {
+      name: jo(results, "longBylineText.runs[0].text"),
+      browseId: jo(results, "longBylineText.runs[0]", NAVIGATION_BROWSE_ID),
+    };
 
     queue.tracks.push(...parse_queue_playlist(results.contents));
 
@@ -115,12 +143,15 @@ export async function get_queue(
 
     if (chipRenderers) {
       for (const chip of chipRenderers) {
+        const endpoint = j(
+          chip,
+          "chipCloudChipRenderer.navigationEndpoint.queueUpdateCommand.fetchContentsCommand.watchEndpoint",
+        );
+
         const data = {
           text: j(chip, "chipCloudChipRenderer", TEXT_RUN_TEXT),
-          playlistId: j(
-            chip,
-            "chipCloudChipRenderer.navigationEndpoint.queueUpdateCommand.fetchContentsCommand.watchEndpoint.playlistId",
-          ),
+          playlistId: endpoint.playlistId,
+          params: endpoint.params,
         };
 
         queue.chips.push(data);
@@ -137,8 +168,28 @@ export async function get_queue(
       continuation,
       "playlistPanelContinuation",
       limit - queue.tracks.length,
-      (params) => {
-        return request_json(endpoint, { data, params });
+      async (params) => {
+        const response = await request_json(endpoint, { data, params });
+
+        if (!("continuationContents" in response)) {
+          const data = jo(
+            response,
+            "contents.singleColumnMusicWatchNextResultsRenderer.tabbedRenderer.watchNextTabbedResultsRenderer",
+            TAB_CONTENT,
+            "musicQueueRenderer",
+            "content.playlistPanelRenderer",
+          );
+
+          if (data) {
+            return {
+              continuationContents: {
+                playlistPanelContinuation: data,
+              },
+            };
+          }
+        } else {
+          return response;
+        }
       },
       (contents) => {
         return parse_queue_playlist(contents);

@@ -62,7 +62,9 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_queue(null, "VLRDCLAK5uy_mSn-M-lIm2IdR8jiJpnYnbwO8BUCTAjX0")
+get_queue("4C6pgZBpwzo", "RDCLAK5uy_mSn-M-lIm2IdR8jiJpnYnbwO8BUCTAjX0", {
+  // autoplay: true,
+})
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
