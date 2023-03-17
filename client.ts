@@ -5,7 +5,6 @@ import {
   get_artist,
   get_artist_albums,
   get_library,
-  get_song_related,
   get_user,
   get_user_playlists,
   init,
@@ -63,7 +62,9 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_song_related("MPTRt_O00gaBylyoG-8")
+get_queue("xPYCtAl7iq8", "RDCLAK5uy_mSn-M-lIm2IdR8jiJpnYnbwO8BUCTAjX0", {
+  // autoplay: true,
+})
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

@@ -11,6 +11,7 @@ import {
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PLAYLIST_ID,
+  RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN_TAB,
@@ -252,6 +253,34 @@ export async function get_song_related(browseId: string) {
   const sections = j(json, "contents", SECTION_LIST);
 
   return parse_mixed_content(sections);
+}
+
+export async function get_lyrics(browseId: string) {
+  if (!browseId) {
+    throw new TypeError(
+      "Invalid browseId provided. This song might not have lyrics.",
+    );
+  }
+
+  const json = await request_json("browse", { data: { browseId } });
+
+  return {
+    lyrics: jo(
+      json,
+      "contents",
+      SECTION_LIST_ITEM,
+      DESCRIPTION_SHELF,
+      DESCRIPTION,
+    ),
+    source: jo(
+      json,
+      "contents",
+      SECTION_LIST_ITEM,
+      DESCRIPTION_SHELF,
+      "footer",
+      RUN_TEXT,
+    ),
+  };
 }
 
 export async function get_artist_albums(channelId: string, params: string) {
