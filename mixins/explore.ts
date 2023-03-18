@@ -1,4 +1,7 @@
 import {
+  CAROUSEL,
+  CAROUSEL_CONTENTS,
+  CAROUSEL_TITLE,
   CATEGORY_COLOR,
   CATEGORY_PARAMS,
   CATEGORY_TITLE,
@@ -6,6 +9,7 @@ import {
   GRID,
   GRID_ITEMS,
   MUSIC_SHELF,
+  NAVIGATION_PARAMS,
   SECTION_LIST,
   SINGLE_COLUMN_TAB,
   TITLE,
@@ -13,7 +17,9 @@ import {
 } from "../nav.ts";
 import {
   parse_chart_contents,
+  parse_content_list,
   parse_explore_contents,
+  parse_playlist,
 } from "../parsers/browsing.ts";
 import { color_to_hex } from "../parsers/util.ts";
 import { j, jo } from "../util.ts";
@@ -84,5 +90,48 @@ export async function get_mood_categories() {
 
         return { title, items };
       }),
+  };
+}
+
+export async function get_mood_playlists(params: string) {
+  const json = await request_json("browse", {
+    data: {
+      browseId: "FEmusic_moods_and_genres_category",
+      params,
+    },
+  });
+
+  const categories = [];
+
+  for (const section of j(json, SINGLE_COLUMN_TAB, SECTION_LIST)) {
+    let path: string | null = null;
+    let title: string | null = null;
+    let params: string | null = null;
+
+    if ("gridRenderer" in section) {
+      path = GRID_ITEMS;
+      title = j(section, GRID, "header.gridHeaderRenderer", TITLE_TEXT);
+    } else if ("musicCarouselShelfRenderer" in section) {
+      path = CAROUSEL_CONTENTS;
+      title = j(section, CAROUSEL, CAROUSEL_TITLE, "text");
+      params = j(section, CAROUSEL, CAROUSEL_TITLE, NAVIGATION_PARAMS);
+    } else if ("musicImmersiveCarouselShelfRenderer" in section) {
+      path = "musicImmersiveCarouselShelfRenderer.contents";
+      title = j(section, TITLE);
+    }
+
+    if (path) {
+      const results = j(section, path);
+      categories.push({
+        title,
+        params,
+        playlists: parse_content_list(results, parse_playlist),
+      });
+    }
+  }
+
+  return {
+    title: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
+    categories,
   };
 }

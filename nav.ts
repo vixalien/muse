@@ -25,6 +25,7 @@ export const PLAY_BUTTON =
   "overlay.musicItemThumbnailOverlayRenderer.content.musicPlayButtonRenderer";
 export const NAVIGATION_BROWSE = "navigationEndpoint.browseEndpoint";
 export const NAVIGATION_BROWSE_ID = `${NAVIGATION_BROWSE}.browseId`;
+export const NAVIGATION_PARAMS = `${NAVIGATION_BROWSE}.params`;
 export const PAGE_TYPE =
   "browseEndpointContextSupportedConfigs.browseEndpointContextMusicConfig.pageType";
 export const NAVIGATION_VIDEO_ID = "navigationEndpoint.watchEndpoint.videoId";
