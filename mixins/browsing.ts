@@ -80,8 +80,9 @@ export async function get_home(limit = 3, continuation?: string) {
       (contents) => {
         return parse_mixed_content(contents);
       },
-    );
-
+      );
+      
+      console.log("continuation", limit, home.results.length);
     home.continuation = continued_data.continuation;
     home.results.push(...continued_data.items);
   }

@@ -15,3 +15,5 @@ export async function check_auth() {
     throw new Error("Please provide authentication before using this function");
   }
 }
+
+export { auth };

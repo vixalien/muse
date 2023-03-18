@@ -1,21 +1,20 @@
-import { Client } from "../client.ts";
+import { auth, init } from "../mod.ts";
 import { DenoFileStore } from "../store.ts";
 
-export type { Client };
+export * from "./deps.ts";
+export * from "../mod.ts";
 
-export * from "../deps_test.ts";
-
-export const setup = async (client: Client) => {
+export const setup = async () => {
   const css = {
     normal: "font-weight: normal",
     bold: "font-weight: bold",
     underline: "text-decoration: underline",
   };
 
-  if (client.auth.requires_login()) {
+  if (await auth.requires_login()) {
     console.log("Getting login code...");
 
-    const loginCode = await client.auth.get_login_code();
+    const loginCode = await auth.get_login_code();
 
     console.log(
       `Go to %c${loginCode.verification_url}%c and enter the code %c${loginCode.user_code}`,
@@ -28,21 +27,21 @@ export const setup = async (client: Client) => {
 
     console.log("Loading token...");
 
-    await client.auth.load_token_with_code(
+    await auth.load_token_with_code(
       loginCode.device_code,
       loginCode.interval,
     );
 
-    console.log("Logged in!", client.auth._token);
+    console.log("Logged in!", auth._token);
   }
 };
 
 export const init_client = () => {
-  const client = new Client({
+  const client = init({
     store: new DenoFileStore("store/muse-store.json"),
   });
 
-  setup(client);
+  setup();
 
   return client;
 };

@@ -1,9 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_new_releases } from "./mixins/explore.ts";
-import {
-  auth,
-  init,
-} from "./mod.ts";
+import { auth, get_home, init } from "./mod.ts";
 import { DenoFileStore } from "./store.ts";
 
 init({
@@ -56,12 +52,13 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_new_releases()
+get_home(100)
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
   .then((data) => {
-    Deno.writeTextFile(
+    console.log(data.results.length);
+    return Deno.writeTextFile(
       "store/rickroll.json",
       JSON.stringify(data, null, 2),
     );

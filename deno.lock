@@ -170,6 +170,7 @@
     "https://deno.land/std@0.177.0/types.d.ts": "220ed56662a0bd393ba5d124aa6ae2ad36a00d2fcbc0e8666a65f4606aaa9784",
     "https://deno.land/std@0.178.0/_util/asserts.ts": "178dfc49a464aee693a7e285567b3d0b555dc805ff490505a8aae34f9cfb1462",
     "https://deno.land/std@0.178.0/_util/os.ts": "d932f56d41e4f6a6093d56044e29ce637f8dcc43c5a90af43504a889cf1775e3",
+    "https://deno.land/std@0.178.0/fmt/colors.ts": "938c5d44d889fb82eff6c358bea8baa7e85950a16c9f6dae3ec3a7a729164471",
     "https://deno.land/std@0.178.0/fs/_util.ts": "65381f341af1ff7f40198cee15c20f59951ac26e51ddc651c5293e24f9ce6f32",
     "https://deno.land/std@0.178.0/fs/copy.ts": "14214efd94fc3aa6db1e4af2b4b9578e50f7362b7f3725d5a14ad259a5df26c8",
     "https://deno.land/std@0.178.0/fs/empty_dir.ts": "c3d2da4c7352fab1cf144a1ecfef58090769e8af633678e0f3fabaef98594688",
@@ -192,6 +193,11 @@
     "https://deno.land/std@0.178.0/path/posix.ts": "8b7c67ac338714b30c816079303d0285dd24af6b284f7ad63da5b27372a2c94d",
     "https://deno.land/std@0.178.0/path/separator.ts": "0fb679739d0d1d7bf45b68dacfb4ec7563597a902edbaf3c59b50d5bcadd93b1",
     "https://deno.land/std@0.178.0/path/win32.ts": "d186344e5583bcbf8b18af416d13d82b35a317116e6460a5a3953508c3de5bba",
+    "https://deno.land/std@0.178.0/testing/_diff.ts": "1a3c044aedf77647d6cac86b798c6417603361b66b54c53331b312caeb447aea",
+    "https://deno.land/std@0.178.0/testing/_format.ts": "a69126e8a469009adf4cf2a50af889aca364c349797e63174884a52ff75cf4c7",
+    "https://deno.land/std@0.178.0/testing/_test_suite.ts": "30f018feeb3835f12ab198d8a518f9089b1bcb2e8c838a8b615ab10d5005465c",
+    "https://deno.land/std@0.178.0/testing/asserts.ts": "984ab0bfb3faeed92ffaa3a6b06536c66811185328c5dd146257c702c41b01ab",
+    "https://deno.land/std@0.178.0/testing/bdd.ts": "c5ca6d85940dbcc19b4d2bc3608d49ab65d81470aa91306d5efa4b0d5c945731",
     "https://deno.land/x/sax_ts@v1.2.10/src/sax.ts": "3d468d10d13d2690b5910fd12afc3cf52d979c0f144899d5c36da45c0931634e",
     "https://deno.land/x/ytdl_core@v0.1.2/deps.ts": "7428c417a5b9fdba0db74790a328e5824e35cc332c25153c7bcf1657a2cf8a4f",
     "https://deno.land/x/ytdl_core@v0.1.2/mod.ts": "5654b5800933c38b0a7cac3f305811668e786b9a717c47c4a8d156c07736ac25",
@@ -575,5 +581,16 @@
     "https://esm.sh/v111/xmlbuilder2@3.0.2/lib/interfaces.d.ts": "bbacb82817b141d94a52e4a99629e96e864aed7f840dd03ecc16e43c68e2c35a",
     "https://esm.sh/xmlbuilder2@3.0.2": "901672b60e63949664c44cbaa382a4706e2d96bdd0fdb702ebfe8a5c14e814f6",
     "https://raw.githubusercontent.com/fent/node-m3u8stream/master/src/parse-time.ts": "7cf1d14095380fa9e75f7c4c4420dcd9f21ea5279a6731e94b81a543342f3ac9"
+  },
+  "npm": {
+    "specifiers": {
+      "@types/node": "@types/node@18.11.18"
+    },
+    "packages": {
+      "@types/node@18.11.18": {
+        "integrity": "sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==",
+        "dependencies": {}
+      }
+    }
   }
 }

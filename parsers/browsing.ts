@@ -109,7 +109,11 @@ export function parse_mixed_content(rows: any[]) {
   const items = [];
 
   for (const row of rows) {
-    let title = null, contents, browseId = null, subtitle = null, thumbnails = null;
+    let title = null,
+      contents,
+      browseId = null,
+      subtitle = null,
+      thumbnails = null;
 
     if (DESCRIPTION_SHELF in row) {
       const results = j(row, DESCRIPTION_SHELF);
@@ -217,7 +221,8 @@ export function parse_search_results(
         j(data, "flexColumns[1]", MRLITFC, "runs[2].text")?.split(" ")[0];
       parse_menu_playlists(data, search_result);
     } else if (result_type == "album") {
-      search_result.type = get_item_text(data, 1).toLowerCase();
+      search_result.type = "album";
+      search_result.album_type = get_item_text(data, 1).toLowerCase();
     } else if (result_type == "playlist") {
       const flex_item = get_flex_column_item(data, 1).text.runs;
       const has_author = flex_item.length == default_offset + 3;
@@ -462,23 +467,49 @@ export function parse_album(result: any) {
 
   const subtitles = j(result, SUBTITLE_RUNS);
 
+  const runs = parse_song_artists_runs(subtitles.slice(2));
+
+  const year = subtitles[subtitles.length - 1].text;
+
+  const is_year = year.match(/^\d{4}$/);
+
+  if (is_year) {
+    runs.pop();
+  }
+
   return {
     title: j(result, TITLE_TEXT),
-    year: j(subtitles[subtitles.length - 1], "text"),
+    year: is_year ? Number(year) : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
-    type: j(result, SUBTITLE).toString(),
-    artists: parse_song_artists_runs(subtitles.slice(2)),
+    album_type: j(result, SUBTITLE).toString().toLowerCase(),
+    artists: runs,
   };
 }
 
 export function parse_single(result: any) {
+  const SUBTITLE_RUNS = "subtitle.runs";
+
+  const subtitles = j(result, SUBTITLE_RUNS);
+
+  const runs = parse_song_artists_runs(subtitles.slice(2));
+
+  const year = subtitles[subtitles.length - 1].text;
+
+  const is_year = year.match(/^\d{4}$/);
+
+  if (is_year) {
+    runs.pop();
+  }
+
   return {
     title: j(result, TITLE_TEXT),
-    year: j(result, SUBTITLE),
+    year: is_year ? Number(year) : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
+    isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
+    artists: runs,
   };
 }
 
