@@ -67,6 +67,8 @@ export const SUBTITLE_BADGE_LABEL = `subtitleBadges.${BADGE_PATH}`;
 export const CATEGORY_TITLE = "musicNavigationButtonRenderer.buttonText.runs";
 export const CATEGORY_PARAMS =
   "musicNavigationButtonRenderer.clickCommand.browseEndpoint.params";
+export const CATEGORY_COLOR =
+  "musicNavigationButtonRenderer.solid.leftStripeColor";
 export const MRLIR = "musicResponsiveListItemRenderer";
 export const MTRIR = "musicTwoRowItemRenderer";
 export const MTCIR = "musicTwoColumnItemRenderer";
@@ -100,7 +102,11 @@ export function find_object_by_key(
   return null;
 }
 
-export function find_objects_by_key(object_list: any, key: string, nested?: string) {
+export function find_objects_by_key(
+  object_list: any,
+  key: string,
+  nested?: string,
+) {
   const objects = [];
   for (const item of object_list) {
     const obj = nested ? item[nested] : item;

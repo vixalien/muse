@@ -142,7 +142,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 ### explore
 
 - [x] get explore
-- [ ] get mood categories
+- [x] get mood categories
 - [ ] get mood playlists
 - [x] get charts
 

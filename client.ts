@@ -1,4 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
+import { get_mood_categories } from "./mixins/explore.ts";
 import { get_queue } from "./mixins/queue.ts";
 import {
   auth,
@@ -64,7 +65,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_charts("UG")
+get_mood_categories()
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

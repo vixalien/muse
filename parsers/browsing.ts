@@ -444,7 +444,6 @@ export function parse_moods_and_genres(result: any[]) {
   return {
     title: j(result, "buttonText.runs[0].text"),
     color: color_to_hex(j(result, "solid.leftStripeColor")),
-    browseId: j(result, "clickCommand.browseEndpoint.browseId"),
     params: j(result, "clickCommand.browseEndpoint.params"),
   };
 }
