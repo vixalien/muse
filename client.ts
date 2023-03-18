@@ -1,17 +1,8 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_mood_categories, get_mood_playlists } from "./mixins/explore.ts";
-import { get_queue } from "./mixins/queue.ts";
+import { get_new_releases } from "./mixins/explore.ts";
 import {
   auth,
-  get_artist,
-  get_artist_albums,
-  get_charts,
-  get_explore,
-  get_library,
-  get_user,
-  get_user_playlists,
   init,
-  search,
 } from "./mod.ts";
 import { DenoFileStore } from "./store.ts";
 
@@ -65,7 +56,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_mood_playlists("ggMPOg1uX1RXcFlyZEpRb1d3")
+get_new_releases()
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

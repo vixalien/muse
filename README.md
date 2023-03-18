@@ -145,6 +145,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get mood categories
 - [x] get mood playlists
 - [x] get charts
+- [x] get new releases
 
 ### watch
 

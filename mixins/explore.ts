@@ -1,7 +1,4 @@
 import {
-  CAROUSEL,
-  CAROUSEL_CONTENTS,
-  CAROUSEL_TITLE,
   CATEGORY_COLOR,
   CATEGORY_PARAMS,
   CATEGORY_TITLE,
@@ -9,7 +6,6 @@ import {
   GRID,
   GRID_ITEMS,
   MUSIC_SHELF,
-  NAVIGATION_PARAMS,
   SECTION_LIST,
   SINGLE_COLUMN_TAB,
   TITLE,
@@ -17,10 +13,10 @@ import {
 } from "../nav.ts";
 import {
   parse_chart_contents,
-  parse_content_list,
   parse_explore_contents,
-  parse_playlist,
+  parse_mixed_content,
 } from "../parsers/browsing.ts";
+import { parse_playlists_categories } from "../parsers/explore.ts";
 import { color_to_hex } from "../parsers/util.ts";
 import { j, jo } from "../util.ts";
 import { request_json } from "./_request.ts";
@@ -101,37 +97,21 @@ export async function get_mood_playlists(params: string) {
     },
   });
 
-  const categories = [];
+  return {
+    title: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
+    categories: parse_playlists_categories(
+      j(json, SINGLE_COLUMN_TAB, SECTION_LIST),
+    ),
+  };
+}
 
-  for (const section of j(json, SINGLE_COLUMN_TAB, SECTION_LIST)) {
-    let path: string | null = null;
-    let title: string | null = null;
-    let params: string | null = null;
-
-    if ("gridRenderer" in section) {
-      path = GRID_ITEMS;
-      title = j(section, GRID, "header.gridHeaderRenderer", TITLE_TEXT);
-    } else if ("musicCarouselShelfRenderer" in section) {
-      path = CAROUSEL_CONTENTS;
-      title = j(section, CAROUSEL, CAROUSEL_TITLE, "text");
-      params = j(section, CAROUSEL, CAROUSEL_TITLE, NAVIGATION_PARAMS);
-    } else if ("musicImmersiveCarouselShelfRenderer" in section) {
-      path = "musicImmersiveCarouselShelfRenderer.contents";
-      title = j(section, TITLE);
-    }
-
-    if (path) {
-      const results = j(section, path);
-      categories.push({
-        title,
-        params,
-        playlists: parse_content_list(results, parse_playlist),
-      });
-    }
-  }
+export async function get_new_releases() {
+  const json = await request_json("browse", {
+    data: { browseId: "FEmusic_new_releases" },
+  });
 
   return {
     title: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
-    categories,
+    categories: parse_mixed_content(j(json, SINGLE_COLUMN_TAB, SECTION_LIST)),
   };
 }

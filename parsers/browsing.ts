@@ -109,7 +109,7 @@ export function parse_mixed_content(rows: any[]) {
   const items = [];
 
   for (const row of rows) {
-    let title, contents, browseId = null, subtitle = null, thumbnails = null;
+    let title = null, contents, browseId = null, subtitle = null, thumbnails = null;
 
     if (DESCRIPTION_SHELF in row) {
       const results = j(row, DESCRIPTION_SHELF);
@@ -118,18 +118,27 @@ export function parse_mixed_content(rows: any[]) {
       contents = j(results, DESCRIPTION);
     } else {
       const results = Object.values(row)[0] as any;
-      if (!("contents" in results)) {
-        continue;
-      }
-      const carousel_title = j(results, CAROUSEL_TITLE);
+      let children: any[];
 
-      title = j(carousel_title, "text");
-      browseId = jo(carousel_title, NAVIGATION_BROWSE_ID);
-      subtitle = jo(results, CAROUSEL_SUBTITLE, "text");
-      thumbnails = jo(results, CAROUSEL_THUMBNAILS);
+      if (!("contents" in results)) {
+        if ("items" in results) {
+          children = results["items"];
+        } else {
+          continue;
+        }
+      } else {
+        const carousel_title = j(results, CAROUSEL_TITLE);
+
+        title = j(carousel_title, "text");
+        browseId = jo(carousel_title, NAVIGATION_BROWSE_ID);
+        subtitle = jo(results, CAROUSEL_SUBTITLE, "text");
+        thumbnails = jo(results, CAROUSEL_THUMBNAILS);
+
+        children = results["contents"];
+      }
 
       contents = [];
-      for (const result of results["contents"]) {
+      for (const result of children) {
         const data = jo(result, MTRIR);
         let content = null, type;
 
