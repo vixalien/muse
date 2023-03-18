@@ -8,12 +8,12 @@ import {
   parse_duration,
 } from "./util.ts";
 
-export function parse_song_artists(data: any, index: number) {
+export function parse_song_artists(data: any, index: number, slice?: number) {
   const flex_item = get_flex_column_item(data, index);
   if (flex_item == null) return null;
 
   const runs = flex_item.text.runs;
-  return parse_song_artists_runs(runs);
+  return parse_song_artists_runs(runs).slice(0, slice);
 }
 
 export function parse_song_artists_runs(runs: any) {

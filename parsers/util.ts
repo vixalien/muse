@@ -113,3 +113,24 @@ export function get_dot_separator_index(runs: any[]): number {
   const index = runs.findIndex((run) => run.text === " • ");
   return index < 0 ? runs.length : index;
 }
+
+export function color_to_hex(a: number) {
+  const arr = [
+    (a & 16711680) >>> 16,
+    (a & 65280) >>> 8,
+    a & 255,
+    (a & 4278190080) >>> 24,
+  ];
+
+  const b = arr.every((c) => c == (c & 255));
+
+  if (!b) throw Error('"(' + arr.join(",") + '") is not a valid RGBA color');
+
+  return (
+    "#" +
+    arr
+      .slice(0, 3)
+      .map((c) => c.toString(16).padStart(2, "0"))
+      .join("")
+  );
+}

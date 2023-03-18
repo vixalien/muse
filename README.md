@@ -141,9 +141,10 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 
 ### explore
 
+- [x] get explore
 - [ ] get mood categories
 - [ ] get mood playlists
-- [ ] get charts
+- [x] get charts
 
 ### watch
 

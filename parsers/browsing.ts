@@ -25,6 +25,7 @@ import {
   SUBTITLE_BADGE_LABEL,
   TEXT_RUN,
   TEXT_RUN_TEXT,
+  TEXT_RUNS,
   THUMBNAIL_RENDERER,
   THUMBNAILS,
   TITLE,
@@ -39,6 +40,7 @@ import {
   parse_song_runs,
 } from "./songs.ts";
 import {
+  color_to_hex,
   get_dot_separator_index,
   get_flex_column_item,
   get_item_text,
@@ -337,68 +339,91 @@ export function parse_search_results(
   return search_results;
 }
 
-export function parse_artist_contents(results: any[]) {
-  const categories = [
-    "albums",
-    "singles",
-    "videos",
-    "playlists",
-    "related",
-    "featured",
-  ];
-  const categories_local = [
-    _("albums"),
-    _("singles"),
-    _("videos"),
-    _("playlists"),
-    _("related"),
-    _("featured"),
-  ];
-  const categories_parser = [
-    parse_album,
-    parse_single,
-    parse_video,
-    parse_playlist,
-    parse_related_artist,
-    parse_featured,
-  ];
+type CategoryMap = Record<string, [string, (a: any) => any, string?]>;
 
-  const artist: any = {};
+export function parse_categories(results: any[], categories_data: CategoryMap) {
+  const categories: any = {};
 
-  for (const i in categories) {
-    const category = categories[i];
+  for (const category in categories_data) {
+    // const category = categories[i];
+    const value = categories_data[category as keyof typeof categories_data];
+    const category_local = value[0];
+    const category_parser = value[1];
+    const category_key = value[2];
 
     const data = results
       .filter((r) =>
         "musicCarouselShelfRenderer" in r &&
         j(r, `${CAROUSEL}.${CAROUSEL_TITLE}`).text.toLowerCase() ==
-          categories_local[i]
+          category_local
       )
       .map((r) => r.musicCarouselShelfRenderer);
 
     if (data.length > 0) {
-      artist[category] = { browseId: null, results: [] };
+      categories[category] = { browseId: null, results: [] };
 
       if ("navigationEndpoint" in j(data[0], CAROUSEL_TITLE)) {
-        artist[category].browseId = j(
+        categories[category].browseId = j(
           data[0],
           `${CAROUSEL_TITLE}.${NAVIGATION_BROWSE_ID}`,
         );
 
         if (["albums", "singles", "playlists"].includes(category)) {
-          artist[category].params =
+          categories[category].params =
             j(data[0], CAROUSEL_TITLE).navigationEndpoint.browseEndpoint.params;
         }
       }
 
-      artist[category].results = parse_content_list(
+      categories[category].results = parse_content_list(
         data[0].contents,
-        categories_parser[i],
+        category_parser as any,
+        category_key,
       );
     }
   }
 
-  return artist;
+  return categories;
+}
+
+export function parse_artist_contents(results: any[]) {
+  const categories_data = {
+    albums: [_("albums"), parse_album],
+    singles: [_("singles"), parse_single],
+    videos: [_("videos"), parse_video],
+    playlists: [_("playlists"), parse_playlist],
+    related: [_("related"), parse_related_artist],
+    featured: [_("featured"), parse_featured],
+  } as CategoryMap;
+
+  return parse_categories(results, categories_data);
+}
+
+export function parse_explore_contents(results: any[]) {
+  const categories_data = {
+    albums: [_("new albums"), parse_album],
+    songs: [_("top songs"), parse_top_song, MRLIR],
+    moods: [
+      _("moods and genres"),
+      parse_moods_and_genres,
+      "musicNavigationButtonRenderer",
+    ],
+    trending: [_("trending"), parse_trending, MRLIR],
+  } as CategoryMap;
+
+  return parse_categories(results, categories_data);
+}
+
+export function parse_chart_contents(results: any[]) {
+  const categories_data = {
+    // In exceedingly rare cases, songs may contain both songs and videos
+    songs: [_("top songs"), parse_trending, MRLIR],
+    videos: [_("top videos"), parse_top_video],
+    genres: [_("genres"), parse_playlist],
+    artists: [_("top artists"), parse_top_artist, MRLIR],
+    trending: [_("trending"), parse_trending, MRLIR],
+  } as CategoryMap;
+
+  return parse_categories(results, categories_data);
 }
 
 export function parse_content_list(
@@ -415,6 +440,15 @@ export function parse_content_list(
   return contents;
 }
 
+export function parse_moods_and_genres(result: any[]) {
+  return {
+    title: j(result, "buttonText.runs[0].text"),
+    color: color_to_hex(j(result, "solid.leftStripeColor")),
+    browseId: j(result, "clickCommand.browseEndpoint.browseId"),
+    params: j(result, "clickCommand.browseEndpoint.params"),
+  };
+}
+
 export function parse_album(result: any) {
   const SUBTITLE_RUNS = "subtitle.runs";
 
@@ -426,8 +460,8 @@ export function parse_album(result: any) {
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
-    type: j(result, SUBTITLE),
-    artists: parse_song_artists_runs(subtitles.slice(2, -1)),
+    type: j(result, SUBTITLE).toString(),
+    artists: parse_song_artists_runs(subtitles.slice(2)),
   };
 }
 
@@ -490,6 +524,112 @@ export function parse_video(result: any) {
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     views: runs[runs.length - 1].text.split(" ")[0],
+  };
+}
+
+export function parse_top_song(result: any) {
+  const title = get_flex_column_item(result, 0);
+  const title_run = j(title, TEXT_RUN);
+
+  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
+
+  const album_run = jo(
+    get_flex_column_item(result, result.flexColumns.length - 1) ?? {},
+    TEXT_RUN,
+  );
+
+  return {
+    title: j(title_run, "text"),
+    videoId: j(title_run, NAVIGATION_VIDEO_ID),
+    artists: parse_song_artists(result, 1),
+    playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
+    thumbnails: j(result, THUMBNAILS),
+    rank: Number(j(rank, TEXT_RUN_TEXT)),
+    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
+    album: album_run
+      ? {
+        title: j(album_run, "text"),
+        browseId: j(album_run, NAVIGATION_BROWSE_ID),
+      }
+      : null,
+  };
+}
+
+export function parse_top_video(result: any) {
+  const runs = result.subtitle.runs;
+  const artists_len = get_dot_separator_index(runs);
+
+  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
+
+  return {
+    title: j(result, TITLE_TEXT),
+    videoId: j(result, NAVIGATION_VIDEO_ID),
+    artists: parse_song_artists_runs(runs.slice(0, artists_len)),
+    playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
+    thumbnails: j(result, THUMBNAIL_RENDERER),
+    views: runs[runs.length - 1].text.split(" ")[0],
+    rank: Number(j(rank, TEXT_RUN_TEXT)),
+    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
+  };
+}
+
+export function parse_top_artist(result: any) {
+  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
+
+  return {
+    names: j(get_flex_column_item(result, 0), TEXT_RUN_TEXT),
+    browseId: j(result, NAVIGATION_BROWSE_ID),
+    subscribers:
+      j(get_flex_column_item(result, 1), TEXT_RUN_TEXT)?.split(" ")[0],
+    thumbnails: j(result, THUMBNAILS),
+    rank: Number(j(rank, TEXT_RUN_TEXT)),
+    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
+  };
+}
+
+export function parse_trending(result: any) {
+  const title = get_flex_column_item(result, 0);
+  const title_run = j(title, TEXT_RUN);
+
+  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
+
+  const last_flex =
+    get_flex_column_item(result, result.flexColumns.length - 1) ??
+      get_flex_column_item(result, result.flexColumns.length - 2);
+
+  // if (!("runs" in last_flex.title.text)) {
+  //   last_flex = get_flex_column_item(result, result.flexColumns.length - 2);
+  // }
+
+  const last_runs = jo(
+    last_flex,
+    TEXT_RUNS,
+  );
+
+  const views = last_runs[last_runs.length - 1];
+
+  const has_views = views?.text.endsWith(_("views")) ?? false;
+
+  const album_flex = get_flex_column_item(
+    result,
+    result.flexColumns.length - 1,
+  );
+
+  return {
+    title: j(title_run, "text"),
+    videoId: jo(title_run, NAVIGATION_VIDEO_ID),
+    artists: parse_song_artists(result, 1, has_views ? -1 : undefined),
+    playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
+    thumbnails: j(result, THUMBNAILS),
+    rank: Number(j(rank, TEXT_RUN_TEXT)),
+    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
+    album: (!has_views && album_flex)
+      ? {
+        title: j(album_flex, TEXT_RUN_TEXT),
+        browseId: j(album_flex, TEXT_RUN, NAVIGATION_BROWSE_ID),
+      }
+      : null,
+    views: has_views ? views.text.split(" ")[0] : null,
   };
 }
 
@@ -564,6 +704,10 @@ export function _(id: string) {
       return "fans might also like";
     case "featured":
       return "featured on";
+    case "new albums":
+      return "new albums and singles";
+    case "top videos":
+      return "top music videos";
     default:
       return id;
   }

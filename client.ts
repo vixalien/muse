@@ -4,6 +4,8 @@ import {
   auth,
   get_artist,
   get_artist_albums,
+  get_charts,
+  get_explore,
   get_library,
   get_user,
   get_user_playlists,
@@ -62,7 +64,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-search("Drake", { filter: "songs", limit: 50 })
+get_charts("UG")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
