@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, get_home, init } from "./mod.ts";
+import { auth, get_artist, get_artist_albums, init } from "./mod.ts";
 import { DenoFileStore } from "./store.ts";
 
 init({
@@ -52,12 +52,14 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home(30)
+get_artist_albums(
+  "UCiGs21G3KeE2tpbbMPzn9Qg",
+  "6gPoAUdxc0JXcHNCQ3BnQkNpUjVkRjl3WVdkbFgzTnVZWEJ6YUc5MFgyMTFjMmxqWDNCaFoyVmZjbVZuYVc5dVlXd1NIekF0WmxWRk1FNUpaRlp6WTFWRE9HTTBMWEZyWkdsUVNVd3hjV2hpZUdjYVR3QUFaVzR0UjBJQUFVZENBQUZIUWdBQkFFWkZiWFZ6YVdOZlpHVjBZV2xzWDJGeWRHbHpkQUFCQVVNQUFBRUFBUUFBQVFFQVZVTnBSM015TVVjelMyVkZNblJ3WW1KTlVIcHVPVkZuQUFIeTJyT3FDZ2RBQVVnQVVMUUI%3D",
+)
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
   .then((data) => {
-    console.log(data.results.length);
     return Deno.writeTextFile(
       "store/rickroll.json",
       JSON.stringify(data, null, 2),
