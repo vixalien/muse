@@ -1,9 +1,14 @@
 import { get_continuations } from "../continuations.ts";
 import { GRID, MTRIR, SECTION_LIST, SINGLE_COLUMN_TAB } from "../nav.ts";
-import { parse_mixed_item } from "../parsers/browsing.ts";
+import { MixedItem, parse_mixed_item } from "../parsers/browsing.ts";
 import { j } from "../util.ts";
 import { check_auth } from "./utils.ts";
 import { request_json } from "./_request.ts";
+
+export interface Library {
+  continuation: string | null;
+  results: MixedItem[];
+}
 
 export async function get_library(limit = 20, continuation?: string) {
   await check_auth();
@@ -12,10 +17,7 @@ export async function get_library(limit = 20, continuation?: string) {
     browseId: "FEmusic_library_landing",
   };
 
-  const library: {
-    continuation: string | null;
-    results: any[];
-  } = {
+  const library: Library = {
     continuation: null,
     results: [],
   };
@@ -27,7 +29,7 @@ export async function get_library(limit = 20, continuation?: string) {
 
     const grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST, "[0]", GRID);
 
-    const results = j(grid, "items");
+    const results = j(grid, "items") as any[];
 
     library.results = results.map((result: any) =>
       parse_mixed_item(j(result, MTRIR))
