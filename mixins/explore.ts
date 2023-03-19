@@ -12,6 +12,7 @@ import {
   TITLE_TEXT,
 } from "../nav.ts";
 import {
+  ChartContents,
   ExploreContents,
   parse_chart_contents,
   parse_explore_contents,
@@ -30,6 +31,14 @@ export async function get_explore() {
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
   return parse_explore_contents(results) as ExploreContents;
+}
+
+export interface Charts {
+  countries: {
+    selected: string;
+    options: string[];
+  };
+  results: ChartContents;
 }
 
 // any section may be missing
@@ -61,7 +70,18 @@ export async function get_charts(country?: string) {
         .filter(Boolean),
     },
     results: parse_chart_contents(results),
-  };
+  } as Charts;
+}
+
+export interface MoodCategories {
+  categories: {
+    title: string;
+    items: {
+      title: string;
+      color: string;
+      params: string;
+    }[];
+  }[];
 }
 
 export async function get_mood_categories() {
@@ -70,13 +90,13 @@ export async function get_mood_categories() {
   });
 
   return {
-    categories: j(json, SINGLE_COLUMN_TAB, SECTION_LIST)
+    categories: (j(json, SINGLE_COLUMN_TAB, SECTION_LIST) as any[])
       .map((section: any) => {
         const title = j(section, GRID, "header.gridHeaderRenderer", TITLE_TEXT);
-        const items = j(
+        const items = (j(
           section,
           GRID_ITEMS,
-        )
+        ) as any[])
           .map((category: any) => {
             return {
               title: j(category, CATEGORY_TITLE, "0.text"),
@@ -87,7 +107,7 @@ export async function get_mood_categories() {
 
         return { title, items };
       }),
-  };
+  } as MoodCategories;
 }
 
 export async function get_mood_playlists(params: string) {
