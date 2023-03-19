@@ -11,8 +11,8 @@ export async function get_continuations(
 ) {
   const items = [];
   let params = reloadable
-      ? get_reloadable_params(results)
-      : get_params(results, _ctoken_path),
+      ? get_reloadable_continuation_params(results)
+      : get_continuation_params(results, _ctoken_path),
     continuation = params.continuation;
 
   while (
@@ -24,8 +24,8 @@ export async function get_continuations(
     if ("continuationContents" in response) {
       results = response.continuationContents[continuation_type];
       params = reloadable
-        ? get_reloadable_params(results)
-        : get_params(results, _ctoken_path);
+        ? get_reloadable_continuation_params(results)
+        : get_continuation_params(results, _ctoken_path);
 
       continuation = params.continuation;
     } else {
@@ -42,7 +42,7 @@ export async function get_continuations(
   return { items, continuation };
 }
 
-function get_params(results: any, ctoken_path = "") {
+export function get_continuation_params(results: any, ctoken_path = "") {
   const ctoken = typeof results === "string" ? results : jo(
     results,
     `continuations[0].next${ctoken_path}ContinuationData.continuation`,
@@ -50,7 +50,7 @@ function get_params(results: any, ctoken_path = "") {
   return get_continuation_object(ctoken);
 }
 
-function get_reloadable_params(results: any) {
+export function get_reloadable_continuation_params(results: any) {
   const ctoken = typeof results === "string" ? results : jo(
     results,
     `continuations[0].reloadContinuationData.continuation`,
@@ -66,7 +66,7 @@ function get_continuation_object(ctoken: string) {
   };
 }
 
-function get_continuation_contents(
+export function get_continuation_contents(
   continuation: any,
   parse: (data: any) => any[],
 ) {

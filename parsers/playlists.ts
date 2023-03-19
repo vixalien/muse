@@ -48,7 +48,7 @@ export const parse_playlist_items = (
               menu_service,
               "playlistEditEndpoint.actions.0.setVideoId",
             );
-            videoId = j(
+            videoId = jo(
               menu_service,
               "playlistEditEndpoint.actions.0.removeVideoId",
             );
