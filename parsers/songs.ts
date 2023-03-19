@@ -8,13 +8,13 @@ import {
   parse_duration,
 } from "./util.ts";
 
-export type Artist = ArtistRun;
+export type SongArtist = ArtistRun;
 
 export function parse_song_artists(
   data: any,
   index: number,
   slice?: number,
-): Artist[] | null {
+): SongArtist[] | null {
   const flex_item = get_flex_column_item(data, index);
   if (flex_item == null) return null;
 
@@ -48,8 +48,24 @@ export function parse_song_artists_runs(runs: any) {
   return artists;
 }
 
+export interface SongRuns {
+  artists: SongArtist[];
+  album: Album | null;
+  views: string | null;
+  duration: string | null;
+  duration_seconds: number | null;
+  year: string | null;
+}
+
 export function parse_song_runs(runs: any[]) {
-  const parsed: any = { artists: [] };
+  const parsed: SongRuns = {
+    artists: [],
+    album: null,
+    views: null,
+    duration: null,
+    duration_seconds: null,
+    year: null,
+  };
 
   for (const i in runs) {
     const run = runs[i];

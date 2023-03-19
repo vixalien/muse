@@ -34,10 +34,13 @@ import {
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
 import {
+  ArtistRun,
   parse_song_artists,
   parse_song_artists_runs,
   parse_song_menu_tokens,
   parse_song_runs,
+  SongArtist,
+  SongRuns,
 } from "./songs.ts";
 import {
   color_to_hex,
@@ -45,10 +48,16 @@ import {
   get_flex_column_item,
   get_item_text,
   parse_menu_playlists,
+  Thumbnail,
 } from "./util.ts";
 
+export interface Mood {
+  name: string;
+  params: string;
+}
+
 export function parse_moods(results: any[]) {
-  const moods: { name: string; params: string }[] = [];
+  const moods: Mood[] = [];
 
   const chips = j(
     results,
@@ -67,8 +76,38 @@ export function parse_moods(results: any[]) {
   return moods;
 }
 
+export type MixedItem =
+  | ({
+    type: "watch-playlist";
+  } & WatchPlaylist)
+  | ({
+    type: "video";
+  } & Song)
+  | ({
+    type: "song";
+  } & Song)
+  | ({
+    type: "album";
+  } & Album)
+  | ({
+    type: "artist";
+  } & RelatedArtist)
+  | ({
+    type: "channel";
+  } & RelatedArtist)
+  | ({
+    type: "flat-song";
+  } & Song)
+  | ({
+    type: "song";
+  } & FlatSong)
+  | ({
+    type: "playlist";
+  } & Playlist)
+  | null;
+
 export function parse_mixed_item(data: any) {
-  let type: string | null = null, content: any;
+  let item: MixedItem = null;
 
   const page_type = jo(data, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
   switch (page_type) {
@@ -76,37 +115,63 @@ export function parse_mixed_item(data: any) {
     case undefined:
       // song or watch playlist
       if (jo(data, NAVIGATION_WATCH_PLAYLIST_ID) != null) {
-        type = "watch-playlist";
-        content = parse_watch_playlist(data);
+        item = {
+          type: "watch-playlist",
+          ...parse_watch_playlist(data),
+        };
       } else {
-        content = parse_song(data);
-        type = content.views != null ? "video" : "song";
+        const content = parse_song(data);
+        if (content.views != null) {
+          item = {
+            type: "video",
+            ...content,
+          };
+        } else {
+          item = {
+            type: "song",
+            ...content,
+          };
+        }
       }
       break;
     case "MUSIC_PAGE_TYPE_ALBUM":
-      type = "album";
-      content = parse_album(data);
+      item = {
+        type: "album",
+        ...parse_album(data),
+      };
       break;
     case "MUSIC_PAGE_TYPE_USER_CHANNEL":
-      type = "channel";
-      /**  falls through */
     case "MUSIC_PAGE_TYPE_ARTIST":
-      type ??= "artist";
-      content = parse_related_artist(data);
+      item = {
+        type: page_type === "MUSIC_PAGE_TYPE_USER_CHANNEL"
+          ? "channel"
+          : "artist",
+        ...parse_related_artist(data),
+      };
       break;
     case "MUSIC_PAGE_TYPE_PLAYLIST":
-      type = "playlist";
-      content = parse_playlist(data);
+      item = {
+        type: "playlist",
+        ...parse_playlist(data),
+      };
       break;
     default:
       console.error("Unknown page type", page_type);
   }
 
-  return type ? { type, content } : null;
+  return item;
+}
+
+export interface MixedContent {
+  title: string | null;
+  subtitle: string | null;
+  thumbnails: Thumbnail[] | null;
+  browseId: string | null;
+  contents: MixedItem[];
 }
 
 export function parse_mixed_content(rows: any[]) {
-  const items = [];
+  const items: MixedContent[] = [];
 
   for (const row of rows) {
     let title = null,
@@ -144,21 +209,23 @@ export function parse_mixed_content(rows: any[]) {
       contents = [];
       for (const result of children) {
         const data = jo(result, MTRIR);
-        let content = null, type;
+        let item: MixedItem = null;
 
         if (data != null) {
-          const item = parse_mixed_item(data);
-          if (item != null) {
-            type = item.type;
-            content = item.content;
+          const mixed_item = parse_mixed_item(data);
+          if (mixed_item != null) {
+            item = mixed_item;
           }
         } else {
-          type = "song";
           const data = j(result, MRLIR);
-          content = parse_song_flat(data);
+
+          item = {
+            type: "song",
+            ...parse_song_flat(data),
+          };
         }
 
-        contents.push({ type, ...content });
+        contents.push(item);
       }
 
       items.push({
@@ -462,7 +529,17 @@ export function parse_moods_and_genres(result: any[]) {
   };
 }
 
-export function parse_album(result: any) {
+export interface Album {
+  title: string;
+  year: string | null;
+  browseId: string;
+  thumbnails: Thumbnail[];
+  isExplicit: boolean;
+  album_type: "album" | "single" | "ep";
+  artists: ArtistRun[];
+}
+
+export function parse_album(result: any): Album {
   const SUBTITLE_RUNS = "subtitle.runs";
 
   const subtitles = j(result, SUBTITLE_RUNS);
@@ -479,7 +556,7 @@ export function parse_album(result: any) {
 
   return {
     title: j(result, TITLE_TEXT),
-    year: is_year ? Number(year) : null,
+    year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
@@ -513,7 +590,14 @@ export function parse_single(result: any) {
   };
 }
 
-export function parse_song(result: any) {
+export interface Song extends SongRuns {
+  title: string;
+  videoId: string | null;
+  playlistId: string | null;
+  thumbnails: Thumbnail[];
+}
+
+export function parse_song(result: any): Song {
   return {
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
@@ -523,18 +607,33 @@ export function parse_song(result: any) {
   };
 }
 
+export interface FlatSong {
+  title: string;
+  videoId: string | null;
+  artists: SongArtist[] | null;
+  thumbnails: Thumbnail[];
+  isExplicit: boolean;
+  album: {
+    name: string;
+    id: string;
+  } | null;
+  views: string | null;
+}
+
 export function parse_song_flat(data: any) {
   const columns = [];
   for (let i = 0; i < data.flexColumns.length; i++) {
     columns.push(get_flex_column_item(data, i));
   }
 
-  const song: any = {
+  const song: FlatSong = {
     title: j(columns[0], TEXT_RUN_TEXT),
     videoId: jo(columns[0], TEXT_RUN, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists(data, 1),
     thumbnails: j(data, THUMBNAILS),
     isExplicit: jo(data, BADGE_LABEL) != null,
+    album: null,
+    views: null,
   };
 
   if (
@@ -672,13 +771,24 @@ export function parse_trending(result: any) {
   };
 }
 
+export interface Playlist {
+  title: string;
+  playlistId: string;
+  thumbnails: Thumbnail[];
+  songs: string | null;
+  authors: ArtistRun[] | null;
+  description: string | null;
+  count: string | null;
+  author: ArtistRun[] | null;
+}
+
 export function parse_playlist(data: any) {
   const subtitles = j(data, "subtitle.runs");
 
   const has_data = subtitles[0]?.text.toLowerCase() === _("playlist");
   const has_songs = subtitles.length > 3;
 
-  const playlist: any = {
+  const playlist: Playlist = {
     title: j(data, TITLE_TEXT),
     playlistId: j(data, TITLE, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),
@@ -690,6 +800,9 @@ export function parse_playlist(data: any) {
         subtitles.slice(2, has_songs ? -1 : undefined),
       )
       : null,
+    description: null,
+    count: null,
+    author: null,
   };
 
   const subtitle = data.subtitle;
@@ -702,6 +815,7 @@ export function parse_playlist(data: any) {
       j(data, SUBTITLE2).match(/\d+ /)
     ) {
       playlist.count = j(data, SUBTITLE2).split(" ")[0];
+      // TODO: why are we getting "author" 2 times?
       playlist.author = parse_song_artists_runs(subtitle.runs.slice(0, 1));
     }
   }
@@ -709,18 +823,31 @@ export function parse_playlist(data: any) {
   return playlist;
 }
 
-export function parse_related_artist(data: any) {
+export interface RelatedArtist {
+  name: string;
+  browseId: string;
+  subscribers: string | null;
+  thumbnails: Thumbnail[];
+}
+
+export function parse_related_artist(data: any): RelatedArtist {
   const subscribers = jo(data, SUBTITLE2)?.split(" ")[0];
 
   return {
-    title: jo(data, TITLE_TEXT),
+    name: j(data, TITLE_TEXT),
     browseId: j(data, TITLE, NAVIGATION_BROWSE_ID),
     subscribers,
     thumbnails: j(data, THUMBNAIL_RENDERER),
   };
 }
 
-export function parse_watch_playlist(data: any) {
+export interface WatchPlaylist {
+  title: string;
+  playlistId: string;
+  thumbnails: Thumbnail[];
+}
+
+export function parse_watch_playlist(data: any): WatchPlaylist {
   return {
     title: j(data, TITLE_TEXT),
     playlistId: j(data, NAVIGATION_WATCH_PLAYLIST_ID),
@@ -728,12 +855,25 @@ export function parse_watch_playlist(data: any) {
   };
 }
 
-export function parse_featured(data: any) {
+export interface FeaturedPlaylist {
+  title: string;
+  playlistId: string;
+  thumbnails: Thumbnail[];
+  author: {
+    name: string;
+    id: string | null;
+  };
+}
+
+export function parse_featured(data: any): FeaturedPlaylist {
   return {
     title: j(data, TITLE_TEXT),
     playlistId: jo(data, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),
-    author: j(data, SUBTITLE2),
+    author: {
+      name: j(data, SUBTITLE2),
+      id: jo(data, "subtitle.runs[2]", NAVIGATION_BROWSE_ID),
+    },
   };
 }
 

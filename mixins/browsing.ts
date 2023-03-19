@@ -21,6 +21,8 @@ import {
 } from "../nav.ts";
 import { parse_album_header } from "../parsers/albums.ts";
 import {
+  MixedContent,
+  Mood,
   parse_album,
   parse_artist_contents,
   parse_content_list,
@@ -33,11 +35,17 @@ import { parse_format } from "../parsers/songs.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { request_json } from "./_request.ts";
 
+export interface Home {
+  continuation: string | null;
+  moods: Mood[];
+  results: MixedContent[];
+}
+
 export async function get_home(limit = 3, continuation?: string) {
   const endpoint = "browse";
   const data = { browseId: "FEmusic_home" };
 
-  const home: { continuation: string | null; moods: any[]; results: any[] } = {
+  const home: Home = {
     continuation: null,
     results: [],
     moods: [],

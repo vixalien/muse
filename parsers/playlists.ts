@@ -12,7 +12,7 @@ import {
 import { j, jo } from "../util.ts";
 import {
   Album,
-  Artist,
+  SongArtist,
   MenuTokens,
   parse_song_album,
   parse_song_artists,
@@ -28,7 +28,7 @@ import {
 export interface PlaylistItem {
   videoId: string;
   title: string;
-  artists: Artist[];
+  artists: SongArtist[];
   album: Album | null;
   likeStatus: "LIKE" | "INDIFFERENT" | "DISLIKE";
   thumbnails: Thumbnail[];
