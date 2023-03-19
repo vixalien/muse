@@ -78,10 +78,12 @@ export async function get_playlist_suggestions(
     true,
   );
 
-  return {
+  const suggestions: PlaylistSuggestions = {
     suggestions: continued_suggestions.items,
     continuation: continued_suggestions.continuation,
-  } as PlaylistSuggestions;
+  };
+
+  return suggestions;
 }
 
 export interface MorePlaylistTracks {
@@ -106,10 +108,12 @@ export async function get_more_playlist_tracks(
     (contents) => parse_playlist_items(contents),
   );
 
-  return {
+  const tracks: MorePlaylistTracks = {
     tracks: continued_data.items,
     continuation: continued_data.continuation,
-  } as MorePlaylistTracks;
+  };
+
+  return tracks;
 }
 
 export async function get_playlist(

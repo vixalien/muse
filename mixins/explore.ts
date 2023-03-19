@@ -66,7 +66,7 @@ export async function get_charts(country?: string) {
     "subheaders.0.musicSideAlignedItemRenderer.startItems.0.musicSortFilterButtonRenderer",
   );
 
-  return {
+  const charts: Charts = {
     countries: {
       selected: j(menu, TITLE),
       options: j(json, FRAMEWORK_MUTATIONS)
@@ -74,7 +74,9 @@ export async function get_charts(country?: string) {
         .filter(Boolean),
     },
     results: parse_chart_contents(results),
-  } as Charts;
+  };
+
+  return charts;
 }
 
 export interface MoodCategories {
@@ -93,7 +95,7 @@ export async function get_mood_categories() {
     data: { browseId: "FEmusic_moods_and_genres" },
   });
 
-  return {
+  const mood_categories: MoodCategories = {
     categories: (j(json, SINGLE_COLUMN_TAB, SECTION_LIST) as any[])
       .map((section: any) => {
         const title = j(section, GRID, "header.gridHeaderRenderer", TITLE_TEXT);
@@ -111,7 +113,9 @@ export async function get_mood_categories() {
 
         return { title, items };
       }),
-  } as MoodCategories;
+  };
+
+  return mood_categories;
 }
 
 export interface MoodPlaylists {
@@ -127,12 +131,14 @@ export async function get_mood_playlists(params: string) {
     },
   });
 
-  return {
+  const mood_playlists: MoodPlaylists = {
     title: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
     categories: parse_playlists_categories(
       j(json, SINGLE_COLUMN_TAB, SECTION_LIST),
     ),
-  } as MoodPlaylists;
+  };
+
+  return mood_playlists;
 }
 
 export interface NewReleases {
@@ -145,8 +151,10 @@ export async function get_new_releases() {
     data: { browseId: "FEmusic_new_releases" },
   });
 
-  return {
+  const new_releases: NewReleases = {
     title: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
     categories: parse_mixed_content(j(json, SINGLE_COLUMN_TAB, SECTION_LIST)),
-  } as NewReleases;
+  };
+
+  return new_releases;
 }
