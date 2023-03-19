@@ -84,6 +84,11 @@ export async function get_playlist_suggestions(
   } as PlaylistSuggestions;
 }
 
+export interface MorePlaylistTracks {
+  tracks: PlaylistItem[];
+  continuation: string | null;
+}
+
 export async function get_more_playlist_tracks(
   playlistId: string,
   continuation: string | any,
@@ -104,7 +109,7 @@ export async function get_more_playlist_tracks(
   return {
     tracks: continued_data.items,
     continuation: continued_data.continuation,
-  };
+  } as MorePlaylistTracks;
 }
 
 export async function get_playlist(
