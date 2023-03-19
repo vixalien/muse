@@ -18,7 +18,7 @@ import {
   TITLE_TEXT,
 } from "../nav.ts";
 import { parse_content_list, parse_playlist } from "../parsers/browsing.ts";
-import { parse_playlist_items } from "../parsers/playlists.ts";
+import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { request_json } from "./_request.ts";
 
@@ -54,6 +54,11 @@ export interface Playlist {
   related: any;
 }
 
+export interface PlaylistSuggestions {
+  suggestions: PlaylistItem[];
+  continuation: string | null;
+}
+
 export async function get_playlist_suggestions(
   playlistId: string,
   continuation: string | any,
@@ -76,7 +81,7 @@ export async function get_playlist_suggestions(
   return {
     suggestions: continued_suggestions.items,
     continuation: continued_suggestions.continuation,
-  };
+  } as PlaylistSuggestions;
 }
 
 export async function get_more_playlist_tracks(
