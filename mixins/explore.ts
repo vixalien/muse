@@ -12,6 +12,7 @@ import {
   TITLE_TEXT,
 } from "../nav.ts";
 import {
+  ExploreContents,
   parse_chart_contents,
   parse_explore_contents,
   parse_mixed_content,
@@ -28,7 +29,7 @@ export async function get_explore() {
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
-  return parse_explore_contents(results);
+  return parse_explore_contents(results) as ExploreContents;
 }
 
 // any section may be missing
