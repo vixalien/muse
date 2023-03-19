@@ -43,3 +43,7 @@ export function parse_playlists_categories(results: any) {
 
   return categories;
 }
+
+export type PlaylistCategory = ReturnType<
+  typeof parse_playlists_categories
+>[number];

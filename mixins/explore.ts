@@ -18,7 +18,10 @@ import {
   parse_explore_contents,
   parse_mixed_content,
 } from "../parsers/browsing.ts";
-import { parse_playlists_categories } from "../parsers/explore.ts";
+import {
+  parse_playlists_categories,
+  PlaylistCategory,
+} from "../parsers/explore.ts";
 import { color_to_hex } from "../parsers/util.ts";
 import { j, jo } from "../util.ts";
 import { request_json } from "./_request.ts";
@@ -110,6 +113,11 @@ export async function get_mood_categories() {
   } as MoodCategories;
 }
 
+export interface MoodPlaylists {
+  title: string;
+  categories: PlaylistCategory[];
+}
+
 export async function get_mood_playlists(params: string) {
   const json = await request_json("browse", {
     data: {
@@ -123,7 +131,7 @@ export async function get_mood_playlists(params: string) {
     categories: parse_playlists_categories(
       j(json, SINGLE_COLUMN_TAB, SECTION_LIST),
     ),
-  };
+  } as MoodPlaylists;
 }
 
 export async function get_new_releases() {
