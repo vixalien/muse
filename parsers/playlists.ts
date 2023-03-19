@@ -11,6 +11,9 @@ import {
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
 import {
+  Album,
+  Artist,
+  MenuTokens,
   parse_song_album,
   parse_song_artists,
   parse_song_menu_tokens,
@@ -19,17 +22,38 @@ import {
   get_fixed_column_item,
   get_item_text,
   parse_duration,
+  Thumbnail,
 } from "./util.ts";
+
+export interface PlaylistItem {
+  videoId: string;
+  title: string;
+  artists: Artist[];
+  album: Album | null;
+  likeStatus: "LIKE" | "INDIFFERENT" | "DISLIKE";
+  thumbnails: Thumbnail[];
+  isAvailable: boolean;
+  isExplicit: boolean;
+  videoType:
+    | // Official Music Videos
+    "MUSIC_VIDEO_TYPE_OMV"
+    | // User Generated Content
+    "MUSIC_VIDEO_TYPE_UGC"
+    | // Artist Videos
+    "MUSIC_VIDEO_TYPE_ATV";
+  duration: string | null;
+  duration_seconds: number | null;
+  setVideoId: string | null;
+  feedbackTokens: MenuTokens | null;
+}
 
 export const parse_playlist_items = (
   results: any,
-  menu_entries?: any[][] | null,
+  // menu_entries?: any[][] | null,
 ) => {
   const songs = [];
-  let count = 1;
 
   for (const result of results) {
-    count++;
     if (!(MRLIR in result)) {
       continue;
     }
@@ -78,7 +102,7 @@ export const parse_playlist_items = (
       continue;
     }
 
-    const artists = parse_song_artists(data, 1);
+    const artists = parse_song_artists(data, 1) ?? [];
 
     const album = parse_song_album(data, 2);
 
@@ -111,7 +135,7 @@ export const parse_playlist_items = (
       `${MENU_ITEMS}[0].menuNavigationItemRenderer.navigationEndpoint.${NAVIGATION_VIDEO_TYPE}`,
     );
 
-    const song: any = {
+    const song: PlaylistItem = {
       videoId,
       title,
       artists,
@@ -121,6 +145,10 @@ export const parse_playlist_items = (
       isAvailable,
       isExplicit,
       videoType,
+      duration: null,
+      duration_seconds: null,
+      setVideoId: null,
+      feedbackTokens: null,
     };
 
     if (duration) {
@@ -136,12 +164,13 @@ export const parse_playlist_items = (
       song.feedbackTokens = feedback_tokens;
     }
 
-    if (menu_entries) {
-      for (const menu_entry of menu_entries) {
-        const lastId = menu_entry[menu_entry.length - 1];
-        song[lastId] = j(data, `${MENU_ITEMS}.${menu_entry.join(".")}`);
-      }
-    }
+    // TODO: fix this
+    // if (menu_entries) {
+    //   for (const menu_entry of menu_entries) {
+    //     const lastId = menu_entry[menu_entry.length - 1];
+    //     song[lastId] = j(data, `${MENU_ITEMS}.${menu_entry.join(".")}`);
+    //   }
+    // }
 
     songs.push(song);
   }

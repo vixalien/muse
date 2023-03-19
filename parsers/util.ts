@@ -5,6 +5,12 @@ import {
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
 
+export interface Thumbnail {
+  url: string;
+  width: number;
+  height: number;
+}
+
 export function get_menu_playlists(data: any) {
   const ids: Record<string, string> = {};
 
@@ -101,7 +107,7 @@ function zip(a: any[], b: any[]) {
   );
 }
 
-export function get_browse_id(item: any, index: number) {
+export function get_browse_id(item: any, index: number): string | null {
   if (!("navigationEndpoint" in item.text.runs[index])) {
     return null;
   } else {

@@ -8,7 +8,13 @@ import {
   parse_duration,
 } from "./util.ts";
 
-export function parse_song_artists(data: any, index: number, slice?: number) {
+export type Artist = ArtistRun;
+
+export function parse_song_artists(
+  data: any,
+  index: number,
+  slice?: number,
+): Artist[] | null {
   const flex_item = get_flex_column_item(data, index);
   if (flex_item == null) return null;
 
@@ -16,8 +22,13 @@ export function parse_song_artists(data: any, index: number, slice?: number) {
   return parse_song_artists_runs(runs).slice(0, slice);
 }
 
+export interface ArtistRun {
+  name: string;
+  id: string | null;
+}
+
 export function parse_song_artists_runs(runs: any) {
-  const artists = [];
+  const artists: ArtistRun[] = [];
   const result = Array(Math.floor(runs.length / 2) + 1).fill(undefined).map((
     _,
     index,
@@ -86,7 +97,12 @@ export function parse_song_runs(runs: any[]) {
   return parsed;
 }
 
-export function parse_song_album(data: any, index: number) {
+export interface Album {
+  name: string;
+  id: string | null;
+}
+
+export function parse_song_album(data: any, index: number): Album | null {
   const flex_item = get_flex_column_item(data, index);
   if (flex_item == null) return null;
 
@@ -96,7 +112,12 @@ export function parse_song_album(data: any, index: number) {
   };
 }
 
-export function parse_song_menu_tokens(item: any) {
+export interface MenuTokens {
+  add: string | null;
+  remove: string | null;
+}
+
+export function parse_song_menu_tokens(item: any): MenuTokens {
   const toggle_menu = item[TOGGLE_MENU],
     service_type = toggle_menu.defaultIcon.iconType;
   let library_add_token = jo(
