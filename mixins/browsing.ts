@@ -326,12 +326,16 @@ export async function get_artist_albums(channelId: string, params: string) {
   return results.map((result: any) => parse_album(result[MTRIR]));
 }
 
+export interface User extends ArtistContents {
+  name: string;
+}
+
 export async function get_user(channelId: string) {
   const json = await request_json("browse", { data: { browseId: channelId } });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
-  const user = {
+  const user: User = {
     name: j(json, "header.musicVisualHeaderRenderer", TITLE_TEXT),
     ...parse_artist_contents(results),
   };
