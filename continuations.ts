@@ -62,6 +62,7 @@ function get_continuation_object(ctoken: string) {
   return {
     ctoken,
     continuation: ctoken,
+    type: "next",
   };
 }
 

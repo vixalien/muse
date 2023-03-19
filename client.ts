@@ -52,7 +52,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home(100)
+get_home(30)
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

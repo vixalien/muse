@@ -80,9 +80,8 @@ export async function get_home(limit = 3, continuation?: string) {
       (contents) => {
         return parse_mixed_content(contents);
       },
-      );
-      
-      console.log("continuation", limit, home.results.length);
+    );
+
     home.continuation = continued_data.continuation;
     home.results.push(...continued_data.items);
   }
@@ -100,7 +99,6 @@ export async function get_artist(artistId: string) {
   });
 
   const results = j(json, `${SINGLE_COLUMN_TAB}.${SECTION_LIST}`);
-  // console.log("results", results);
   const header = j(json, "header.musicImmersiveHeaderRenderer");
   const subscription_button = j(
     header,

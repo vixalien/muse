@@ -546,7 +546,7 @@ export function parse_song_flat(data: any) {
       id: j(columns[2], TEXT_RUN, NAVIGATION_BROWSE_ID),
     };
   } else {
-    song.views = j(columns[1], `text.runs[-1].text`).split(" ")[0];
+    song.views = jo(columns[1], `text.runs[-1].text`)?.split(" ")[0];
   }
 
   return song;

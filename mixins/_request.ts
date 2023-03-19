@@ -60,15 +60,14 @@ export async function request_json(endpoint: string, options: RequestInit) {
 
 const encoder = new TextEncoder();
 
-function hash(string: string) {
+async function hash(string: string) {
   // use the subtle crypto API to generate a 512 bit hash
   // return the hash as a hex string
   const data = encoder.encode(string);
-  return crypto.subtle
-    .digest("SHA-256", data)
-    .then((hash) => {
-      return Array.from(new Uint8Array(hash))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
-    });
+  const hash = await crypto.subtle
+    .digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }

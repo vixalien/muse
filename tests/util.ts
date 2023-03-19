@@ -1,6 +1,7 @@
 import { auth, init } from "../mod.ts";
 import { DenoFileStore } from "../store.ts";
 
+export * from "./asserts.ts";
 export * from "./deps.ts";
 export * from "../mod.ts";
 
