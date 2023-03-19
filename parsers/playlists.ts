@@ -12,11 +12,12 @@ import {
 import { j, jo } from "../util.ts";
 import {
   Album,
-  SongArtist,
+  LikeStatus,
   MenuTokens,
   parse_song_album,
   parse_song_artists,
   parse_song_menu_tokens,
+  SongArtist,
 } from "./songs.ts";
 import {
   get_fixed_column_item,
@@ -25,22 +26,21 @@ import {
   Thumbnail,
 } from "./util.ts";
 
+export type VideoType =
+  | "MUSIC_VIDEO_TYPE_OMV" /** Official Music Videos */
+  | "MUSIC_VIDEO_TYPE_UGC" /** User Generated Content */
+  | "MUSIC_VIDEO_TYPE_ATV" /** Artist Videos */;
+
 export interface PlaylistItem {
   videoId: string;
   title: string;
   artists: SongArtist[];
   album: Album | null;
-  likeStatus: "LIKE" | "INDIFFERENT" | "DISLIKE";
+  likeStatus: LikeStatus;
   thumbnails: Thumbnail[];
   isAvailable: boolean;
   isExplicit: boolean;
-  videoType:
-    | // Official Music Videos
-    "MUSIC_VIDEO_TYPE_OMV"
-    | // User Generated Content
-    "MUSIC_VIDEO_TYPE_UGC"
-    | // Artist Videos
-    "MUSIC_VIDEO_TYPE_ATV";
+  videoType: VideoType;
   duration: string | null;
   duration_seconds: number | null;
   setVideoId: string | null;

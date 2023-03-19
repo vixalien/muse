@@ -7,12 +7,16 @@ import {
   TOGGLE_MENU,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
+import { VideoType } from "./playlists.ts";
 import {
+LikeStatus,
+MenuTokens,
   parse_like_status,
   parse_song_menu_tokens,
   parse_song_runs,
+SongRuns,
 } from "./songs.ts";
-import { parse_duration } from "./util.ts";
+import { parse_duration, Thumbnail } from "./util.ts";
 
 export function parse_queue_playlist(results: any) {
   const tracks = [];
@@ -50,6 +54,19 @@ export function parse_queue_playlist(results: any) {
   return tracks;
 }
 
+export interface QueueTrack extends SongRuns {
+  videoId: string;
+  title: string;
+  duration: string | null;
+  duration_seconds: number | null;
+  thumbnails: Thumbnail[];
+  feedbackTokens: MenuTokens | null;
+  likeStatus: LikeStatus | null;
+  videoType: VideoType | null;
+  isExplicit: boolean;
+  counterpart: QueueTrack | null;
+}
+
 export function parse_queue_track(data: any) {
   let feedback_tokens = null, like_status = null;
 
@@ -82,7 +99,8 @@ export function parse_queue_track(data: any) {
     likeStatus: like_status,
     videoType: jo(data, "navigationEndpoint", NAVIGATION_VIDEO_ID),
     isExplicit: jo(data, BADGE_LABEL) != null,
-  };
+    counterpart: null,
+  } as QueueTrack
 }
 
 export function get_tab_browse_id(

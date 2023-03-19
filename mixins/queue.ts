@@ -1,7 +1,11 @@
 import { get_continuations } from "../continuations.ts";
 import { NAVIGATION_BROWSE_ID, TAB_CONTENT, TEXT_RUN_TEXT } from "../nav.ts";
 import { validate_playlist_id } from "../parsers/playlists.ts";
-import { get_tab_browse_id, parse_queue_playlist } from "../parsers/queue.ts";
+import {
+  get_tab_browse_id,
+  parse_queue_playlist,
+  QueueTrack,
+} from "../parsers/queue.ts";
 import { j, jo } from "../util.ts";
 import { request_json } from "./_request.ts";
 
@@ -12,6 +16,25 @@ export interface QueueOptions {
   shuffle?: boolean;
   autoplay?: boolean;
   params?: string;
+}
+
+export interface QueueChip {
+  title: string;
+  playlistId: string;
+  params: string;
+}
+
+export interface Queue {
+  chips: QueueChip[];
+  playlistId: string | null;
+  playlist: string | null;
+  tracks: QueueTrack[];
+  lyrics: string | null;
+  related: string | null;
+  author: {
+    name: string | null;
+    id: string | null;
+  } | null;
 }
 
 export async function get_queue(
@@ -97,11 +120,14 @@ export async function get_queue(
 
   const is_playlist = data.playlistId.match(/^(PL|OLA|RD)/) ? true : false;
 
-  const queue: any = {
+  const queue: Queue = {
     chips: [],
     playlist: null,
     playlistId: null,
     tracks: [],
+    lyrics: null,
+    related: null,
+    author: null,
   };
 
   if (!continuation) {
@@ -131,7 +157,7 @@ export async function get_queue(
 
     queue.author = {
       name: jo(results, "longBylineText.runs[0].text"),
-      browseId: jo(results, "longBylineText.runs[0]", NAVIGATION_BROWSE_ID),
+      id: jo(results, "longBylineText.runs[0]", NAVIGATION_BROWSE_ID),
     };
 
     queue.tracks.push(...parse_queue_playlist(results.contents));
@@ -149,7 +175,7 @@ export async function get_queue(
         );
 
         const data = {
-          text: j(chip, "chipCloudChipRenderer", TEXT_RUN_TEXT),
+          title: j(chip, "chipCloudChipRenderer", TEXT_RUN_TEXT),
           playlistId: endpoint.playlistId,
           params: endpoint.params,
         };
