@@ -420,10 +420,27 @@ export function parse_search_results(
   return search_results;
 }
 
-type CategoryMap = Record<string, [string, (a: any) => any, string?]>;
+export type CategoryMap = Record<string, [string, (a: any) => any, string?]>;
 
-export function parse_categories(results: any[], categories_data: CategoryMap) {
-  const categories: any = {};
+export type Category<Return> = {
+  browseId: string | null;
+  params: string | null;
+  results: Return[];
+};
+
+export function parse_categories<
+  Map extends CategoryMap,
+>(
+  results: any[],
+  categories_data: Map,
+) {
+  const categories: {
+    [Key in keyof Map]: Category<
+      ReturnType<
+        Map[Key][1]
+      >
+    >;
+  } = {} as any;
 
   for (const category in categories_data) {
     // const category = categories[i];
@@ -441,25 +458,33 @@ export function parse_categories(results: any[], categories_data: CategoryMap) {
       .map((r) => r.musicCarouselShelfRenderer);
 
     if (data.length > 0) {
-      categories[category] = { browseId: null, results: [] };
+      const category_obj: Category<any> = {
+        browseId: null,
+        results: [],
+        params: null,
+      };
 
       if ("navigationEndpoint" in j(data[0], CAROUSEL_TITLE)) {
-        categories[category].browseId = j(
+        category_obj.browseId = j(
           data[0],
           `${CAROUSEL_TITLE}.${NAVIGATION_BROWSE_ID}`,
         );
 
         if (["albums", "singles", "playlists"].includes(category)) {
-          categories[category].params =
+          category_obj.params =
             j(data[0], CAROUSEL_TITLE).navigationEndpoint.browseEndpoint.params;
         }
       }
 
-      categories[category].results = parse_content_list(
+      category_obj.results = parse_content_list(
         data[0].contents,
-        category_parser as any,
+        category_parser,
         category_key,
       );
+
+      console.log("data", category_obj);
+
+      categories[category] = category_obj as any;
     }
   }
 
@@ -474,10 +499,12 @@ export function parse_artist_contents(results: any[]) {
     playlists: [_("playlists"), parse_playlist],
     related: [_("related"), parse_related_artist],
     featured: [_("featured"), parse_featured],
-  } as CategoryMap;
+  } satisfies CategoryMap;
 
   return parse_categories(results, categories_data);
 }
+
+export type ArtistContents = ReturnType<typeof parse_artist_contents>;
 
 export function parse_explore_contents(results: any[]) {
   const categories_data = {
@@ -485,14 +512,16 @@ export function parse_explore_contents(results: any[]) {
     songs: [_("top songs"), parse_top_song, MRLIR],
     moods: [
       _("moods and genres"),
-      parse_moods_and_genres,
+      parse_mood_or_genre,
       "musicNavigationButtonRenderer",
     ],
     trending: [_("trending"), parse_trending, MRLIR],
-  } as CategoryMap;
+  } satisfies CategoryMap;
 
   return parse_categories(results, categories_data);
 }
+
+export type ExploreContents = ReturnType<typeof parse_explore_contents>;
 
 export function parse_chart_contents(results: any[]) {
   const categories_data = {
@@ -502,10 +531,12 @@ export function parse_chart_contents(results: any[]) {
     genres: [_("genres"), parse_playlist],
     artists: [_("top artists"), parse_top_artist, MRLIR],
     trending: [_("trending"), parse_trending, MRLIR],
-  } as CategoryMap;
+  } satisfies CategoryMap;
 
   return parse_categories(results, categories_data);
 }
+
+export type ChartContents = ReturnType<typeof parse_chart_contents>;
 
 export function parse_content_list(
   results: any,
@@ -521,7 +552,13 @@ export function parse_content_list(
   return contents;
 }
 
-export function parse_moods_and_genres(result: any[]) {
+export interface MoodOrGenre {
+  title: string;
+  color: string;
+  params: string;
+}
+
+export function parse_mood_or_genre(result: any[]): MoodOrGenre {
   return {
     title: j(result, "buttonText.runs[0].text"),
     color: color_to_hex(j(result, "solid.leftStripeColor")),
@@ -565,7 +602,16 @@ export function parse_album(result: any): Album {
   };
 }
 
-export function parse_single(result: any) {
+export interface Single {
+  title: string;
+  year: string | null;
+  browseId: string;
+  thumbnails: Thumbnail[];
+  isExplicit: boolean;
+  artists: ArtistRun[];
+}
+
+export function parse_single(result: any): Single {
   const SUBTITLE_RUNS = "subtitle.runs";
 
   const subtitles = j(result, SUBTITLE_RUNS);
@@ -582,7 +628,7 @@ export function parse_single(result: any) {
 
   return {
     title: j(result, TITLE_TEXT),
-    year: is_year ? Number(year) : null,
+    year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
@@ -651,7 +697,16 @@ export function parse_song_flat(data: any) {
   return song;
 }
 
-export function parse_video(result: any) {
+export interface Video {
+  title: string;
+  videoId: string;
+  artists: SongArtist[] | null;
+  playlistId: string | null;
+  thumbnails: Thumbnail[];
+  views: string | null;
+}
+
+export function parse_video(result: any): Video {
   const runs = result.subtitle.runs;
   const artists_len = get_dot_separator_index(runs);
 
@@ -665,7 +720,23 @@ export function parse_video(result: any) {
   };
 }
 
-export function parse_top_song(result: any) {
+type TrendChange = "up" | "down" | "new";
+
+export interface TopSong {
+  title: string;
+  videoId: string;
+  artists: SongArtist[] | null;
+  playlistId: string | null;
+  thumbnails: Thumbnail[];
+  rank: number;
+  change: TrendChange | null;
+  album: {
+    title: string;
+    browseId: string;
+  } | null;
+}
+
+export function parse_top_song(result: any): TopSong {
   const title = get_flex_column_item(result, 0);
   const title_run = j(title, TEXT_RUN);
 
@@ -693,7 +764,18 @@ export function parse_top_song(result: any) {
   };
 }
 
-export function parse_top_video(result: any) {
+export interface TopVideo {
+  title: string;
+  videoId: string;
+  artists: SongArtist[] | null;
+  playlistId: string | null;
+  thumbnails: Thumbnail[];
+  views: string | null;
+  rank: number;
+  change: TrendChange | null;
+}
+
+export function parse_top_video(result: any): TopVideo {
   const runs = result.subtitle.runs;
   const artists_len = get_dot_separator_index(runs);
 
@@ -711,11 +793,20 @@ export function parse_top_video(result: any) {
   };
 }
 
-export function parse_top_artist(result: any) {
+export interface TopArtist {
+  name: string;
+  browseId: string;
+  subscribers: string;
+  thumbnails: Thumbnail[];
+  rank: number;
+  change: TrendChange | null;
+}
+
+export function parse_top_artist(result: any): TopArtist {
   const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   return {
-    names: j(get_flex_column_item(result, 0), TEXT_RUN_TEXT),
+    name: j(get_flex_column_item(result, 0), TEXT_RUN_TEXT),
     browseId: j(result, NAVIGATION_BROWSE_ID),
     subscribers:
       j(get_flex_column_item(result, 1), TEXT_RUN_TEXT)?.split(" ")[0],
@@ -725,7 +816,22 @@ export function parse_top_artist(result: any) {
   };
 }
 
-export function parse_trending(result: any) {
+export interface TrendingSong {
+  title: string;
+  videoId: string | null;
+  artists: SongArtist[] | null;
+  playlistId: string | null;
+  thumbnails: Thumbnail[];
+  rank: number;
+  change: TrendChange | null;
+  album: {
+    title: string;
+    browseId: string;
+  } | null;
+  views: string | null;
+}
+
+export function parse_trending(result: any): TrendingSong {
   const title = get_flex_column_item(result, 0);
   const title_run = j(title, TEXT_RUN);
 

@@ -1,7 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_home } from "./mixins/browsing.ts";
-import { get_playlist } from "./mixins/playlist.ts";
-import { auth, init } from "./mod.ts";
+import { auth, get_artist, init } from "./mod.ts";
 import { DenoFileStore } from "./store.ts";
 
 init({
@@ -54,7 +52,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home()
+get_artist("UCiGs21G3KeE2tpbbMPzn9Qg")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

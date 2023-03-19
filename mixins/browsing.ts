@@ -21,6 +21,7 @@ import {
 } from "../nav.ts";
 import { parse_album_header } from "../parsers/albums.ts";
 import {
+  ArtistContents,
   MixedContent,
   Mood,
   parse_album,
@@ -30,9 +31,10 @@ import {
   parse_moods,
   parse_playlist,
 } from "../parsers/browsing.ts";
-import { parse_playlist_items } from "../parsers/playlists.ts";
+import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { parse_format } from "../parsers/songs.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
+import { Thumbnail } from "./playlist.ts";
 import { request_json } from "./_request.ts";
 
 export interface Home {
@@ -97,6 +99,22 @@ export async function get_home(limit = 3, continuation?: string) {
   return home;
 }
 
+export interface Artist extends ArtistContents {
+  views: string | null;
+  description: string | null;
+  name: string;
+  channelId: string;
+  shuffleId: string | null;
+  radioId: string | null;
+  subscribers: string | null;
+  subscribed: boolean;
+  thumbnails: Thumbnail[];
+  songs: {
+    browseId: string | null;
+    results: PlaylistItem[];
+  };
+}
+
 export async function get_artist(artistId: string) {
   if (artistId.startsWith("MPLA")) artistId = artistId.slice(4);
 
@@ -113,7 +131,7 @@ export async function get_artist(artistId: string) {
     "subscriptionButton.subscribeButtonRenderer",
   );
 
-  const artist: any = {
+  const artist: Artist = {
     views: null,
     description: null,
     name: j(header, TITLE_TEXT),
