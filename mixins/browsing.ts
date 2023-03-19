@@ -321,7 +321,7 @@ export async function get_artist_albums(channelId: string, params: string) {
     SINGLE_COLUMN_TAB,
     SECTION_LIST_ITEM,
     GRID_ITEMS,
-  );
+  ) as any[];
 
   return results.map((result: any) => parse_album(result[MTRIR]));
 }
