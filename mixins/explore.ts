@@ -14,6 +14,7 @@ import {
 import {
   ChartContents,
   ExploreContents,
+  MixedContent,
   parse_chart_contents,
   parse_explore_contents,
   parse_mixed_content,
@@ -134,6 +135,11 @@ export async function get_mood_playlists(params: string) {
   } as MoodPlaylists;
 }
 
+export interface NewReleases {
+  title: string;
+  categories: MixedContent[];
+}
+
 export async function get_new_releases() {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_new_releases" },
@@ -142,5 +148,5 @@ export async function get_new_releases() {
   return {
     title: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
     categories: parse_mixed_content(j(json, SINGLE_COLUMN_TAB, SECTION_LIST)),
-  };
+  } as NewReleases;
 }
