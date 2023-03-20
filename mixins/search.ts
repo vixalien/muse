@@ -28,12 +28,14 @@ export type Query = {
   bold?: true;
 }[];
 
-export type SearchQuickLink = {
+export interface ArtistQuickLink {
   type: "artist";
   thumbnails: Thumbnail[];
   name: string;
   id: string;
-} | {
+}
+
+export interface SongQuickLink {
   type: "song" | "video";
   thumbnails: Thumbnail[];
   title: string;
@@ -43,7 +45,9 @@ export type SearchQuickLink = {
     id: string;
   }[];
   isExplicit: boolean;
-};
+}
+
+export type SearchQuickLink = ArtistQuickLink | SongQuickLink;
 
 export interface SearchSuggestions {
   history: {
