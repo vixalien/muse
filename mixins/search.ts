@@ -77,11 +77,6 @@ export async function get_search_suggestions(query: string) {
     history: [],
   };
 
-  Deno.writeTextFileSync(
-    "store/quick_links.json",
-    JSON.stringify(results, null, 2),
-  );
-
   if (results[0]) {
     const items = j(results[0], "searchSuggestionsSectionRenderer.contents");
 

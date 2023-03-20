@@ -1,6 +1,6 @@
 import { Authenticator, PureAuthenticatorOptions } from "./auth.ts";
 import { FetchClient, RequestClient } from "./request.ts";
-import { get_default_store, Store } from "./store.ts";
+import { MemoryStore, Store } from "./store.ts";
 
 interface ClientOptions {
   auth?: PureAuthenticatorOptions;
@@ -9,7 +9,7 @@ interface ClientOptions {
 }
 
 export function setup(options: ClientOptions = {}) {
-  const store = options.store ?? get_default_store();
+  const store = options.store ?? new MemoryStore();
   const client = options.client ?? new FetchClient();
   const auth = new Authenticator({
     client: client,
