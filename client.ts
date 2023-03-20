@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, get_artist, init } from "./mod.ts";
+import { auth, get_artist, get_song, init } from "./mod.ts";
 import { DenoFileStore } from "./store.ts";
 
 init({
@@ -52,7 +52,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_artist("UCiGs21G3KeE2tpbbMPzn9Qg")
+get_song("oDd32K-mOVw")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

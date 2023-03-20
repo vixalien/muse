@@ -32,8 +32,13 @@ import {
   parse_playlist,
   ParsedAlbum,
 } from "../parsers/browsing.ts";
-import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
+import {
+  parse_playlist_items,
+  PlaylistItem,
+  VideoType,
+} from "../parsers/playlists.ts";
 import { ArtistRun, parse_format } from "../parsers/songs.ts";
+import { Format } from "../parsers/types.d.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
 import { request_json } from "./_request.ts";
@@ -251,6 +256,31 @@ export async function get_album(
   return album;
 }
 
+export interface VideoDetails {
+  videoId: string;
+  title: string;
+  lengthSeconds: number;
+  channelId: string;
+  isOwnerViewing: boolean;
+  isCrawlable: boolean;
+  thumbnail: { thumbnails: Thumbnail[] };
+  allowRatings: true;
+  viewCount: number;
+  author: string;
+  isPrivate: boolean;
+  isUnpluggedCorpus: boolean;
+  musicVideoType: VideoType;
+  isLiveContent: boolean;
+}
+
+export interface Song {
+  formats: Format[];
+  adaptive_formats: Format[];
+  expires: Date;
+  videoDetails: VideoDetails;
+  playerConfig: any;
+}
+
 export async function get_song(
   video_id: string,
 ) {
@@ -263,7 +293,7 @@ export async function get_song(
     },
   });
 
-  return {
+  const song: Song = {
     formats: response.streamingData.formats.map(parse_format),
     adaptive_formats: response.streamingData.adaptiveFormats.map(
       parse_format,
@@ -272,9 +302,15 @@ export async function get_song(
       new Date().getTime() +
         (Number(response.streamingData.expiresInSeconds) * 1000),
     ),
-    videoDetails: response.videoDetails,
+    videoDetails: {
+      ...response.videoDetails,
+      lengthSeconds: Number(response.videoDetails.lengthSeconds),
+      viewCount: Number(response.videoDetails.viewCount),
+    },
     playerConfig: response.playerConfig,
   };
+
+  return song;
 }
 
 export async function get_song_related(browseId: string) {
