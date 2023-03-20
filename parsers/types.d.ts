@@ -1,13 +1,15 @@
-export type AudioFormat = {
+export interface AudioFormat extends BaseFormat {
   has_audio: true;
+  has_video: false;
   audio_quality: "tiny" | "low" | "medium" | "high";
   channels: number;
   sample_rate: number;
   audio_codec: string | null;
-};
+}
 
-export type VideoFormat = {
+export interface VideoFormat extends BaseFormat  {
   has_video: true;
+  has_audio: true;
   width: number;
   height: number;
   quality_label:
@@ -37,9 +39,11 @@ export type VideoFormat = {
     | "4320p60";
   fps: number;
   video_codec: string | null;
-};
+}
 
 export type BaseFormat = {
+  has_video: boolean;
+  has_audio: boolean;
   codecs: string;
   url: string;
   duration_ms: number;
@@ -66,9 +70,4 @@ export type BaseFormat = {
   container: "flv" | "3gp" | "mp4" | "webm" | "ts";
 };
 
-export type Format =
-  & BaseFormat
-  & ({ has_video: false } | VideoFormat)
-  & ({
-    has_audio: false;
-  } | AudioFormat);
+export type Format = VideoFormat | AudioFormat;

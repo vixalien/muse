@@ -1,6 +1,6 @@
 import { FEEDBACK_TOKEN, NAVIGATION_BROWSE_ID, TOGGLE_MENU } from "../nav.ts";
 import { jo } from "../util.ts";
-import type { AudioFormat, Format, VideoFormat } from "./types.d.ts";
+import type { AudioFormat, BaseFormat, Format, VideoFormat } from "./types.d.ts";
 import {
   get_browse_id,
   get_flex_column_item,
@@ -161,7 +161,7 @@ export function parse_song_menu_tokens(item: any): MenuTokens {
 
 export function parse_format(format: any) {
   const has_video = format.width && format.height;
-  const has_audio = format.bitrate;
+  const has_audio = format.audioSampleRate;
 
   const parse_ranges = (ranges: any) => {
     if (!ranges) return ranges;
@@ -175,7 +175,7 @@ export function parse_format(format: any) {
     ? format.mimeType.match(/codecs="(.*)"/)[1]
     : null;
 
-  const n: Format = {
+  const n: BaseFormat = {
     codecs,
     itag: format.itag as number,
     url: format.url as string,
