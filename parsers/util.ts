@@ -11,8 +11,16 @@ export interface Thumbnail {
   height: number;
 }
 
+export interface MenuPlaylists {
+  shuffleId: string | null;
+  radioId: string | null;
+}
+
 export function get_menu_playlists(data: any) {
-  const ids: Record<string, string> = {};
+  const ids: MenuPlaylists = {
+    shuffleId: null,
+    radioId: null,
+  };
 
   const watch_menu = find_objects_by_key(
     j(data, MENU_ITEMS),
@@ -23,21 +31,17 @@ export function get_menu_playlists(data: any) {
     const item of watch_menu.map((menu: any) => menu.menuNavigationItemRenderer)
   ) {
     const icon = j(item, "icon.iconType");
-    let watch_key;
-    if (icon == "MUSIC_SHUFFLE") {
-      watch_key = "shuffleId";
-    } else if (icon == "MIX") {
-      watch_key = "radioId";
-    } else {
-      continue;
-    }
 
     const watch_id =
       jo(item, "navigationEndpoint.watchPlaylistEndpoint.playlistId") ??
         jo(item, "navigationEndpoint.watchEndpoint.playlistId");
 
-    if (watch_id) {
-      ids[watch_key] = watch_id;
+    if (icon == "MUSIC_SHUFFLE") {
+      ids["shuffleId"] = watch_id;
+    } else if (icon == "MIX") {
+      ids["radioId"] = watch_id;
+    } else {
+      continue;
     }
   }
 
@@ -48,7 +52,7 @@ export function parse_menu_playlists(data: any, results: any) {
   const ids = get_menu_playlists(data);
 
   for (const id in ids) {
-    results[id] = ids[id];
+    results[id] = ids[id as keyof typeof ids];
   }
 }
 

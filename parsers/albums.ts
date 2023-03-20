@@ -9,22 +9,47 @@ import {
   TITLE_TEXT,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
-import { parse_like_status, parse_song_runs } from "./songs.ts";
-import { get_menu_playlists } from "./util.ts";
+import { AlbumType } from "./browsing.ts";
+import {
+  LikeStatus,
+  parse_like_status,
+  parse_song_runs,
+  SongRuns,
+} from "./songs.ts";
+import { get_menu_playlists, MenuPlaylists, Thumbnail } from "./util.ts";
+
+export type AlbumHeaderExtends = SongRuns & MenuPlaylists;
+
+export interface AlbumHeader extends AlbumHeaderExtends {
+  title: string;
+  album_type: AlbumType;
+  thumbnails: Thumbnail[];
+  isExplicit: boolean;
+  description: string | null;
+  trackCount: number | null;
+  duration: string | null;
+  audioPlaylistId: string | null;
+  likeStatus: LikeStatus | null;
+}
 
 export function parse_album_header(response: any) {
   const header = j(response, HEADER_DETAIL);
 
   const album_info = parse_song_runs(header.subtitle.runs.slice(2));
 
-  const album = {
+  const album: AlbumHeader = {
     ...album_info,
+    ...get_menu_playlists(header),
     title: j(header, TITLE_TEXT),
-    type: j(header, SUBTITLE),
+    album_type: j(header, SUBTITLE).toLowerCase(),
     thumbnails: j(header, THUMBNAIL_CROPPED),
     isExplicit: j(header, "subtitleBadges", BADGE_PATH) != null,
-    ...get_menu_playlists(header),
-  } as any;
+    description: null,
+    trackCount: null,
+    duration: null,
+    audioPlaylistId: null,
+    likeStatus: null,
+  };
 
   if ("description" in header) {
     album.description = header.description.runs[0].text;

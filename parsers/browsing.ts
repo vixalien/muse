@@ -82,13 +82,13 @@ export type MixedItem =
   } & WatchPlaylist)
   | ({
     type: "video";
-  } & Song)
+  } & ParsedSong)
   | ({
     type: "song";
-  } & Song)
+  } & ParsedSong)
   | ({
     type: "album";
-  } & Album)
+  } & ParsedAlbum)
   | ({
     type: "artist";
   } & RelatedArtist)
@@ -97,13 +97,13 @@ export type MixedItem =
   } & RelatedArtist)
   | ({
     type: "flat-song";
-  } & Song)
+  } & ParsedSong)
   | ({
     type: "song";
   } & FlatSong)
   | ({
     type: "playlist";
-  } & Playlist)
+  } & ParsedPlaylist)
   | null;
 
 export function parse_mixed_item(data: any) {
@@ -552,13 +552,13 @@ export function parse_content_list<T extends any>(
   return contents;
 }
 
-export interface MoodOrGenre {
+export interface ParsedMoodOrGenre {
   title: string;
   color: string;
   params: string;
 }
 
-export function parse_mood_or_genre(result: any[]): MoodOrGenre {
+export function parse_mood_or_genre(result: any[]): ParsedMoodOrGenre {
   return {
     title: j(result, "buttonText.runs[0].text"),
     color: color_to_hex(j(result, "solid.leftStripeColor")),
@@ -566,17 +566,19 @@ export function parse_mood_or_genre(result: any[]): MoodOrGenre {
   };
 }
 
-export interface Album {
+export type AlbumType = "album" | "single" | "ep";
+
+export interface ParsedAlbum {
   title: string;
   year: string | null;
   browseId: string;
   thumbnails: Thumbnail[];
   isExplicit: boolean;
-  album_type: "album" | "single" | "ep";
+  album_type: AlbumType;
   artists: ArtistRun[];
 }
 
-export function parse_album(result: any): Album {
+export function parse_album(result: any): ParsedAlbum {
   const SUBTITLE_RUNS = "subtitle.runs";
 
   const subtitles = j(result, SUBTITLE_RUNS);
@@ -602,7 +604,7 @@ export function parse_album(result: any): Album {
   };
 }
 
-export interface Single {
+export interface ParsedSingle {
   title: string;
   year: string | null;
   browseId: string;
@@ -611,7 +613,7 @@ export interface Single {
   artists: ArtistRun[];
 }
 
-export function parse_single(result: any): Single {
+export function parse_single(result: any): ParsedSingle {
   const SUBTITLE_RUNS = "subtitle.runs";
 
   const subtitles = j(result, SUBTITLE_RUNS);
@@ -636,14 +638,14 @@ export function parse_single(result: any): Single {
   };
 }
 
-export interface Song extends SongRuns {
+export interface ParsedSong extends SongRuns {
   title: string;
   videoId: string | null;
   playlistId: string | null;
   thumbnails: Thumbnail[];
 }
 
-export function parse_song(result: any): Song {
+export function parse_song(result: any): ParsedSong {
   return {
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
@@ -697,7 +699,7 @@ export function parse_song_flat(data: any) {
   return song;
 }
 
-export interface Video {
+export interface ParsedVideo {
   title: string;
   videoId: string;
   artists: SongArtist[] | null;
@@ -706,7 +708,7 @@ export interface Video {
   views: string | null;
 }
 
-export function parse_video(result: any): Video {
+export function parse_video(result: any): ParsedVideo {
   const runs = result.subtitle.runs;
   const artists_len = get_dot_separator_index(runs);
 
@@ -877,7 +879,7 @@ export function parse_trending(result: any): TrendingSong {
   };
 }
 
-export interface Playlist {
+export interface ParsedPlaylist {
   title: string;
   playlistId: string;
   thumbnails: Thumbnail[];
@@ -894,7 +896,7 @@ export function parse_playlist(data: any) {
   const has_data = subtitles[0]?.text.toLowerCase() === _("playlist");
   const has_songs = subtitles.length > 3;
 
-  const playlist: Playlist = {
+  const playlist: ParsedPlaylist = {
     title: j(data, TITLE_TEXT),
     playlistId: j(data, TITLE, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),

@@ -19,7 +19,7 @@ import {
   TITLE,
   TITLE_TEXT,
 } from "../nav.ts";
-import { parse_album_header } from "../parsers/albums.ts";
+import { AlbumHeader, parse_album_header } from "../parsers/albums.ts";
 import {
   ArtistContents,
   MixedContent,
@@ -30,9 +30,10 @@ import {
   parse_mixed_content,
   parse_moods,
   parse_playlist,
+  ParsedAlbum,
 } from "../parsers/browsing.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
-import { parse_format } from "../parsers/songs.ts";
+import { ArtistRun, parse_format } from "../parsers/songs.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
 import { request_json } from "./_request.ts";
@@ -195,6 +196,16 @@ export async function get_artist(artistId: string) {
   // return artist;
 }
 
+export interface AlbumResultTrack extends PlaylistItem {
+  album_name: string;
+  artists: ArtistRun[];
+}
+
+export interface AlbumResult extends AlbumHeader {
+  tracks: AlbumResultTrack[];
+  other_versions: ParsedAlbum[] | null;
+}
+
 export async function get_album(
   browseId: string,
 ) {
@@ -204,15 +215,12 @@ export async function get_album(
     },
   });
 
-  const album = parse_album_header(response);
   const results = j(
     response,
     SINGLE_COLUMN_TAB,
     SECTION_LIST_ITEM,
     MUSIC_SHELF,
   );
-
-  album.tracks = parse_playlist_items(results.contents);
 
   const carousel = jo(
     response,
@@ -222,20 +230,23 @@ export async function get_album(
     CAROUSEL,
   );
 
+  const album: AlbumResult = {
+    ...parse_album_header(response),
+    tracks: parse_playlist_items(results.contents).map((track) => {
+      return {
+        ...track,
+        album_name: album.title,
+        artists: album.artists,
+      };
+    }),
+    other_versions: null,
+  };
+
   if (carousel != null) {
     album.other_versions = parse_content_list(results.contents, parse_album);
   }
 
   album.duration_seconds = sum_total_duration(album);
-
-  for (const i in album.tracks) {
-    const track = album.tracks[i];
-    album.tracks[i] = {
-      ...track,
-      album: album.title,
-      artists: album.artists,
-    };
-  }
 
   return album;
 }
