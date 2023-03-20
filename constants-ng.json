@@ -35,7 +35,7 @@
         "theme": "CLASSIC",
         "platform": "DESKTOP",
         "clientFormFactor": "UNKNOWN_FORM_FACTOR",
-        "webpSupport": false,
+        "webpSupport": true,
         "tvAppInfo": {
           "appQuality": "TV_APP_QUALITY_FULL_ANIMATION",
           "certificationScope": "",
