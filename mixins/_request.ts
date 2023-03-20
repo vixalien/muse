@@ -12,10 +12,12 @@ export async function request(endpoint: string, options: RequestInit) {
   const auth_headers = await get_auth_headers();
 
   return client.request(
-    `${CONSTANTS2.API_URL}/${endpoint}`,
+    endpoint.startsWith("http")
+      ? endpoint
+      : `${CONSTANTS2.API_URL}/${endpoint}`,
     {
       method: options.method || "post",
-      data: {
+      data: options.method === "get" ? undefined : {
         ...CONSTANTS2.DATA,
         ...options.data,
       },
@@ -34,40 +36,9 @@ export async function request(endpoint: string, options: RequestInit) {
 }
 
 export async function request_json(endpoint: string, options: RequestInit) {
-  // caching
-  const path = `store/cache/${await hash(
-    JSON.stringify({ ...options.data, ...options.params } || {}),
-  )}.json`;
-
-  const cache = true;
-
-  const cached = await Deno.readTextFile(path)
-    .then(JSON.parse).catch(() => null);
-
-  if (cache && cached) return cached;
-
   const response = await request(endpoint, options);
 
   const json = await response.json();
 
-  if (cache) {
-    await Deno.mkdir("store/cache", { recursive: true });
-    await Deno.writeTextFile(path, JSON.stringify(json, null, 2));
-  }
-
   return json;
-}
-
-const encoder = new TextEncoder();
-
-async function hash(string: string) {
-  // use the subtle crypto API to generate a 512 bit hash
-  // return the hash as a hex string
-  const data = encoder.encode(string);
-  const hash = await crypto.subtle
-    .digest("SHA-256", data);
-
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
 }

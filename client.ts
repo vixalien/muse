@@ -1,9 +1,90 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, get_artist, get_song, init } from "./mod.ts";
+import { request, request_json } from "./mixins/_request.ts";
+import {
+  auth,
+  get_artist,
+  get_queue,
+  get_search_suggestions,
+  get_song,
+  init,
+  search,
+} from "./mod.ts";
+import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
+import { debug } from "./util.ts";
+
+const encoder = new TextEncoder();
+
+async function hash(string: string) {
+  // use the subtle crypto API to generate a 512 bit hash
+  // return the hash as a hex string
+  const data = encoder.encode(string);
+  const hash = await crypto.subtle
+    .digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+class CustomFetch extends FetchClient {
+  async request(path: string, options: RequestInit) {
+    // caching
+    const cache_path = `store/cache/${await hash(
+      JSON.stringify({ ...options.data, ...options.params } || {}),
+    )}.json`;
+
+    const cache = true;
+
+    const cached = await Deno.readTextFile(cache_path)
+      .then(JSON.parse).catch(() => null);
+
+    if (cache && cached) return new Response(JSON.stringify(cached));
+    // end caching
+
+    console.debug(options.method, path);
+
+    const hasData = options.data != null;
+
+    const params = new URLSearchParams(options.params);
+
+    const url = new URL(path + "?" + params.toString());
+
+    const headers = new Headers(options.headers);
+
+    if (this.auth_header) headers.set("Authorization", this.auth_header);
+
+    debug(`Requesting ${options.method} with ${JSON.stringify(options)}`);
+
+    const response = await fetch(url, {
+      method: options.method,
+      headers,
+      body: hasData ? JSON.stringify(options.data) : undefined,
+    });
+
+    // store into cache
+    if (cache) {
+      await Deno.mkdir("store/cache", { recursive: true });
+      await Deno.writeTextFile(
+        cache_path,
+        JSON.stringify(await response.clone().json(), null, 2),
+      );
+    }
+
+    console.debug("DONE", options.method, path);
+
+    // if (!response.ok) {
+    //   const text = await response.text();
+    //   throw new Error(text);
+    // }
+
+    return response;
+  }
+}
 
 init({
   store: new DenoFileStore("store/muse-store.json"),
+  client: new CustomFetch(),
 });
 
 const css = {
@@ -52,7 +133,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_song("oDd32K-mOVw")
+search("hello", { filter: "songs" })
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
@@ -62,3 +143,15 @@ get_song("oDd32K-mOVw")
       JSON.stringify(data, null, 2),
     );
   });
+
+// await auth.requires_login();
+
+// request(
+//   "https://music.youtube.com/youtubei/v1/captions/AUieDabrBVLM_fV9CXYQ6L6XtClOZCDhTx3ciLv06QYQiX_EHqQ",
+//   {
+//     method: "post",
+//   },
+// )
+//   .then((data) => {
+//     console.log("result", data);
+//   });

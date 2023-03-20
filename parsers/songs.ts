@@ -1,6 +1,6 @@
 import { FEEDBACK_TOKEN, NAVIGATION_BROWSE_ID, TOGGLE_MENU } from "../nav.ts";
 import { jo } from "../util.ts";
-import type { AudioFormat, BaseFormat, Format, VideoFormat } from "./types.d.ts";
+import type { AudioFormat, BaseFormat, VideoFormat } from "./types.d.ts";
 import {
   get_browse_id,
   get_flex_column_item,
