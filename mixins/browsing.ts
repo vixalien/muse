@@ -327,6 +327,11 @@ export async function get_song_related(browseId: string) {
   return parse_mixed_content(sections);
 }
 
+export interface Lyrics {
+  lyrics: string;
+  source: string;
+}
+
 export async function get_lyrics(browseId: string) {
   if (!browseId) {
     throw new TypeError(
@@ -336,7 +341,7 @@ export async function get_lyrics(browseId: string) {
 
   const json = await request_json("browse", { data: { browseId } });
 
-  return {
+  const lyrics: Lyrics = {
     lyrics: jo(
       json,
       "contents",
@@ -353,6 +358,8 @@ export async function get_lyrics(browseId: string) {
       RUN_TEXT,
     ),
   };
+
+  return lyrics;
 }
 
 export async function get_artist_albums(channelId: string, params: string) {
