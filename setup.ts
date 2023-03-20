@@ -10,7 +10,7 @@ interface ClientOptions {
 
 export function setup(options: ClientOptions = {}) {
   const store = options.store ?? get_default_store();
-  const client = options.client ?? new FetchClient(store);
+  const client = options.client ?? new FetchClient();
   const auth = new Authenticator({
     client: client,
     store: store,
