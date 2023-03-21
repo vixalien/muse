@@ -1,14 +1,6 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_library_playlists, get_library_songs } from "./mixins/library.ts";
-import {
-  auth,
-  create_playlist,
-  delete_playlist,
-  edit_playlist,
-  get_album_browse_id,
-  get_playlist,
-  init,
-} from "./mod.ts";
+import { request_json } from "./mixins/_request.ts";
+import { auth, get_library, get_library_songs, init } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -133,9 +125,8 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_library_playlists({
-  limit: Infinity,
-  order: "z_to_a",
+get_library({
+  order: "recently_added",
 })
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {

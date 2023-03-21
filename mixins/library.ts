@@ -4,7 +4,13 @@ import {
   resend_request_until_valid,
   validate_response,
 } from "../continuations.ts";
-import { GRID, MTRIR, SECTION_LIST, SINGLE_COLUMN_TAB } from "../nav.ts";
+import {
+  GRID,
+  MTRIR,
+  SECTION_LIST,
+  SECTION_LIST_CONTINUATION,
+  SINGLE_COLUMN_TAB,
+} from "../nav.ts";
 import {
   MixedItem,
   parse_content_list,
@@ -20,23 +26,37 @@ import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { j } from "../util.ts";
 import {
   check_auth,
+  LibraryOrder,
   Order,
+  prepare_library_sort_params,
   prepare_order_params,
   validate_order_parameter,
 } from "./utils.ts";
 import { request_json } from "./_request.ts";
+
+export interface GetLibraryOptions extends PaginationOptions {
+  order?: LibraryOrder;
+}
 
 export interface Library {
   continuation: string | null;
   results: MixedItem[];
 }
 
-export async function get_library(limit = 20, continuation?: string) {
+export async function get_library(options: GetLibraryOptions = {}) {
+  const { order, limit = 25, continuation } = options;
+
   await check_auth();
   const endpoint = "browse";
-  const data = {
+  const data: Record<string, unknown> = {
     browseId: "FEmusic_library_landing",
   };
+
+  const order_continuation = prepare_library_sort_params(order);
+
+  if (order_continuation) {
+    data.continuation = order_continuation;
+  }
 
   const library: Library = {
     continuation: null,
@@ -48,7 +68,13 @@ export async function get_library(limit = 20, continuation?: string) {
   } else {
     const json = await request_json(endpoint, { data });
 
-    const grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST, "[0]", GRID);
+    let grid: any;
+
+    if (order_continuation) {
+      grid = j(json, SECTION_LIST_CONTINUATION, "[0]", GRID);
+    } else {
+      grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST, "[0]", GRID);
+    }
 
     const results = j(grid, "items") as any[];
 
