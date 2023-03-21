@@ -130,7 +130,9 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-edit_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE", {})
+edit_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE", {
+  add_source_playlists: ["PLCwfwQhurMOukaOfq_L2NHaaNnam5GwQK"],
+})
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

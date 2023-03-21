@@ -174,8 +174,8 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] create playlist
 - [x] edit playlist
 - [ ] delete playlist
-- [ ] add playlist items
-- [ ] remove playlist items
+- [x] add playlist items
+- [x] remove playlist items
 
 ### uploads
 

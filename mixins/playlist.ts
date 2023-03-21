@@ -291,9 +291,9 @@ export interface EditPlaylistOptions {
   description?: string;
   privacy_status?: PlaylistPrivacyStatus;
   move_items?: { setVideoId: string; positionBefore?: string }[];
-  add_playlist_id?: string;
   add_videos?: string[];
   remove_videos?: { videoId: string; setVideoId: string }[];
+  add_source_playlists?: string[];
 }
 
 export async function edit_playlist(
@@ -305,9 +305,9 @@ export async function edit_playlist(
     description,
     privacy_status,
     move_items,
-    add_playlist_id,
     add_videos,
     remove_videos,
+    add_source_playlists,
   } = options;
   await check_auth();
 
@@ -348,13 +348,6 @@ export async function edit_playlist(
     });
   }
 
-  if (add_playlist_id) {
-    actions.push({
-      action: "ACTION_ADD_PLAYLIST",
-      addedFullListId: add_playlist_id,
-    });
-  }
-
   if (add_videos) {
     add_videos.forEach((video_id) => {
       actions.push({
@@ -370,6 +363,15 @@ export async function edit_playlist(
         action: "ACTION_REMOVE_VIDEO",
         removedVideoId: remove_video.videoId,
         setVideoId: remove_video.setVideoId,
+      });
+    });
+  }
+
+  if (add_source_playlists) {
+    add_source_playlists.forEach((playlist_id) => {
+      actions.push({
+        action: "ACTION_ADD_PLAYLIST",
+        addedFullListId: playlist_id,
       });
     });
   }
