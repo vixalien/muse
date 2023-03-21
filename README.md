@@ -173,7 +173,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get playlist
 - [x] create playlist
 - [x] edit playlist
-- [ ] delete playlist
+- [x] delete playlist
 - [x] add playlist items
 - [x] remove playlist items
 
