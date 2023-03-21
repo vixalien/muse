@@ -45,11 +45,12 @@ export interface PlaylistItem {
   duration_seconds: number | null;
   setVideoId: string | null;
   feedbackTokens: MenuTokens | null;
+  feedbackToken: null;
 }
 
 export const parse_playlist_items = (
   results: any,
-  // menu_entries?: any[][] | null,
+  menu_entries?: string[][] | null,
 ) => {
   const songs = [];
 
@@ -149,6 +150,7 @@ export const parse_playlist_items = (
       duration_seconds: null,
       setVideoId: null,
       feedbackTokens: null,
+      feedbackToken: null,
     };
 
     if (duration) {
@@ -164,13 +166,11 @@ export const parse_playlist_items = (
       song.feedbackTokens = feedback_tokens;
     }
 
-    // TODO: fix this
-    // if (menu_entries) {
-    //   for (const menu_entry of menu_entries) {
-    //     const lastId = menu_entry[menu_entry.length - 1];
-    //     song[lastId] = j(data, `${MENU_ITEMS}.${menu_entry.join(".")}`);
-    //   }
-    // }
+    if (menu_entries) {
+      for (const menu_entry of menu_entries) {
+        song.feedbackToken = j(data, `${MENU_ITEMS}.${menu_entry.join(".")}`);
+      }
+    }
 
     songs.push(song);
   }
