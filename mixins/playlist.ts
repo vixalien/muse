@@ -382,3 +382,19 @@ export async function edit_playlist(
 
   return "status" in json ? json.status : json;
 }
+
+export function add_playlist_items(
+  playlistId: string,
+  video_ids: string[],
+) {
+  return edit_playlist(playlistId, { add_videos: video_ids });
+}
+
+export function remove_playlist_items(
+  playlistId: string,
+  video_ids: { videoId: string; setVideoId: string }[],
+) {
+  return edit_playlist(playlistId, {
+    remove_videos: video_ids,
+  });
+}
