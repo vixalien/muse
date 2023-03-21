@@ -18,7 +18,11 @@ import {
   TITLE_TEXT,
 } from "../nav.ts";
 import { parse_content_list, parse_playlist } from "../parsers/browsing.ts";
-import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
+import {
+  parse_playlist_items,
+  PlaylistItem,
+  validate_playlist_id,
+} from "../parsers/playlists.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { check_auth, html_to_text } from "./utils.ts";
 import { request_json } from "./_request.ts";
@@ -252,13 +256,15 @@ interface CreatePlaylistOptions {
 
 export async function create_playlist(
   title: string,
-  {
+  options: CreatePlaylistOptions = {},
+) {
+  const {
     description = "",
     privacy_status = "PUBLIC",
     video_ids,
     source_playlist,
-  }: CreatePlaylistOptions = {},
-) {
+  } = options;
+
   await check_auth();
 
   const data: Record<string, any> = {
@@ -278,4 +284,99 @@ export async function create_playlist(
   const json = await request_json("playlist/create", { data });
 
   return json.playlistId;
+}
+
+export interface EditPlaylistOptions {
+  title?: string;
+  description?: string;
+  privacy_status?: PlaylistPrivacyStatus;
+  move_items?: { setVideoId: string; positionBefore?: string }[];
+  add_playlist_id?: string;
+  add_videos?: string[];
+  remove_videos?: { videoId: string; setVideoId: string }[];
+}
+
+export async function edit_playlist(
+  playlistId: string,
+  options: EditPlaylistOptions,
+) {
+  const {
+    title,
+    description,
+    privacy_status,
+    move_items,
+    add_playlist_id,
+    add_videos,
+    remove_videos,
+  } = options;
+  await check_auth();
+
+  const data: Record<string, any> = {
+    playlistId: validate_playlist_id(playlistId),
+  };
+
+  const actions: ({ action: string } & Record<string, any>)[] = [];
+
+  if (title) {
+    actions.push({
+      action: "ACTION_SET_PLAYLIST_NAME",
+      playlistName: title,
+    });
+  }
+
+  if (description) {
+    actions.push({
+      action: "ACTION_SET_PLAYLIST_DESCRIPTION",
+      playlistDescription: description,
+    });
+  }
+
+  if (privacy_status) {
+    actions.push({
+      action: "ACTION_SET_PLAYLIST_PRIVACY",
+      playlistPrivacy: privacy_status,
+    });
+  }
+
+  if (move_items) {
+    move_items.forEach((move_item) => {
+      actions.push({
+        action: "ACTION_MOVE_VIDEO_BEFORE",
+        setVideoId: move_item.setVideoId,
+        movedSetVideoIdSuccessor: move_item.positionBefore,
+      });
+    });
+  }
+
+  if (add_playlist_id) {
+    actions.push({
+      action: "ACTION_ADD_PLAYLIST",
+      addedFullListId: add_playlist_id,
+    });
+  }
+
+  if (add_videos) {
+    add_videos.forEach((video_id) => {
+      actions.push({
+        action: "ACTION_ADD_VIDEO",
+        addedVideoId: video_id,
+      });
+    });
+  }
+
+  if (remove_videos) {
+    remove_videos.forEach((remove_video) => {
+      actions.push({
+        action: "ACTION_REMOVE_VIDEO",
+        removedVideoId: remove_video.videoId,
+        setVideoId: remove_video.setVideoId,
+      });
+    });
+  }
+
+  data.actions = actions;
+
+  const json = await request_json("browse/edit_playlist", { data });
+
+  return "status" in json ? json.status : json;
 }

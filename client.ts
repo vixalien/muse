@@ -2,6 +2,8 @@ import { RequiresLoginEvent } from "./auth.ts";
 import {
   auth,
   create_playlist,
+  edit_playlist,
+  get_playlist,
   init,
 } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
@@ -128,7 +130,8 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-create_playlist("test playlist")
+edit_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE", {})
+  // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
