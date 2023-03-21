@@ -156,9 +156,9 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get library
 - [x] get library playlists
 - [x] get library songs
-- [ ] get library albums
-- [ ] get library artists
-- [ ] get library subscriptions
+- [x] get library albums
+- [x] get library artists
+- [x] get library subscriptions
 - [ ] get liked songs
 - [ ] get history
 - [ ] add history item

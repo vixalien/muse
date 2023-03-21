@@ -48,6 +48,10 @@ export function get_menu_playlists(data: any) {
   return ids;
 }
 
+// TODO: remove this function
+/**
+ * @deprecated
+ */
 export function parse_menu_playlists(data: any, results: any) {
   const ids = get_menu_playlists(data);
 

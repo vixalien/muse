@@ -19,7 +19,12 @@ import {
   ParsedPlaylist,
 } from "../parsers/browsing.ts";
 import {
+  fetch_library_contents,
   get_library_contents,
+  PaginationAndOrderOptions,
+  PaginationOptions,
+  parse_albums,
+  parse_artists,
   parse_library_songs,
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
@@ -113,15 +118,6 @@ export async function get_library(options: GetLibraryOptions = {}) {
   return library;
 }
 
-export interface PaginationOptions {
-  limit?: number;
-  continuation?: string;
-}
-
-export interface PaginationAndOrderOptions extends PaginationOptions {
-  order?: Order;
-}
-
 export interface LibraryPlaylists {
   playlists: ParsedPlaylist[];
   continuation: string | null;
@@ -191,7 +187,7 @@ export interface GetLibrarySongOptions {
 }
 
 export interface LibrarySongs {
-  songs: PlaylistItem[];
+  items: PlaylistItem[];
   continuation: string | null;
 }
 
@@ -220,7 +216,7 @@ export async function get_library_songs(options: GetLibrarySongOptions = {}) {
   const parse = (response: any) => parse_library_songs(response);
 
   const library_songs: LibrarySongs = {
-    songs: [],
+    items: [],
     continuation: continuation ?? null,
   };
 
@@ -239,7 +235,7 @@ export async function get_library_songs(options: GetLibrarySongOptions = {}) {
       response = parse(await request());
     }
 
-    library_songs.songs = response.parsed ?? [];
+    library_songs.items = response.parsed ?? [];
     library_songs.continuation = response.results;
   }
 
@@ -253,18 +249,18 @@ export async function get_library_songs(options: GetLibrarySongOptions = {}) {
       const continued_data = await get_validated_continuations(
         library_songs.continuation,
         "musicShelfContinuation",
-        limit - library_songs.songs.length,
+        limit - library_songs.items.length,
         per_page,
         request_continuations,
         parse_continuations,
       );
 
       library_songs.continuation = continued_data.continuation;
-      library_songs.songs.push(...continued_data.items);
+      library_songs.items.push(...continued_data.items);
     } else {
       const remaining_limit = limit == null
         ? null
-        : limit - library_songs.songs.length;
+        : limit - library_songs.items.length;
 
       const continued_data = await get_continuations(
         library_songs.continuation,
@@ -275,9 +271,42 @@ export async function get_library_songs(options: GetLibrarySongOptions = {}) {
       );
 
       library_songs.continuation = continued_data.continuation;
-      library_songs.songs.push(...continued_data.items);
+      library_songs.items.push(...continued_data.items);
     }
   }
 
   return library_songs;
+}
+
+export function get_library_albums(
+  options?: PaginationAndOrderOptions,
+) {
+  return fetch_library_contents(
+    "FEmusic_liked_albums",
+    options,
+    parse_albums,
+    true,
+  );
+}
+
+export function get_library_artists(
+  options?: PaginationAndOrderOptions,
+) {
+  return fetch_library_contents(
+    "FEmusic_library_corpus_track_artists",
+    options,
+    parse_artists,
+    false,
+  );
+}
+
+export function get_library_subscriptions(
+  options?: PaginationAndOrderOptions,
+) {
+  return fetch_library_contents(
+    "FEmusic_library_corpus_artists",
+    options,
+    (results) => parse_artists(results, true),
+    false,
+  );
 }
