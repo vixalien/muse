@@ -6,6 +6,7 @@ import {
   get_library_artists,
   get_library_songs,
   get_library_subscriptions,
+  get_liked_songs,
   init,
 } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
@@ -132,9 +133,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_library_subscriptions({
-  order: "z_to_a",
-})
+get_liked_songs()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

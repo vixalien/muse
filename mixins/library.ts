@@ -29,6 +29,7 @@ import {
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { j } from "../util.ts";
+import { get_playlist, GetPlaylistOptions } from "./playlist.ts";
 import {
   check_auth,
   LibraryOrder,
@@ -309,4 +310,8 @@ export function get_library_subscriptions(
     (results) => parse_artists(results, true),
     false,
   );
+}
+
+export function get_liked_songs(options?: GetPlaylistOptions) {
+  return get_playlist("LM", options);
 }

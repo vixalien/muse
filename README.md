@@ -159,7 +159,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get library albums
 - [x] get library artists
 - [x] get library subscriptions
-- [ ] get liked songs
+- [x] get liked songs
 - [ ] get history
 - [ ] add history item
 - [ ] remove history items
