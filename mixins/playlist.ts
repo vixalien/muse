@@ -383,6 +383,18 @@ export async function edit_playlist(
   return "status" in json ? json.status : json;
 }
 
+export async function delete_playlist(playlistId: string) {
+  await check_auth();
+
+  const data = {
+    playlistId: validate_playlist_id(playlistId),
+  };
+
+  const json = await request_json("playlist/delete", { data });
+
+  return "status" in json ? json.status : json;
+}
+
 export function add_playlist_sources(
   playlistId: string,
   source_playlists: string[],

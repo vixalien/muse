@@ -3,10 +3,13 @@ import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 import { get_continuations } from "../continuations.ts";
 import {
   CAROUSEL,
+  CONTENT,
   DESCRIPTION,
   DESCRIPTION_SHELF,
   find_object_by_key,
   GRID_ITEMS,
+  MRLIR,
+  MRLITFC,
   MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
@@ -279,6 +282,29 @@ export interface Song {
   expires: Date;
   videoDetails: VideoDetails;
   playerConfig: any;
+}
+
+export async function get_album_browse_id(audio_playlist_id: string) {
+  const json = await request_json("browse", {
+    data: {
+      browseId: audio_playlist_id.startsWith("VL")
+        ? audio_playlist_id
+        : "VL" + audio_playlist_id,
+    },
+  });
+
+  return jo(
+    json,
+    SINGLE_COLUMN_TAB,
+    SECTION_LIST_ITEM,
+    "musicPlaylistShelfRenderer",
+    CONTENT,
+    MRLIR,
+    "flexColumns[2]",
+    MRLITFC,
+    "runs[0]",
+    NAVIGATION_BROWSE_ID,
+  ) as string | null;
 }
 
 export async function get_song(

@@ -2,7 +2,9 @@ import { RequiresLoginEvent } from "./auth.ts";
 import {
   auth,
   create_playlist,
+  delete_playlist,
   edit_playlist,
+  get_album_browse_id,
   get_playlist,
   init,
 } from "./mod.ts";
@@ -130,9 +132,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-edit_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE", {
-  add_source_playlists: ["PLCwfwQhurMOukaOfq_L2NHaaNnam5GwQK"],
-})
+get_album_browse_id("OLAK5uy_ln6M00_rlfmSHZ-PjMRIGETBnlmci4gBg")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
