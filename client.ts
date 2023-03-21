@@ -7,6 +7,7 @@ import {
   get_library_songs,
   get_library_subscriptions,
   get_liked_songs,
+  get_song,
   init,
 } from "./mod.ts";
 import { get_history } from "./parsers/library.ts";
@@ -134,7 +135,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_history()
+get_song("Z4Ys4uTNuCM")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

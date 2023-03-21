@@ -282,6 +282,8 @@ export interface Song {
   expires: Date;
   videoDetails: VideoDetails;
   playerConfig: any;
+  playbackTracking: any;
+  videostatsPlaybackUrl: string;
 }
 
 export async function get_album_browse_id(audio_playlist_id: string) {
@@ -334,6 +336,8 @@ export async function get_song(
       viewCount: Number(response.videoDetails.viewCount),
     },
     playerConfig: response.playerConfig,
+    playbackTracking: response.playbackTracking,
+    videostatsPlaybackUrl: response.playbackTracking.videostatsPlaybackUrl.baseUrl,
   };
 
   return song;
