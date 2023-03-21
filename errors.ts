@@ -7,6 +7,9 @@ export enum ERROR_CODE {
   AUTH_INVALID_TOKEN,
   AUTH_INVALID_REFRESH_TOKEN,
   AUTH_NO_TOKEN,
+
+  /* Parsing */
+  PARSING_INVALID_JSON,
 }
 
 export class MuseError extends Error {
