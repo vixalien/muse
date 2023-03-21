@@ -383,6 +383,13 @@ export async function edit_playlist(
   return "status" in json ? json.status : json;
 }
 
+export function add_playlist_sources(
+  playlistId: string,
+  source_playlists: string[],
+) {
+  return edit_playlist(playlistId, { add_source_playlists: source_playlists });
+}
+
 export function add_playlist_items(
   playlistId: string,
   video_ids: string[],
