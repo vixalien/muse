@@ -1,4 +1,5 @@
 import { auth } from "../setup.ts";
+export { auth };
 
 /**
  * Get number of days since the unix epoch
@@ -20,4 +21,30 @@ export function html_to_text(html: string) {
   return html.replace(/<[^>]*>?/gm, "");
 }
 
-export { auth };
+export const order_params = new Map(
+  [
+    ["a_to_z", "ggMGKgQIARAA"],
+    ["z_to_a", "ggMGKgQIARAB"],
+    ["recently_added", "ggMGKgQIABAB"],
+  ] as const,
+);
+
+export const orders = [...order_params.keys()] as const;
+
+export type Order = typeof orders[number];
+
+export function validate_order_parameter(order?: Order) {
+  if (order && !orders.includes(order)) {
+    throw new Error(
+      `Invalid orderprovided. Please use one of the following: ${
+        orders.join(", ")
+      }`,
+    );
+  }
+}
+
+export function prepare_order_params(order?: Order) {
+  if (order) {
+    return order_params.get(order);
+  }
+}

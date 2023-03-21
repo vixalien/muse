@@ -1,4 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
+import { get_library_songs } from "./mixins/library.ts";
 import {
   auth,
   create_playlist,
@@ -132,7 +133,11 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_album_browse_id("OLAK5uy_ln6M00_rlfmSHZ-PjMRIGETBnlmci4gBg")
+get_library_songs({
+  order: "recently_added",
+  validate_responses: true,
+  limit: Infinity,
+})
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
