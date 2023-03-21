@@ -154,7 +154,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 ### library
 
 - [x] get library
-- [ ] get library playlists
+- [x] get library playlists
 - [x] get library songs
 - [ ] get library albums
 - [ ] get library artists

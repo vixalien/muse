@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_library_songs } from "./mixins/library.ts";
+import { get_library_playlists, get_library_songs } from "./mixins/library.ts";
 import {
   auth,
   create_playlist,
@@ -133,10 +133,9 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_library_songs({
-  order: "recently_added",
-  validate_responses: true,
+get_library_playlists({
   limit: Infinity,
+  order: "z_to_a",
 })
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {

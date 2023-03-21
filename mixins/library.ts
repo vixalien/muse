@@ -5,8 +5,17 @@ import {
   validate_response,
 } from "../continuations.ts";
 import { GRID, MTRIR, SECTION_LIST, SINGLE_COLUMN_TAB } from "../nav.ts";
-import { MixedItem, parse_mixed_item } from "../parsers/browsing.ts";
-import { parse_library_songs } from "../parsers/library.ts";
+import {
+  MixedItem,
+  parse_content_list,
+  parse_mixed_item,
+  parse_playlist,
+  ParsedPlaylist,
+} from "../parsers/browsing.ts";
+import {
+  get_library_contents,
+  parse_library_songs,
+} from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { j } from "../util.ts";
 import {
@@ -76,6 +85,76 @@ export async function get_library(limit = 20, continuation?: string) {
   }
 
   return library;
+}
+
+export interface PaginationOptions {
+  limit?: number;
+  continuation?: string;
+}
+
+export interface PaginationAndOrderOptions extends PaginationOptions {
+  order?: Order;
+}
+
+export interface LibraryPlaylists {
+  playlists: ParsedPlaylist[];
+  continuation: string | null;
+}
+
+export async function get_library_playlists(
+  options: PaginationAndOrderOptions = {},
+) {
+  const { order, limit = 25, continuation } = options;
+
+  await check_auth();
+
+  const endpoint = "browse";
+  const body: Record<string, any> = { browseId: "FEmusic_liked_playlists" };
+
+  validate_order_parameter(order);
+
+  if (order) body.params = prepare_order_params(order);
+
+  const library_playlists: LibraryPlaylists = {
+    playlists: [],
+    continuation: continuation ?? null,
+  };
+
+  if (!continuation) {
+    const json = await request_json(endpoint, { data: body });
+
+    const results = get_library_contents(json, GRID);
+    library_playlists.playlists = parse_content_list(
+      results.items.slice(1),
+      parse_playlist,
+    );
+
+    if ("continuations" in results) {
+      library_playlists.continuation = results;
+    }
+  }
+
+  if (library_playlists.continuation) {
+    const continued_data = await get_continuations(
+      library_playlists.continuation,
+      "gridContinuation",
+      limit - library_playlists.playlists.length,
+      (params) => {
+        return request_json(endpoint, {
+          data: body,
+          params,
+        });
+      },
+      (contents) => {
+        return parse_content_list(contents, parse_playlist);
+      },
+    );
+
+    library_playlists.continuation = continued_data.continuation;
+    library_playlists.playlists.push(...continued_data.items);
+  }
+
+  return library_playlists;
 }
 
 export interface GetLibrarySongOptions {
