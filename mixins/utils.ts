@@ -16,4 +16,8 @@ export async function check_auth() {
   }
 }
 
+export function html_to_text(html: string) {
+  return html.replace(/<[^>]*>?/gm, "");
+}
+
 export { auth };

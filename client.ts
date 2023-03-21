@@ -1,13 +1,8 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { request, request_json } from "./mixins/_request.ts";
 import {
   auth,
-  get_artist,
-  get_queue,
-  get_search_suggestions,
-  get_song,
+  create_playlist,
   init,
-  search,
 } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
@@ -133,7 +128,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-search("hello", { filter: "songs" })
+create_playlist("test playlist")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })

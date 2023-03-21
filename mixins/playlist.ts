@@ -20,6 +20,7 @@ import {
 import { parse_content_list, parse_playlist } from "../parsers/browsing.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
+import { check_auth, html_to_text } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export interface GetPlaylistOptions {
@@ -238,4 +239,43 @@ export async function get_playlist(
   playlist.duration_seconds = sum_total_duration(playlist);
 
   return playlist;
+}
+
+type PlaylistPrivacyStatus = "PUBLIC" | "PRIVATE" | "UNLISTED";
+
+interface CreatePlaylistOptions {
+  description?: string;
+  privacy_status?: PlaylistPrivacyStatus;
+  video_ids?: string[];
+  source_playlist?: string;
+}
+
+export async function create_playlist(
+  title: string,
+  {
+    description = "",
+    privacy_status = "PUBLIC",
+    video_ids,
+    source_playlist,
+  }: CreatePlaylistOptions = {},
+) {
+  await check_auth();
+
+  const data: Record<string, any> = {
+    title,
+    description: html_to_text(description),
+    privacyStatus: privacy_status,
+  };
+
+  if (video_ids && video_ids.length > 0) {
+    data.videoIds = video_ids;
+  }
+
+  if (source_playlist) {
+    data.sourcePlaylistId = source_playlist;
+  }
+
+  const json = await request_json("playlist/create", { data });
+
+  return json.playlistId;
 }
