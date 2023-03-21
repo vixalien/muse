@@ -1,3 +1,4 @@
+import { ERROR_CODE, MuseError } from "../errors.ts";
 import { auth } from "../setup.ts";
 export { auth };
 
@@ -13,7 +14,10 @@ export function get_timestamp() {
 
 export async function check_auth() {
   if (await auth.requires_login()) {
-    throw new Error("Please provide authentication before using this function");
+    throw new MuseError(
+      ERROR_CODE.AUTH_REQUIRED,
+      "Please provide authentication before using this function",
+    );
   }
 }
 
