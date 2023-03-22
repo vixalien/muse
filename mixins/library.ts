@@ -389,3 +389,27 @@ export async function rate_playlist(
 
   return parse_toast(json);
 }
+
+export async function subscribe_artists(channelIds: string[]) {
+  await check_auth();
+
+  const json = await request_json("subscription/subscribe", {
+    data: {
+      channelIds,
+    },
+  });
+
+  return parse_toast(json);
+}
+
+export async function unsubscribe_artists(channelIds: string[]) {
+  await check_auth();
+
+  const json = await request_json("subscription/unsubscribe", {
+    data: {
+      channelIds,
+    },
+  });
+
+  return parse_toast(json);
+}

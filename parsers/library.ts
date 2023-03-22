@@ -260,7 +260,7 @@ export function parse_toast(json: any): string | null {
     );
 
   if (action) {
-    return j(action, RUN_TEXT);
+    return action.runs.map((run: any) => run.text).join("");
   } else {
     return null;
   }

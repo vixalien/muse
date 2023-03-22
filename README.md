@@ -166,7 +166,8 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] rate song
 - [x] edit song library status
 - [x] rate playlist
-- [ ] subscribe artists
+- [x] subscribe artists
+- [x] unsubscribe artists
 
 ### playlists
 
