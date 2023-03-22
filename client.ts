@@ -135,7 +135,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-unsubscribe_artists(["UCUA7hrg4GtPogRTgHqNWA7g"])
+get_home("ggMeSgQIBxADSgQICRABSgQIBBABSgQIAxABSgQIBhAB", 6)
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

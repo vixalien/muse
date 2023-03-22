@@ -52,9 +52,17 @@ export interface Home {
   results: MixedContent[];
 }
 
-export async function get_home(limit = 3, continuation?: string) {
+export async function get_home(
+  params?: string,
+  limit = 3,
+  continuation?: string,
+) {
   const endpoint = "browse";
-  const data = { browseId: "FEmusic_home" };
+  const data: Record<string, any> = { browseId: "FEmusic_home" };
+
+  if (params) {
+    data.params = params;
+  }
 
   const home: Home = {
     continuation: null,
@@ -337,7 +345,8 @@ export async function get_song(
     },
     playerConfig: response.playerConfig,
     playbackTracking: response.playbackTracking,
-    videostatsPlaybackUrl: response.playbackTracking.videostatsPlaybackUrl.baseUrl,
+    videostatsPlaybackUrl:
+      response.playbackTracking.videostatsPlaybackUrl.baseUrl,
   };
 
   return song;
