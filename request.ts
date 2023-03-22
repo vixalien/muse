@@ -40,9 +40,11 @@ export class FetchClient extends RequestClient {
 
     const hasData = options.data != null;
 
-    const params = new URLSearchParams(options.params);
+    const url = new URL(path);
 
-    const url = new URL(path + "?" + params.toString());
+    (new URLSearchParams(options.params)).forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
 
     const headers = new Headers(options.headers);
 

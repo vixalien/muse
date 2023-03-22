@@ -1,16 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { request_json } from "./mixins/_request.ts";
-import {
-  auth,
-  get_library,
-  get_library_artists,
-  get_library_songs,
-  get_library_subscriptions,
-  get_liked_songs,
-  get_song,
-  init,
-} from "./mod.ts";
-import { get_history } from "./parsers/library.ts";
+import { add_history_item, auth, get_song, init } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -44,13 +33,15 @@ class CustomFetch extends FetchClient {
     if (cache && cached) return new Response(JSON.stringify(cached));
     // end caching
 
-    console.debug(options.method, path);
+    debug(options.method, path);
 
     const hasData = options.data != null;
 
-    const params = new URLSearchParams(options.params);
+    const url = new URL(path);
 
-    const url = new URL(path + "?" + params.toString());
+    (new URLSearchParams(options.params)).forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
 
     const headers = new Headers(options.headers);
 
@@ -58,7 +49,7 @@ class CustomFetch extends FetchClient {
 
     debug(`Requesting ${options.method} with ${JSON.stringify(options)}`);
 
-    const response = await fetch(url, {
+    const response = await fetch(url.toString(), {
       method: options.method,
       headers,
       body: hasData ? JSON.stringify(options.data) : undefined,
@@ -66,14 +57,18 @@ class CustomFetch extends FetchClient {
 
     // store into cache
     if (cache) {
-      await Deno.mkdir("store/cache", { recursive: true });
-      await Deno.writeTextFile(
-        cache_path,
-        JSON.stringify(await response.clone().json(), null, 2),
-      );
+      try {
+        await Deno.mkdir("store/cache", { recursive: true });
+        await Deno.writeTextFile(
+          cache_path,
+          JSON.stringify(await response.clone().json(), null, 2),
+        );
+      } catch {
+        // not json probably: ignore
+      }
     }
 
-    console.debug("DONE", options.method, path);
+    debug("DONE", options.method, path);
 
     // if (!response.ok) {
     //   const text = await response.text();
@@ -135,26 +130,23 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_song("Z4Ys4uTNuCM")
+get_song("GqrJyLpHpPo")
+  .then((song) => {
+    Deno.writeTextFile(
+      "store/rickroll.json",
+      JSON.stringify(song, null, 2),
+    );
+    return add_history_item(song);
+  })
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
   .then((data) => {
-    return Deno.writeTextFile(
-      "store/rickroll.json",
-      JSON.stringify(data, null, 2),
-    );
+    // console.log("result", data);
+    // return Deno.writeTextFile(
+    //   "store/rickroll.json",
+    //   JSON.stringify(data, null, 2),
+    // );
+    return data;
   });
-
-// await auth.requires_login();
-
-// request(
-//   "https://music.youtube.com/youtubei/v1/captions/AUieDabrBVLM_fV9CXYQ6L6XtClOZCDhTx3ciLv06QYQiX_EHqQ",
-//   {
-//     method: "post",
-//   },
-// )
-//   .then((data) => {
-//     console.log("result", data);
-//   });

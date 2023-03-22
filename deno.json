@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-read --allow-write ./client.ts",
-    "test": "deno test --allow-net --allow-read --allow-write --fail-fast ./tests/"
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env=DEBUG ./client.ts",
+    "test": "deno test --allow-net --allow-read --allow-write --allow-env=DEBUG --fail-fast ./tests/"
   },
   "lint": {
     "rules": {
