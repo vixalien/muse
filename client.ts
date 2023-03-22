@@ -130,7 +130,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_song("GqrJyLpHpPo")
+get_song("_xNwCOtKIao")
   .then((song) => {
     Deno.writeTextFile(
       "store/rickroll.json",

@@ -10,7 +10,7 @@
     "X-YouTube-Client-Version": "7.20230301.06.00",
     "X-YouTube-Page-Label": "youtube.kabuki.web_20230301_06_RC00",
     "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Mode": "same-origin",
     "Sec-Fetch-Site": "same-origin",
     "Origin": "https://www.youtube.com/tv?is_account_switch=1&hrld=1&fltor=1"
   },

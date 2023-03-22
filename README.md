@@ -161,7 +161,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get library subscriptions
 - [x] get liked songs
 - [x] get history
-- [ ] add history item
+- [x] add history item
 - [ ] remove history items
 - [ ] rate song
 - [ ] edit song library status

@@ -29,6 +29,7 @@ import {
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { j } from "../util.ts";
+import { Song } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions } from "./playlist.ts";
 import {
   check_auth,
@@ -38,7 +39,7 @@ import {
   prepare_order_params,
   validate_order_parameter,
 } from "./utils.ts";
-import { request_json } from "./_request.ts";
+import { request, request_json } from "./_request.ts";
 
 export interface GetLibraryOptions extends PaginationOptions {
   order?: LibraryOrder;
@@ -314,4 +315,23 @@ export function get_library_subscriptions(
 
 export function get_liked_songs(options?: GetPlaylistOptions) {
   return get_playlist("LM", options);
+}
+
+export function add_history_item(song: Song | string) {
+  const url = typeof song === "string" ? song : song.videostatsPlaybackUrl;
+
+  return request(url, {
+    method: "get",
+    params: {
+      ver: "2",
+      cpn: randomString(16),
+      c: "WEB_REMIX",
+    },
+  });
+}
+
+const p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+function randomString(len: number) {
+  return [...Array(len)].reduce((a) => a + p[~~(Math.random() * p.length)], "");
 }
