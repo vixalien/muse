@@ -330,3 +330,11 @@ export function add_history_item(song: Song | string) {
     },
   });
 }
+
+export async function remove_history_items(feedbackTokens: string[]) {
+  await check_auth();
+
+  return request_json("feedback", {
+    data: { feedbackTokens },
+  });
+}

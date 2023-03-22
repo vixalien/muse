@@ -162,7 +162,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get liked songs
 - [x] get history
 - [x] add history item
-- [ ] remove history items
+- [x] remove history items
 - [ ] rate song
 - [ ] edit song library status
 - [ ] rate playlist

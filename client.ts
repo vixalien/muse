@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { add_history_item, auth, get_song, init } from "./mod.ts";
+import { auth, init, remove_history_items } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -130,23 +130,17 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_song("_xNwCOtKIao")
-  .then((song) => {
-    Deno.writeTextFile(
-      "store/rickroll.json",
-      JSON.stringify(song, null, 2),
-    );
-    return add_history_item(song);
-  })
+remove_history_items([
+  "AB9zfpJ439EpT0l7Rfb98XuvXl0zeYclISf1wJ-tTXnI_ysSObzMNC6mc1qsFoVq6YQELTDhrSLuWd7jgtUquJgFSHq9fP0j0w",
+])
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
   // })
   .then((data) => {
-    // console.log("result", data);
-    // return Deno.writeTextFile(
-    //   "store/rickroll.json",
-    //   JSON.stringify(data, null, 2),
-    // );
-    return data;
+    return Deno.writeTextFile(
+      "store/rickroll.json",
+      JSON.stringify(data, null, 2),
+    );
+    // return data;
   });
