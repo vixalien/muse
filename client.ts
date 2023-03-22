@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, get_home, init } from "./mod.ts";
+import { auth, get_song_related, init } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -22,7 +22,7 @@ class CustomFetch extends FetchClient {
   async request(path: string, options: RequestInit) {
     // caching
     const cache_path = `store/cache/${await hash(
-      JSON.stringify(options || {}),
+      JSON.stringify({ ...options.data, ...options.params, path } || {}),
     )}.json`;
 
     const cache = !path.startsWith("like/");
@@ -130,10 +130,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home({
-  params: "ggMeSgQIBxADSgQICRABSgQIBBABSgQIAxABSgQIBhAB",
-  limit: 6,
-})
+get_song_related("MPTRt_qteOMZ4oFXP-4")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

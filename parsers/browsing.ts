@@ -167,7 +167,7 @@ export interface MixedContent {
   subtitle: string | null;
   thumbnails: Thumbnail[] | null;
   browseId: string | null;
-  contents: MixedItem[];
+  contents: string | MixedItem[];
 }
 
 export function parse_mixed_content(rows: any[]) {
@@ -227,15 +227,15 @@ export function parse_mixed_content(rows: any[]) {
 
         contents.push(item);
       }
-
-      items.push({
-        title,
-        subtitle,
-        thumbnails,
-        browseId,
-        contents,
-      });
     }
+
+    items.push({
+      title,
+      subtitle,
+      thumbnails,
+      browseId,
+      contents,
+    });
   }
 
   return items;
