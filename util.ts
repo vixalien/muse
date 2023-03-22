@@ -1,5 +1,6 @@
 import { JSONPath } from "./deps.ts";
 import { ERROR_CODE, MuseError } from "./errors.ts";
+import { get_option } from "./setup.ts";
 
 /**
  * Wait a given number of milliseconds, then resolve
@@ -7,17 +8,11 @@ import { ERROR_CODE, MuseError } from "./errors.ts";
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export let ENABLE_DEBUG = false;
-
 /**
  * Logs debug messages to the console
  */
 export const debug = (...args: unknown[]) => {
-  if (ENABLE_DEBUG) console.debug(...args);
-};
-
-export const set_debug = (value: boolean) => {
-  ENABLE_DEBUG = value;
+  if (get_option("debug")) console.debug(...args);
 };
 
 export const jo = (

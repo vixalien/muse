@@ -14,6 +14,10 @@ export enum ERROR_CODE {
 
   /* Parsing */
   PARSING_INVALID_JSON,
+
+  /* Locales */
+  UNSUPPORTED_LOCATION,
+  UNSUPPORTED_LANGUAGE,
 }
 
 export class MuseError extends Error {

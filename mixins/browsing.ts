@@ -57,6 +57,7 @@ export interface HomeOptions extends PaginationOptions {
   params?: string;
 }
 
+// TODO: get home thumbnails
 export async function get_home(
   options: HomeOptions = {},
 ) {

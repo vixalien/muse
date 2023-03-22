@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, get_song_related, init } from "./mod.ts";
+import { get_home, get_option, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -19,6 +19,10 @@ async function hash(string: string) {
 }
 
 class CustomFetch extends FetchClient {
+  constructor() {
+    super();
+  }
+
   async request(path: string, options: RequestInit) {
     // caching
     const cache_path = `store/cache/${await hash(
@@ -30,30 +34,13 @@ class CustomFetch extends FetchClient {
     const cached = await Deno.readTextFile(cache_path)
       .then(JSON.parse).catch(() => null);
 
-    if (cache && cached) return new Response(JSON.stringify(cached));
+    if (cache && cached) {
+      debug("CACHED", options.method, path);
+      return new Response(JSON.stringify(cached));
+    }
     // end caching
 
-    debug(options.method, path);
-
-    const hasData = options.data != null;
-
-    const url = new URL(path);
-
-    (new URLSearchParams(options.params)).forEach((value, key) => {
-      url.searchParams.set(key, value);
-    });
-
-    const headers = new Headers(options.headers);
-
-    if (this.auth_header) headers.set("Authorization", this.auth_header);
-
-    debug(`Requesting ${options.method} with ${JSON.stringify(options)}`);
-
-    const response = await fetch(url.toString(), {
-      method: options.method,
-      headers,
-      body: hasData ? JSON.stringify(options.data) : undefined,
-    });
+    const response = await super.request(path, options);
 
     // store into cache
     if (cache) {
@@ -68,8 +55,6 @@ class CustomFetch extends FetchClient {
       }
     }
 
-    debug("DONE", options.method, path);
-
     // if (!response.ok) {
     //   const text = await response.text();
     //   throw new Error(text);
@@ -79,9 +64,11 @@ class CustomFetch extends FetchClient {
   }
 }
 
-init({
+setup({
   store: new DenoFileStore("store/muse-store.json"),
   client: new CustomFetch(),
+  debug: true,
+  language: "ar"
 });
 
 const css = {
@@ -89,6 +76,8 @@ const css = {
   bold: "font-weight: bold",
   underline: "text-decoration: underline",
 };
+
+const auth = get_option("auth");
 
 const auth_flow = async () => {
   if (auth.has_token()) return;
@@ -130,7 +119,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_song_related("MPTRt_qteOMZ4oFXP-4")
+get_home()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

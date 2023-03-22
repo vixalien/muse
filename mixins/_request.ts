@@ -1,17 +1,17 @@
 import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 
-import { auth, client } from "../setup.ts";
+import { get_option } from "../setup.ts";
 
 import { RequestInit } from "../request.ts";
 
 export function get_auth_headers() {
-  return auth.get_headers();
+  return get_option("auth").get_headers();
 }
 
 export async function request(endpoint: string, options: RequestInit) {
   const auth_headers = await get_auth_headers();
 
-  return client.request(
+  return get_option("client").request(
     endpoint.startsWith("http")
       ? endpoint
       : `${CONSTANTS2.API_URL}/${endpoint}`,

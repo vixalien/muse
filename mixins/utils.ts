@@ -1,7 +1,7 @@
 import { ERROR_CODE, MuseError } from "../errors.ts";
 import { LikeStatus } from "../parsers/songs.ts";
-import { auth } from "../setup.ts";
-export { auth };
+import { get_option } from "../setup.ts";
+export { get_option };
 
 export function prepare_like_endpoint(status: LikeStatus) {
   switch (status.toUpperCase() as LikeStatus) {
@@ -30,7 +30,7 @@ export function get_timestamp() {
 }
 
 export async function check_auth() {
-  if (await auth.requires_login()) {
+  if (await get_option("auth").requires_login()) {
     throw new MuseError(
       ERROR_CODE.AUTH_REQUIRED,
       "Please provide authentication before using this function",
