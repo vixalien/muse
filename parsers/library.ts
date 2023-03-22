@@ -12,6 +12,7 @@ import {
   MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
+  RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN,
@@ -246,4 +247,21 @@ export async function get_history() {
   }
 
   return history;
+}
+
+export function parse_toast(json: any): string | null {
+  const action = jo(
+    json,
+    "actions.0.addToToastAction.item.notificationActionRenderer.responseText",
+  ) ??
+    jo(
+      json,
+      "actions.0.addToToastAction.item.notificationTextRenderer.successResponseText",
+    );
+
+  if (action) {
+    return j(action, RUN_TEXT);
+  } else {
+    return null;
+  }
 }

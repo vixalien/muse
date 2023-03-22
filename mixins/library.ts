@@ -7,7 +7,6 @@ import {
 import {
   GRID,
   MTRIR,
-  RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_CONTINUATION,
   SINGLE_COLUMN_TAB,
@@ -27,10 +26,11 @@ import {
   parse_albums,
   parse_artists,
   parse_library_songs,
+  parse_toast,
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { LikeStatus } from "../parsers/songs.ts";
-import { j, jo } from "../util.ts";
+import { j } from "../util.ts";
 import { Song } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions } from "./playlist.ts";
 import {
@@ -317,7 +317,9 @@ export function get_library_subscriptions(
   );
 }
 
-export function get_liked_songs(options?: GetPlaylistOptions) {
+export async function get_liked_songs(options?: GetPlaylistOptions) {
+  await check_auth();
+
   return get_playlist("LM", options);
 }
 
@@ -348,8 +350,6 @@ export async function rate_song(
 ): Promise<string | null> {
   await check_auth();
 
-  console.log("endpoint", prepare_like_endpoint(status));
-
   const json = await request_json(prepare_like_endpoint(status), {
     data: {
       target: {
@@ -358,18 +358,17 @@ export async function rate_song(
     },
   });
 
-  const action = jo(
-    json,
-    "actions.0.addToToastAction.item.notificationActionRenderer.responseText",
-  ) ??
-    jo(
-      json,
-      "actions.0.addToToastAction.item.notificationTextRenderer.successResponseText",
-    );
+  return parse_toast(json);
+}
 
-  if (action) {
-    return j(action, RUN_TEXT);
-  } else {
-    return null;
-  }
+export async function edit_song_library_status(
+  feedbackTokens: string[],
+): Promise<string | null> {
+  await check_auth();
+
+  const json = await request_json("feedback", {
+    data: { feedbackTokens },
+  });
+
+  return parse_toast(json);
 }

@@ -1,5 +1,6 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, init, rate_song } from "./mod.ts";
+import { edit_song_library_status } from "./mixins/library.ts";
+import { auth, init } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -130,7 +131,9 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-rate_song("PRweujsWGV8", "INDIFFERENT")
+edit_song_library_status([
+  "AB9zfpJeK6JXPyzYF7aQl2lXNvlAXPbWleMVskH7qfhVbu9ynpw7vmnSXYIeqhxU1YYRaqh1g-VdjiAvDeAJkkv-jjHCZS67_Q",
+])
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
