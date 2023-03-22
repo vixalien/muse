@@ -47,7 +47,7 @@ import {
   get_dot_separator_index,
   get_flex_column_item,
   get_item_text,
-  parse_menu_playlists,
+  get_menu_playlists,
   Thumbnail,
 } from "./util.ts";
 
@@ -286,7 +286,7 @@ export function parse_search_results(
       search_result.artist = get_item_text(data, 0);
       search_result.subscribers =
         j(data, "flexColumns[1]", MRLITFC, "runs[2].text")?.split(" ")[0];
-      parse_menu_playlists(data, search_result);
+      search_result = { ...search_result, ...get_menu_playlists(data) };
     } else if (result_type == "album") {
       search_result.type = "album";
       search_result.album_type = get_item_text(data, 1).toLowerCase();

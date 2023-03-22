@@ -48,18 +48,6 @@ export function get_menu_playlists(data: any) {
   return ids;
 }
 
-// TODO: remove this function
-/**
- * @deprecated
- */
-export function parse_menu_playlists(data: any, results: any) {
-  const ids = get_menu_playlists(data);
-
-  for (const id in ids) {
-    results[id] = ids[id as keyof typeof ids];
-  }
-}
-
 export function get_item_text(item: any, index: number, run_index = 0) {
   const column = get_flex_column_item(item, index);
 
