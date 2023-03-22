@@ -482,8 +482,6 @@ export function parse_categories<
         category_key,
       );
 
-      console.log("data", category_obj);
-
       categories[category] = category_obj as any;
     }
   }
