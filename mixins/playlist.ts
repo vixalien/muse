@@ -24,7 +24,7 @@ import {
   validate_playlist_id,
 } from "../parsers/playlists.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
-import { check_auth, html_to_text } from "./utils.ts";
+import { check_auth, html_to_text, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export interface GetPlaylistOptions {
@@ -66,9 +66,10 @@ export interface PlaylistSuggestions {
 
 export async function get_playlist_suggestions(
   playlistId: string,
-  continuation: string | any,
-  limit: number,
+  options: Required<PaginationOptions>,
 ) {
+  const { continuation, limit } = options;
+
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
   const data = { browseId };
   const endpoint = "browse";
@@ -98,9 +99,10 @@ export interface MorePlaylistTracks {
 
 export async function get_more_playlist_tracks(
   playlistId: string,
-  continuation: string | any,
-  limit: number,
+  options: Required<PaginationOptions>,
 ) {
+  const { continuation, limit } = options;
+
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
   const data = { browseId };
   const endpoint = "browse";
@@ -206,8 +208,10 @@ export async function get_playlist(
 
       const continued_suggestions = await get_playlist_suggestions(
         playlistId,
-        suggestions_shelf,
-        suggestions_limit - playlist.suggestions.length,
+        {
+          continuation: suggestions_shelf,
+          limit: suggestions_limit - playlist.suggestions.length,
+        },
       );
 
       playlist.suggestions.push(...continued_suggestions.suggestions);
@@ -231,8 +235,10 @@ export async function get_playlist(
     if ("continuations" in results) {
       const continued_data = await get_more_playlist_tracks(
         playlistId,
-        results,
-        songs_to_get - playlist.tracks.length,
+        {
+          continuation: results,
+          limit: songs_to_get - playlist.tracks.length,
+        },
       );
 
       playlist.tracks.push(...continued_data.tracks);

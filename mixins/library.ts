@@ -21,8 +21,6 @@ import {
 import {
   fetch_library_contents,
   get_library_contents,
-  PaginationAndOrderOptions,
-  PaginationOptions,
   parse_albums,
   parse_artists,
   parse_library_songs,
@@ -36,7 +34,8 @@ import { get_playlist, GetPlaylistOptions } from "./playlist.ts";
 import {
   check_auth,
   LibraryOrder,
-  Order,
+  PaginationAndOrderOptions,
+  PaginationOptions,
   prepare_library_sort_params,
   prepare_like_endpoint,
   prepare_order_params,
@@ -185,11 +184,8 @@ export async function get_library_playlists(
   return library_playlists;
 }
 
-export interface GetLibrarySongOptions {
-  limit?: number;
-  continuation?: string;
+export interface GetLibrarySongOptions extends PaginationAndOrderOptions {
   validate_responses?: boolean;
-  order?: Order;
 }
 
 export interface LibrarySongs {

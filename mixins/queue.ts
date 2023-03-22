@@ -7,11 +7,10 @@ import {
   QueueTrack,
 } from "../parsers/queue.ts";
 import { j, jo } from "../util.ts";
+import { PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
-export interface QueueOptions {
-  limit?: number;
-  continuation?: string;
+export interface QueueOptions extends PaginationOptions {
   radio?: boolean;
   shuffle?: boolean;
   autoplay?: boolean;

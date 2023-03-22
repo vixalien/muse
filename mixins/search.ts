@@ -21,6 +21,7 @@ import {
 } from "../parsers/search.ts";
 import { j, jo } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
+import { PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export type Query = {
@@ -159,12 +160,10 @@ export async function get_search_suggestions(query: string) {
   return suggestions;
 }
 
-export interface SearchOptions {
+export interface SearchOptions extends PaginationOptions {
   filter?: Filter;
   scope?: Scope;
   ignore_spelling?: boolean;
-  limit?: number;
-  continuation?: string;
 }
 
 export async function search(query: string, options: SearchOptions = {}) {

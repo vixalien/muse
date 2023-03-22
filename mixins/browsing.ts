@@ -44,6 +44,7 @@ import { ArtistRun, parse_format } from "../parsers/songs.ts";
 import { Format } from "../parsers/types.d.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
+import { PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export interface Home {
@@ -52,11 +53,15 @@ export interface Home {
   results: MixedContent[];
 }
 
+export interface HomeOptions extends PaginationOptions {
+  params?: string;
+}
+
 export async function get_home(
-  params?: string,
-  limit = 3,
-  continuation?: string,
+  options: HomeOptions = {},
 ) {
+  const { params, limit = 3, continuation } = options;
+
   const endpoint = "browse";
   const data: Record<string, any> = { browseId: "FEmusic_home" };
 

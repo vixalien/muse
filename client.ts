@@ -1,9 +1,4 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import {
-  edit_song_library_status,
-  subscribe_artists,
-  unsubscribe_artists,
-} from "./mixins/library.ts";
 import { auth, get_home, init } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
@@ -135,7 +130,10 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home("ggMeSgQIBxADSgQICRABSgQIBBABSgQIAxABSgQIBhAB", 6)
+get_home({
+  params: "ggMeSgQIBxADSgQICRABSgQIBBABSgQIAxABSgQIBhAB",
+  limit: 6,
+})
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

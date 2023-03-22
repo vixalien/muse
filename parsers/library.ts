@@ -1,5 +1,9 @@
 import { get_continuations } from "../continuations.ts";
-import { check_auth, Order, prepare_order_params } from "../mixins/utils.ts";
+import {
+  check_auth,
+  PaginationAndOrderOptions,
+  prepare_order_params,
+} from "../mixins/utils.ts";
 import { request_json } from "../mixins/_request.ts";
 import {
   FEEDBACK_TOKEN,
@@ -12,7 +16,6 @@ import {
   MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
-  RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN,
@@ -96,15 +99,6 @@ export function parse_albums(results: any) {
   }
 
   return albums;
-}
-
-export interface PaginationOptions {
-  limit?: number;
-  continuation?: string;
-}
-
-export interface PaginationAndOrderOptions extends PaginationOptions {
-  order?: Order;
 }
 
 export async function fetch_library_contents<T extends any>(

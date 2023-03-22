@@ -115,3 +115,12 @@ const p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 export function randomString(len: number) {
   return [...Array(len)].reduce((a) => a + p[~~(Math.random() * p.length)], "");
 }
+
+export interface PaginationOptions {
+  limit?: number;
+  continuation?: string;
+}
+
+export interface PaginationAndOrderOptions extends PaginationOptions {
+  order?: Order;
+}
