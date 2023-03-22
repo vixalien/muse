@@ -7,6 +7,7 @@ import {
 import {
   GRID,
   MTRIR,
+  RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_CONTINUATION,
   SINGLE_COLUMN_TAB,
@@ -28,7 +29,8 @@ import {
   parse_library_songs,
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
-import { j } from "../util.ts";
+import { LikeStatus } from "../parsers/songs.ts";
+import { j, jo } from "../util.ts";
 import { Song } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions } from "./playlist.ts";
 import {
@@ -36,6 +38,7 @@ import {
   LibraryOrder,
   Order,
   prepare_library_sort_params,
+  prepare_like_endpoint,
   prepare_order_params,
   randomString,
   validate_order_parameter,
@@ -337,4 +340,36 @@ export async function remove_history_items(feedbackTokens: string[]) {
   return request_json("feedback", {
     data: { feedbackTokens },
   });
+}
+
+export async function rate_song(
+  videoId: string,
+  status: LikeStatus,
+): Promise<string | null> {
+  await check_auth();
+
+  console.log("endpoint", prepare_like_endpoint(status));
+
+  const json = await request_json(prepare_like_endpoint(status), {
+    data: {
+      target: {
+        videoId,
+      },
+    },
+  });
+
+  const action = jo(
+    json,
+    "actions.0.addToToastAction.item.notificationActionRenderer.responseText",
+  ) ??
+    jo(
+      json,
+      "actions.0.addToToastAction.item.notificationTextRenderer.successResponseText",
+    );
+
+  if (action) {
+    return j(action, RUN_TEXT);
+  } else {
+    return null;
+  }
 }

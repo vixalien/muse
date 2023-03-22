@@ -1,6 +1,23 @@
 import { ERROR_CODE, MuseError } from "../errors.ts";
+import { LikeStatus } from "../parsers/songs.ts";
 import { auth } from "../setup.ts";
 export { auth };
+
+export function prepare_like_endpoint(status: LikeStatus) {
+  switch (status.toUpperCase() as LikeStatus) {
+    case "LIKE":
+      return "like/like";
+    case "DISLIKE":
+      return "like/dislike";
+    case "INDIFFERENT":
+      return "like/removelike";
+    default:
+      throw new MuseError(
+        ERROR_CODE.INVALID_PARAMETER,
+        `Invalid like status: ${status}`,
+      );
+  }
+}
 
 /**
  * Get number of days since the unix epoch

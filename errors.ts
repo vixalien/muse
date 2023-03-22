@@ -1,6 +1,9 @@
 export enum ERROR_CODE {
   GENERIC,
 
+  /* Params */
+  INVALID_PARAMETER,
+
   /* Auth */
   AUTH_GENERIC,
   AUTH_CANT_GET_LOGIN_CODE,

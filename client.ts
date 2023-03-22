@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { auth, init, remove_history_items } from "./mod.ts";
+import { auth, init, rate_song } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -22,10 +22,10 @@ class CustomFetch extends FetchClient {
   async request(path: string, options: RequestInit) {
     // caching
     const cache_path = `store/cache/${await hash(
-      JSON.stringify({ ...options.data, ...options.params } || {}),
+      JSON.stringify(options || {}),
     )}.json`;
 
-    const cache = true;
+    const cache = !path.startsWith("like/");
 
     const cached = await Deno.readTextFile(cache_path)
       .then(JSON.parse).catch(() => null);
@@ -130,9 +130,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-remove_history_items([
-  "AB9zfpJ439EpT0l7Rfb98XuvXl0zeYclISf1wJ-tTXnI_ysSObzMNC6mc1qsFoVq6YQELTDhrSLuWd7jgtUquJgFSHq9fP0j0w",
-])
+rate_song("PRweujsWGV8", "INDIFFERENT")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

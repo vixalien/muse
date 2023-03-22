@@ -163,7 +163,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get history
 - [x] add history item
 - [x] remove history items
-- [ ] rate song
+- [x] rate song
 - [ ] edit song library status
 - [ ] rate playlist
 - [ ] subscribe artists
