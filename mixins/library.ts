@@ -372,3 +372,20 @@ export async function edit_song_library_status(
 
   return parse_toast(json);
 }
+
+export async function rate_playlist(
+  playlistId: string,
+  status: LikeStatus,
+): Promise<string | null> {
+  await check_auth();
+
+  const json = await request_json(prepare_like_endpoint(status), {
+    data: {
+      target: {
+        playlistId,
+      },
+    },
+  });
+
+  return parse_toast(json);
+}

@@ -164,8 +164,8 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] add history item
 - [x] remove history items
 - [x] rate song
-- [ ] edit song library status
-- [ ] rate playlist
+- [x] edit song library status
+- [x] rate playlist
 - [ ] subscribe artists
 
 ### playlists
