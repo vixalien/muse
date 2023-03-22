@@ -92,3 +92,9 @@ export function prepare_library_sort_params(sort?: LibraryOrder) {
     return library_order_continuations.get(sort);
   }
 }
+
+const p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+export function randomString(len: number) {
+  return [...Array(len)].reduce((a) => a + p[~~(Math.random() * p.length)], "");
+}

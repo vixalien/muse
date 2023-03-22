@@ -37,6 +37,7 @@ import {
   Order,
   prepare_library_sort_params,
   prepare_order_params,
+  randomString,
   validate_order_parameter,
 } from "./utils.ts";
 import { request, request_json } from "./_request.ts";
@@ -328,10 +329,4 @@ export function add_history_item(song: Song | string) {
       c: "WEB_REMIX",
     },
   });
-}
-
-const p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
-function randomString(len: number) {
-  return [...Array(len)].reduce((a) => a + p[~~(Math.random() * p.length)], "");
 }
