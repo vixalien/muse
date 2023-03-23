@@ -6,8 +6,8 @@ export interface Options {
   auth: Authenticator;
   client: RequestClient;
   store: Store;
-  language: string | null;
-  location: string | null;
+  language: string;
+  location: string;
   debug: boolean;
 }
 
@@ -21,8 +21,8 @@ const options: Options = {
     client: default_client,
     store: default_store,
   }),
-  language: null,
-  location: null,
+  language: "en",
+  location: "US",
   debug: false,
 };
 

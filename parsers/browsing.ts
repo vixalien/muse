@@ -1,3 +1,5 @@
+import STRINGS from "../locales/strings.json" assert { type: "json" };
+
 import {
   BADGE_LABEL,
   CAROUSEL,
@@ -32,6 +34,7 @@ import {
   TITLE_TEXT,
   TOGGLE_MENU,
 } from "../nav.ts";
+import { get_option } from "../setup.ts";
 import { j, jo } from "../util.ts";
 import {
   ArtistRun,
@@ -510,7 +513,7 @@ export function parse_explore_contents(results: any[]) {
     albums: [_("new albums"), parse_album],
     songs: [_("top songs"), parse_top_song, MRLIR],
     moods: [
-      _("moods and genres"),
+      _("moods"),
       parse_mood_or_genre,
       "musicNavigationButtonRenderer",
     ],
@@ -984,19 +987,10 @@ export function parse_featured(data: any): FeaturedPlaylist {
   };
 }
 
-export function _(id: string) {
-  switch (id) {
-    case "library":
-      return "from your library";
-    case "related":
-      return "fans might also like";
-    case "featured":
-      return "featured on";
-    case "new albums":
-      return "new albums and singles";
-    case "top videos":
-      return "top music videos";
-    default:
-      return id;
-  }
+type Translatable = keyof typeof STRINGS[keyof typeof STRINGS];
+
+export function _(id: Translatable) {
+  const result = STRINGS[get_option("language") as keyof typeof STRINGS];
+
+  return result[id] ?? id;
 }
