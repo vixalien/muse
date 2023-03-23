@@ -67,7 +67,7 @@ export interface PlaylistSuggestions {
 export async function get_playlist_suggestions(
   playlistId: string,
   options: Required<PaginationOptions>,
-) {
+): Promise<PlaylistSuggestions> {
   const { continuation, limit } = options;
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
@@ -100,7 +100,7 @@ export interface MorePlaylistTracks {
 export async function get_more_playlist_tracks(
   playlistId: string,
   options: Required<PaginationOptions>,
-) {
+): Promise<MorePlaylistTracks> {
   const { continuation, limit } = options;
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
@@ -126,7 +126,7 @@ export async function get_more_playlist_tracks(
 export async function get_playlist(
   playlistId: string,
   options?: GetPlaylistOptions,
-) {
+): Promise<Playlist> {
   const { limit = 100, related = false, suggestions_limit = 0 } = options || {};
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
@@ -263,7 +263,7 @@ interface CreatePlaylistOptions {
 export async function create_playlist(
   title: string,
   options: CreatePlaylistOptions = {},
-) {
+): Promise<string> {
   const {
     description = "",
     privacy_status = "PUBLIC",
@@ -305,7 +305,7 @@ export interface EditPlaylistOptions {
 export async function edit_playlist(
   playlistId: string,
   options: EditPlaylistOptions,
-) {
+): Promise<any> {
   const {
     title,
     description,
@@ -389,7 +389,7 @@ export async function edit_playlist(
   return "status" in json ? json.status : json;
 }
 
-export async function delete_playlist(playlistId: string) {
+export async function delete_playlist(playlistId: string): Promise<any> {
   await check_auth();
 
   const data = {
@@ -404,21 +404,21 @@ export async function delete_playlist(playlistId: string) {
 export function add_playlist_sources(
   playlistId: string,
   source_playlists: string[],
-) {
+): Promise<any> {
   return edit_playlist(playlistId, { add_source_playlists: source_playlists });
 }
 
 export function add_playlist_items(
   playlistId: string,
   video_ids: string[],
-) {
+): Promise<any> {
   return edit_playlist(playlistId, { add_videos: video_ids });
 }
 
 export function remove_playlist_items(
   playlistId: string,
   video_ids: { videoId: string; setVideoId: string }[],
-) {
+): Promise<any> {
   return edit_playlist(playlistId, {
     remove_videos: video_ids,
   });

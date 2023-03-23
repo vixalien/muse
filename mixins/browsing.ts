@@ -34,6 +34,7 @@ import {
   parse_moods,
   parse_playlist,
   ParsedAlbum,
+  ParsedPlaylist,
 } from "../parsers/browsing.ts";
 import {
   parse_playlist_items,
@@ -60,7 +61,7 @@ export interface HomeOptions extends PaginationOptions {
 // TODO: get home thumbnails
 export async function get_home(
   options: HomeOptions = {},
-) {
+): Promise<Home> {
   const { params, limit = 3, continuation } = options;
 
   const endpoint = "browse";
@@ -138,7 +139,7 @@ export interface Artist extends ArtistContents {
   };
 }
 
-export async function get_artist(artistId: string) {
+export async function get_artist(artistId: string): Promise<Artist> {
   if (artistId.startsWith("MPLA")) artistId = artistId.slice(4);
 
   const json = await request_json("browse", {
@@ -230,7 +231,7 @@ export interface AlbumResult extends AlbumHeader {
 
 export async function get_album(
   browseId: string,
-) {
+): Promise<AlbumResult> {
   const response = await request_json("browse", {
     data: {
       browseId,
@@ -300,7 +301,9 @@ export interface Song {
   videostatsPlaybackUrl: string;
 }
 
-export async function get_album_browse_id(audio_playlist_id: string) {
+export async function get_album_browse_id(
+  audio_playlist_id: string,
+): Promise<string | null> {
   const json = await request_json("browse", {
     data: {
       browseId: audio_playlist_id.startsWith("VL")
@@ -325,7 +328,7 @@ export async function get_album_browse_id(audio_playlist_id: string) {
 
 export async function get_song(
   video_id: string,
-) {
+): Promise<Song> {
   const response = await request_json("player", {
     data: {
       ...CONSTANTS2.ANDROID.DATA,
@@ -358,7 +361,9 @@ export async function get_song(
   return song;
 }
 
-export async function get_song_related(browseId: string) {
+export async function get_song_related(
+  browseId: string,
+): Promise<MixedContent[]> {
   if (!browseId) throw new Error("No browseId provided");
 
   const json = await request_json("browse", {
@@ -377,7 +382,7 @@ export interface Lyrics {
   source: string;
 }
 
-export async function get_lyrics(browseId: string) {
+export async function get_lyrics(browseId: string): Promise<Lyrics> {
   if (!browseId) {
     throw new TypeError(
       "Invalid browseId provided. This song might not have lyrics.",
@@ -407,7 +412,10 @@ export async function get_lyrics(browseId: string) {
   return lyrics;
 }
 
-export async function get_artist_albums(channelId: string, params: string) {
+export async function get_artist_albums(
+  channelId: string,
+  params: string,
+): Promise<ParsedAlbum[]> {
   const json = await request_json("browse", {
     data: {
       browseId: channelId,
@@ -429,7 +437,7 @@ export interface User extends ArtistContents {
   name: string;
 }
 
-export async function get_user(channelId: string) {
+export async function get_user(channelId: string): Promise<User> {
   const json = await request_json("browse", { data: { browseId: channelId } });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
@@ -442,7 +450,10 @@ export async function get_user(channelId: string) {
   return user;
 }
 
-export async function get_user_playlists(channelId: string, params: string) {
+export async function get_user_playlists(
+  channelId: string,
+  params: string,
+): Promise<ParsedPlaylist[]> {
   const json = await request_json("browse", {
     data: {
       browseId: channelId,

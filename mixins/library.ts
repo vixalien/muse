@@ -25,12 +25,14 @@ import {
   parse_artists,
   parse_library_songs,
   parse_toast,
+  ParsedLibraryAlbum,
+  ParsedLibraryArtist,
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { LikeStatus } from "../parsers/songs.ts";
 import { j } from "../util.ts";
 import { Song } from "./browsing.ts";
-import { get_playlist, GetPlaylistOptions } from "./playlist.ts";
+import { get_playlist, GetPlaylistOptions, Playlist } from "./playlist.ts";
 import {
   check_auth,
   LibraryOrder,
@@ -53,7 +55,9 @@ export interface Library {
   results: MixedItem[];
 }
 
-export async function get_library(options: GetLibraryOptions = {}) {
+export async function get_library(
+  options: GetLibraryOptions = {},
+): Promise<Library> {
   const { order, limit = 25, continuation } = options;
 
   await check_auth();
@@ -130,7 +134,7 @@ export interface LibraryPlaylists {
 
 export async function get_library_playlists(
   options: PaginationAndOrderOptions = {},
-) {
+): Promise<LibraryPlaylists> {
   const { order, limit = 25, continuation } = options;
 
   await check_auth();
@@ -193,7 +197,9 @@ export interface LibrarySongs {
   continuation: string | null;
 }
 
-export async function get_library_songs(options: GetLibrarySongOptions = {}) {
+export async function get_library_songs(
+  options: GetLibrarySongOptions = {},
+): Promise<LibrarySongs> {
   const { order, limit = 25, validate_responses = false, continuation } =
     options;
 
@@ -280,9 +286,14 @@ export async function get_library_songs(options: GetLibrarySongOptions = {}) {
   return library_songs;
 }
 
+export interface LibraryItems<T extends any> {
+  continuation: string | null;
+  items: T[];
+}
+
 export function get_library_albums(
   options?: PaginationAndOrderOptions,
-) {
+): Promise<LibraryItems<ParsedLibraryAlbum>> {
   return fetch_library_contents(
     "FEmusic_liked_albums",
     options,
@@ -293,7 +304,7 @@ export function get_library_albums(
 
 export function get_library_artists(
   options?: PaginationAndOrderOptions,
-) {
+): Promise<LibraryItems<ParsedLibraryArtist>> {
   return fetch_library_contents(
     "FEmusic_library_corpus_track_artists",
     options,
@@ -304,7 +315,7 @@ export function get_library_artists(
 
 export function get_library_subscriptions(
   options?: PaginationAndOrderOptions,
-) {
+): Promise<LibraryItems<ParsedLibraryArtist>> {
   return fetch_library_contents(
     "FEmusic_library_corpus_artists",
     options,
@@ -313,13 +324,15 @@ export function get_library_subscriptions(
   );
 }
 
-export async function get_liked_songs(options?: GetPlaylistOptions) {
+export async function get_liked_songs(
+  options?: GetPlaylistOptions,
+): Promise<Playlist> {
   await check_auth();
 
   return get_playlist("LM", options);
 }
 
-export function add_history_item(song: Song | string) {
+export function add_history_item(song: Song | string): Promise<Response> {
   const url = typeof song === "string" ? song : song.videostatsPlaybackUrl;
 
   return request(url, {
@@ -332,12 +345,16 @@ export function add_history_item(song: Song | string) {
   });
 }
 
-export async function remove_history_items(feedbackTokens: string[]) {
+export async function remove_history_items(
+  feedbackTokens: string[],
+): Promise<string | null> {
   await check_auth();
 
-  return request_json("feedback", {
+  const json = request_json("feedback", {
     data: { feedbackTokens },
   });
+
+  return parse_toast(json);
 }
 
 export async function rate_song(
@@ -386,7 +403,9 @@ export async function rate_playlist(
   return parse_toast(json);
 }
 
-export async function subscribe_artists(channelIds: string[]) {
+export async function subscribe_artists(
+  channelIds: string[],
+): Promise<string | null> {
   await check_auth();
 
   const json = await request_json("subscription/subscribe", {
@@ -398,7 +417,9 @@ export async function subscribe_artists(channelIds: string[]) {
   return parse_toast(json);
 }
 
-export async function unsubscribe_artists(channelIds: string[]) {
+export async function unsubscribe_artists(
+  channelIds: string[],
+): Promise<string | null> {
   await check_auth();
 
   const json = await request_json("subscription/unsubscribe", {

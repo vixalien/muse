@@ -34,13 +34,14 @@ export interface Queue {
     name: string | null;
     id: string | null;
   } | null;
+  continuation: string | null;
 }
 
 export async function get_queue(
   videoId: string | null,
   playlistId?: string | null,
   options: QueueOptions = {},
-) {
+): Promise<Queue> {
   const {
     limit = 10,
     continuation: _continuation = null,
@@ -127,6 +128,7 @@ export async function get_queue(
     lyrics: null,
     related: null,
     author: null,
+    continuation: null,
   };
 
   if (!continuation) {
@@ -226,8 +228,7 @@ export async function get_queue(
     continuation = continued_data.continuation;
   }
 
-  return {
-    ...queue,
-    continuation: typeof continuation === "string" ? continuation : null,
-  };
+  queue.continuation = typeof continuation === "string" ? continuation : null;
+
+  return queue;
 }

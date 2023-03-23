@@ -63,7 +63,9 @@ export interface SearchSuggestions {
   quick_links: SearchQuickLink[];
 }
 
-export async function get_search_suggestions(query: string) {
+export async function get_search_suggestions(
+  query: string,
+): Promise<SearchSuggestions> {
   const json = await request_json("music/get_search_suggestions", {
     params: {
       input: query,
@@ -166,7 +168,19 @@ export interface SearchOptions extends PaginationOptions {
   ignore_spelling?: boolean;
 }
 
-export async function search(query: string, options: SearchOptions = {}) {
+export interface SearchResults {
+  did_you_mean: { search: string; query: Query } | null;
+  categories: {
+    title: string;
+    results: Record<string, any>[];
+  }[];
+  continuation: string | null;
+}
+
+export async function search(
+  query: string,
+  options: SearchOptions = {},
+): Promise<SearchResults> {
   const {
     filter,
     scope,
@@ -179,10 +193,10 @@ export async function search(query: string, options: SearchOptions = {}) {
 
   const data = { query } as any;
   const endpoint = "search";
-  const search_results = {
-    did_you_mean: null as any,
-    categories: [] as any[],
-    continuation: null as string | null,
+  const search_results: SearchResults = {
+    did_you_mean: null,
+    categories: [],
+    continuation: null,
   };
 
   if (filter != null && !filters.includes(filter)) {
@@ -266,8 +280,8 @@ export async function search(query: string, options: SearchOptions = {}) {
 
         if (category_search_results.length > 0) {
           search_results.categories.push({
-            name: category.toLowerCase(),
-            items: category_search_results,
+            title: category.toLowerCase(),
+            results: category_search_results,
           });
         }
 
@@ -282,8 +296,8 @@ export async function search(query: string, options: SearchOptions = {}) {
 
         if (did_you_mean) {
           search_results.did_you_mean = {
-            query: j(did_you_mean, "correctedQuery.runs"),
-            search: j(
+            search: j(did_you_mean, "correctedQuery.runs"),
+            query: j(
               did_you_mean,
               "correctedQueryEndpoint.searchEndpoint.query",
             ),
@@ -300,7 +314,7 @@ export async function search(query: string, options: SearchOptions = {}) {
       "musicShelfContinuation",
       limit -
         search_results.categories.reduce(
-          (acc, curr) => acc + curr.items.length,
+          (acc, curr) => acc + curr.results.length,
           0,
         ),
       (params) => {
@@ -312,16 +326,16 @@ export async function search(query: string, options: SearchOptions = {}) {
     );
 
     const category = search_results.categories.find((category) =>
-      category.name === filter
+      category.title === filter
     ) ?? search_results.categories[
       search_results.categories.push({
-        name: filter,
-        items: [],
+        title: filter,
+        results: [],
       })
     ];
 
     search_results.continuation = continued_data.continuation;
-    category.items.push(...continued_data.items);
+    category.results.push(...continued_data.items);
   }
 
   return search_results;

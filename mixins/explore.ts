@@ -27,7 +27,7 @@ import { color_to_hex } from "../parsers/util.ts";
 import { j, jo } from "../util.ts";
 import { request_json } from "./_request.ts";
 
-export async function get_explore() {
+export async function get_explore(): Promise<ExploreContents> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_explore" },
   });
@@ -46,7 +46,7 @@ export interface Charts {
 }
 
 // any section may be missing
-export async function get_charts(country?: string) {
+export async function get_charts(country?: string): Promise<Charts> {
   const endpoint = "browse";
   const data: Record<string, unknown> = { browseId: "FEmusic_charts" };
 
@@ -90,7 +90,7 @@ export interface MoodCategories {
   }[];
 }
 
-export async function get_mood_categories() {
+export async function get_mood_categories(): Promise<MoodCategories> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_moods_and_genres" },
   });
@@ -123,7 +123,9 @@ export interface MoodPlaylists {
   categories: PlaylistCategory[];
 }
 
-export async function get_mood_playlists(params: string) {
+export async function get_mood_playlists(
+  params: string,
+): Promise<MoodPlaylists> {
   const json = await request_json("browse", {
     data: {
       browseId: "FEmusic_moods_and_genres_category",
@@ -146,7 +148,7 @@ export interface NewReleases {
   categories: MixedContent[];
 }
 
-export async function get_new_releases() {
+export async function get_new_releases(): Promise<NewReleases> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_new_releases" },
   });
