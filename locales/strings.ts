@@ -189,37 +189,37 @@ export async function get_all_strings() {
   // );
 
   // serial
-  // for (const language of languages) {
-  //   if (language === "en-GB") continue;
+  for (const language of languages) {
+    if (language === "en-GB") continue;
 
-  //   strings[language] = await get_strings_for_language(base_id_map, language);
-  //   console.log("got", language);
-  // }
+    strings[language] = await get_strings_for_language(base_id_map, language);
+    console.log("got", language);
+  }
 
   // a version that allows a max of 5 requests at a time
-  for (let i = 0; i < languages.length; i += 8) {
-    const slice = languages.slice(i, i + 8);
+  // for (let i = 0; i < languages.length; i += 8) {
+  //   const slice = languages.slice(i, i + 8);
 
-    await Promise.all(
-      slice.map(async (language) => {
-        if (language === "en") return;
+  //   await Promise.all(
+  //     slice.map(async (language) => {
+  //       if (language === "en") return;
 
-        strings[language] = await get_strings_for_language(
-          base_id_map,
-          language,
-        );
+  //       strings[language] = await get_strings_for_language(
+  //         base_id_map,
+  //         language,
+  //       );
 
-        // also print progress
-        console.log(
-          Object.keys(strings).length,
-          "/",
-          languages.length,
-          ":",
-          language,
-        );
-      }),
-    );
-  }
+  //       // also print progress
+  //       console.log(
+  //         Object.keys(strings).length,
+  //         "/",
+  //         languages.length,
+  //         ":",
+  //         language,
+  //       );
+  //     }),
+  //   );
+  // }
 
   return strings;
 }
