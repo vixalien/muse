@@ -497,6 +497,7 @@ export function parse_artist_contents(results: any[]) {
     playlists: [_("playlists"), parse_playlist],
     related: [_("related"), parse_related_artist],
     featured: [_("featured"), parse_featured],
+    library: [_("library"), parse_mixed_item],
   } satisfies CategoryMap;
 
   return parse_categories(results, categories_data);
@@ -985,6 +986,8 @@ export function parse_featured(data: any): FeaturedPlaylist {
 
 export function _(id: string) {
   switch (id) {
+    case "library":
+      return "from your library";
     case "related":
       return "fans might also like";
     case "featured":
