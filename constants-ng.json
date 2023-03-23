@@ -6,49 +6,55 @@
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Cobalt/Version",
     "Accept": "*/*",
     "Accept-Language": "en-US,en;q=0.5",
-    "X-YouTube-Page-CL": "513403406",
-    "X-YouTube-Client-Version": "7.20230301.06.00",
-    "X-YouTube-Page-Label": "youtube.kabuki.web_20230301_06_RC00",
+    "Referer": "https://music.youtube.com/",
+    "X-Youtube-Client-Name": "67",
+    "X-Youtube-Client-Version": "1.20230320.01.00",
+    "X-Goog-AuthUser": "0",
+    "X-Origin": "https://music.youtube.com",
+    "Origin": "https://music.youtube.com",
     "Sec-Fetch-Dest": "empty",
     "Sec-Fetch-Mode": "same-origin",
     "Sec-Fetch-Site": "same-origin",
-    "Origin": "https://www.youtube.com/tv?is_account_switch=1&hrld=1&fltor=1"
+    "Connection": "keep-alive",
+    "TE": "trailers"
   },
   "DATA": {
     "context": {
       "client": {
-        "screenWidthPoints": 689,
-        "screenHeightPoints": 963,
-        "screenPixelDensity": 1,
-        "utcOffsetMinutes": 120,
         "hl": "en-GB",
         "gl": "GB",
         "remoteHost": "1.1.1.1",
         "deviceMake": "",
         "deviceModel": "",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Cobalt/Version,gzip(gfe)",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0,gzip(gfe)",
         "clientName": "WEB_REMIX",
-        "clientVersion": "1.20230213.01.00",
-        "osName": "Windows",
-        "osVersion": "10.0",
-        "originalUrl": "https://www.youtube.com/tv?is_account_switch=1&hrld=1&fltor=1",
-        "theme": "CLASSIC",
+        "clientVersion": "1.20230320.01.00",
+        "osName": "X11",
+        "osVersion": "",
+        "originalUrl": "https://music.youtube.com/search",
         "platform": "DESKTOP",
         "clientFormFactor": "UNKNOWN_FORM_FACTOR",
-        "webpSupport": true,
-        "tvAppInfo": {
-          "appQuality": "TV_APP_QUALITY_FULL_ANIMATION",
-          "certificationScope": "",
-          "voiceCapability": { "hasSoftMicSupport": false },
-          "zylonLeftNav": true
-        },
-        "timeZone": "Europe/Amsterdam",
-        "browserName": "Chrome",
-        "browserVersion": "110.0.0.0",
-        "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+        "browserName": "Firefox",
+        "browserVersion": "111.0",
+        "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "screenWidthPoints": 1920,
+        "screenHeightPoints": 1080,
+        "screenPixelDensity": 1,
+        "screenDensityFloat": 1,
+        "utcOffsetMinutes": 120,
+        "userInterfaceTheme": "USER_INTERFACE_THEME_DARK",
+        "timeZone": "Africa/Kigali",
+        "musicAppInfo": {
+          "pwaInstallabilityStatus": "PWA_INSTALLABILITY_STATUS_UNKNOWN",
+          "webDisplayMode": "WEB_DISPLAY_MODE_BROWSER",
+          "storeDigitalGoodsApiSupportStatus": {
+            "playStoreDigitalGoodsApiSupportStatus": "DIGITAL_GOODS_API_SUPPORT_STATUS_UNSUPPORTED"
+          }
+        }
       },
-      "user": { "enableSafetyMode": false },
+      "user": { "lockedSafetyMode": false },
       "request": {
+        "useSsl": true,
         "internalExperimentFlags": [],
         "consistencyTokenJars": []
       }
