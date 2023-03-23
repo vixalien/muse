@@ -26,16 +26,8 @@ const options: Options = {
   debug: false,
 };
 
-let last_options: Options | null = null;
-let frozen_options: Readonly<Options> | null = null;
-
 export function get_options() {
-  if (last_options !== options) {
-    last_options = options;
-    frozen_options = Object.freeze(options);
-  }
-
-  return frozen_options as Readonly<Options>;
+  return Object.freeze({ ...options });
 }
 
 export function get_option<Name extends keyof Options>(name: Name) {
@@ -44,6 +36,13 @@ export function get_option<Name extends keyof Options>(name: Name) {
 
 export function set_options(passed_options: Partial<Options>) {
   Object.assign(options, passed_options);
+}
+
+export function set_option<Name extends keyof Options>(
+  name: Name,
+  value: Options[Name],
+) {
+  set_options({ [name]: value });
 }
 
 export interface SetupOptions extends Omit<Options, "auth"> {

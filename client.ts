@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_home, get_option, setup } from "./mod.ts";
+import { get_artist, get_explore, get_home, get_option, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -68,7 +68,6 @@ setup({
   store: new DenoFileStore("store/muse-store.json"),
   client: new CustomFetch(),
   debug: true,
-  language: "ar"
 });
 
 const css = {
@@ -119,7 +118,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home()
+get_explore()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

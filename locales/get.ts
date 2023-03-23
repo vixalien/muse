@@ -28,5 +28,5 @@ export async function get_locales() {
 
 await get_locales()
   .then((result) => {
-    Deno.writeTextFile("locales.json", JSON.stringify(result));
+    Deno.writeTextFile("locales/locales.json", JSON.stringify(result));
   });
