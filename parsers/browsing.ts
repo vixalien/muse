@@ -288,7 +288,7 @@ export function parse_search_results(
     if (result_type == "artist") {
       search_result.artist = get_item_text(data, 0);
       search_result.subscribers =
-        j(data, "flexColumns[1]", MRLITFC, "runs[2].text")?.split(" ")[0];
+        jo(data, "flexColumns[1]", MRLITFC, "runs[2].text")?.split(" ")[0];
       search_result = { ...search_result, ...get_menu_playlists(data) };
     } else if (result_type == "album") {
       search_result.type = "album";
