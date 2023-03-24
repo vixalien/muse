@@ -30,8 +30,10 @@ Here's the flow:
 3. Get the OAuth token & refresh tokens
 
 ```ts
-import { auth } from "https://deno.land/x/muse/mod.ts";
+import { get_option } from "https://deno.land/x/muse/mod.ts";
 import { RequiresLoginEvent } from "https://deno.land/x/muse/auth.ts";
+
+const auth = get_option("auth");
 
 // this is the authentication flow
 const auth_flow = async () => {
@@ -77,7 +79,7 @@ Youtube TV login codes.
 You can pass in a storage object to the client to persist the auth token.
 
 ```ts
-import { init } from "https://deno.land/x/muse/mod.ts";
+import { setup } from "https://deno.land/x/muse/mod.ts";
 import {
   DenoFileStore,
   get_default_store,
@@ -87,12 +89,12 @@ import {
 } from "https://deno.land/x/muse/store.ts";
 
 // you can use the default store, which is DenoFileStore if available, then LocalStorageStore, then MemoryStore
-const client = init({ store: get_default_store() });
+const client = setup({ store: get_default_store() });
 
 // or you can use any of the built-in stores
-const client = init({ store: new DenoFileStore("/path/to/file.json") });
-const client = init({ store: new LocalStorageStore() });
-const client = init({ store: new MemoryStore() });
+const client = setup({ store: new DenoFileStore("/path/to/file.json") });
+const client = setup({ store: new LocalStorageStore() });
+const client = setup({ store: new MemoryStore() });
 
 // or you can implement your own store
 // by extending the Store abstract class
@@ -103,14 +105,14 @@ class MyStore extends Store {
 }
 
 // then use it accordingly
-const client = init({ store: new MyStore() });
+const client = setup({ store: new MyStore() });
 
-// Do note that init() can be called multiple times, but it's not recommended. 
-// this is because init overrides the global store, so if you call init()
+// Do note that setup() can be called multiple times, but it's not recommended. 
+// this is because setup overrides the global store, so if you call setup()
 // multiple times, other options set before will be ignored. example:
 
-init({ auth: { /* custom auth options */ } });
-init({ store: /* custom store */ });
+setup({ auth: { /* custom auth options */ } });
+setup({ store: /* custom store */ });
 
 // the above will only use the custom store, and ignore the custom auth options
 ```
