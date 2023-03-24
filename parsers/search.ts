@@ -14,91 +14,81 @@ export const scopes = ["library", "uploads"] as const;
 
 export type Scope = typeof scopes[number];
 
-const FILTERED_PARAM1 = "EgWKAQI";
-
 export function get_search_params(
-  filter: Filter | undefined,
-  scope: Scope | undefined,
-  ignore_spelling: boolean,
+  filter: Filter | null = null,
+  scope: Scope | null = null,
+  autocorrect: boolean,
 ) {
-  let params = null, param1 = null, param2 = null, param3 = null;
-
-  if (filter == null && scope == null && !ignore_spelling) {
-    return params;
+  if (filter == null && scope == null && autocorrect) {
+    return null;
   }
 
   switch (scope) {
-    case "uploads":
-      params = "agIYAw%3D%3D";
-      break;
-
-    case "library":
-      if (filter) {
-        param1 = FILTERED_PARAM1;
-        param2 = _get_param2(filter);
-        param3 = "AWoKEAUQCRADEAoYBA%3D%3D";
-      } else {
-        params = "agIYBA%3D%3D";
-      }
-      break;
-
     case null:
-    case undefined:
-      if (filter) {
+      if (autocorrect) {
         switch (filter) {
+          case null:
+            return null;
+          case "songs":
+          case "videos":
+          case "albums":
+          case "artists":
           case "playlists":
-            params = "Eg-KAQwIABAAGAAgACgB";
-            if (ignore_spelling) {
-              params += "MABqChAEEAMQCRAFEAo%3D";
-            } else {
-              params += "MABCAggBagoQBBADEAkQBRAK";
-            }
-            break;
-
-          case "community_playlists":
+            return `EgWKAQI${_get_param2(filter)}AWoMEAMQBBAJEA4QChAF`;
           case "featured_playlists":
-            param1 = "EgeKAQQoA";
-            if (filter == "featured_playlists") {
-              param2 = "Dg";
-            } else {
-              param2 = "EA";
-            }
-
-            if (!ignore_spelling) {
-              param3 = "BagwQDhAKEAMQBBAJEAU%3D";
-            } else {
-              param3 = "BQgIIAWoMEA4QChADEAQQCRAF";
-            }
-            break;
-
-          default:
-            param1 = FILTERED_PARAM1;
-            param2 = _get_param2(filter);
-
-            if (!ignore_spelling) {
-              param3 = "AWoMEA4QChADEAQQCRAF";
-            } else {
-              param3 = "AUICCAFqDBAOEAoQAxAEEAkQBQ%3D%3D";
-            }
-            break;
+          case "community_playlists":
+            return `EgeKAQQoA${_get_param2(filter)}BagwQAxAEEAkQDhAKEAU%3D`;
         }
-      } else if (ignore_spelling) {
-        params = "EhGKAQ4IARABGAEgASgAOAFAAUICCAE%3D";
+      } else {
+        switch (filter) {
+          case null:
+            return "QgIIAQ%3D%3D";
+          case "songs":
+          case "videos":
+          case "albums":
+          case "artists":
+          case "playlists":
+            return `EgWKAQI${_get_param2(filter)}AWoIEAMQBBAJEAo%3D`;
+          case "featured_playlists":
+            return `EgeKAQQoA${_get_param2(filter)}BaggQAxAEEAkQCg%3D%3D`;
+        }
       }
       break;
+    case "library":
+      switch (filter) {
+        case "artists":
+        case "albums":
+        case "songs":
+          // note that `videos` is not supported here
+          return `EgWKAQI${_get_param2(filter)}AWoIEAUQCRADGAQ%3D`;
+        case "playlists":
+          return "EgWKAQIoAWoEEAoYBA%3D%3D";
+        default:
+          return "agIYBA%3D%3D";
+      }
+      break;
+    case "uploads":
+      return "agIYAw%3D%3D";
   }
-
-  return params ?? `${param1}${param2}${param3}`;
 }
 
-const filter_param_map = new Map([
-  ["songs", "I"],
-  ["videos", "Q"],
-  ["albums", "Y"],
-  ["artists", "g"],
-  ["playlists", "o"],
-]);
-
 export function _get_param2(filter: Filter) {
-  return filter_param_map.get(filter);
+  switch (filter) {
+    case "songs":
+      return "I";
+    case "videos":
+      return "Q";
+    case "albums":
+      return "Y";
+    case "artists":
+      return "g";
+    case "playlists":
+      return "o";
+    case "featured_playlists":
+      return "Dg";
+    case "community_playlists":
+      return "EA";
+    default:
+      throw Error("Invalid filter: " + filter);
+  }
 }
