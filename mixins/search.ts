@@ -16,6 +16,7 @@ import {
   Filter,
   filters,
   get_search_params,
+  parse_search_results2,
   Scope,
   scopes,
 } from "../parsers/search.ts";
@@ -193,6 +194,7 @@ export async function search(
 
   const data = { query } as any;
   const endpoint = "search";
+
   const search_results: SearchResults = {
     did_you_mean: null,
     categories: [],
@@ -221,7 +223,11 @@ export async function search(
     );
   }
 
-  const params = get_search_params(filter, scope, ignore_spelling);
+  console.log("ignore spelling", ignore_spelling);
+
+  const params = get_search_params(filter, scope, !ignore_spelling);
+
+  console.log("params", params);
 
   if (params) {
     data.params = params;
@@ -268,7 +274,7 @@ export async function search(
       if ("musicShelfRenderer" in res) {
         const results = j(res, "musicShelfRenderer.contents");
         let new_filter = parser_filter;
-        const category = j(res, MUSIC_SHELF, TITLE_TEXT);
+        const category = jo(res, MUSIC_SHELF, TITLE_TEXT);
 
         if (!filter && scope == scopes[0]) {
           new_filter = category;
@@ -276,11 +282,199 @@ export async function search(
 
         const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
 
+        const bottom_params = jo(
+          res,
+          "musicShelfRenderer.bottomEndpoint.searchEndpoint.params",
+        );
+
+        console.log("bottom_params", category, bottom_params);
+
         const category_search_results = parse_search_results(results, type);
 
         if (category_search_results.length > 0) {
           search_results.categories.push({
-            title: category.toLowerCase(),
+            title: category?.toLowerCase(),
+            results: category_search_results,
+          });
+        }
+
+        if ("continuations" in res["musicShelfRenderer"]) {
+          continuation = res.musicShelfRenderer;
+        }
+      } else if ("itemSectionRenderer" in res) {
+        const did_you_mean = jo(
+          res,
+          "itemSectionRenderer.contents[0].didYouMeanRenderer",
+        );
+
+        if (did_you_mean) {
+          search_results.did_you_mean = {
+            search: j(did_you_mean, "correctedQuery.runs"),
+            query: j(
+              did_you_mean,
+              "correctedQueryEndpoint.searchEndpoint.query",
+            ),
+          };
+        }
+      }
+    }
+  }
+
+  // limit only works when there's a filter
+  if (continuation && filter) {
+    const continued_data = await get_continuations(
+      continuation,
+      "musicShelfContinuation",
+      limit -
+        search_results.categories.reduce(
+          (acc, curr) => acc + curr.results.length,
+          0,
+        ),
+      (params) => {
+        return request_json(endpoint, { data, params });
+      },
+      (contents) => {
+        return parse_search_results(contents);
+      },
+    );
+
+    const category = search_results.categories.find((category) =>
+      category.title === filter
+    ) ?? search_results.categories[
+      search_results.categories.push({
+        title: filter,
+        results: [],
+      })
+    ];
+
+    search_results.continuation = continued_data.continuation;
+    category.results.push(...continued_data.items);
+  }
+
+  return search_results;
+}
+
+export async function search2(
+  query: string,
+  options: SearchOptions = {},
+): Promise<SearchResults> {
+  const {
+    filter,
+    scope,
+    ignore_spelling = true,
+    limit = 20,
+    continuation: _continuation = null,
+  } = options;
+
+  let continuation: any = _continuation;
+
+  const data = { query } as any;
+  const endpoint = "search";
+
+  const search_results: SearchResults = {
+    did_you_mean: null,
+    categories: [],
+    continuation: null,
+  };
+
+  if (filter != null && !filters.includes(filter)) {
+    throw new Error(
+      `Invalid filter provided. Please use one of the following filters or leave out the parameter: ${
+        filters.join(", ")
+      }`,
+    );
+  }
+
+  if (scope != null && !scopes.includes(scope)) {
+    throw new Error(
+      `Invalid scope provided. Please use one of the following scopes or leave out the parameter: ${
+        scopes.join(", ")
+      }`,
+    );
+  }
+
+  if (scope == "uploads" && filter != null) {
+    throw new Error(
+      "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to uploads",
+    );
+  }
+
+  console.log("ignore spelling", ignore_spelling);
+
+  const params = get_search_params(filter, scope, !ignore_spelling);
+
+  console.log("params", params);
+
+  if (params) {
+    data.params = params;
+  }
+
+  if (!continuation) {
+    const response = await request_json(endpoint, { data });
+
+    let results;
+
+    // no results
+    if (!("contents" in response)) {
+      return search_results;
+    } else if ("tabbedSearchResultsRenderer" in response.contents) {
+      const tab_index = (!scope || filter)
+        ? 0
+        : scopes.indexOf(scope as any) + 1;
+      results = response.contents.tabbedSearchResultsRenderer.tabs[tab_index]
+        .tabRenderer.content;
+    } else {
+      results = response.contents;
+    }
+
+    const section_list = j(results, SECTION_LIST);
+
+    // no results
+    if (
+      !section_list ||
+      (section_list.length == 1 && ("itemSectionRenderer" in section_list[0]))
+    ) {
+      return search_results;
+    }
+
+    // set filter for parser
+    let parser_filter = filter as string;
+
+    if (filter && filter.includes("playlist")) {
+      parser_filter = "playlists";
+    } else if (scope == "uploads") {
+      parser_filter = "uploads";
+    }
+
+    for (const res of section_list) {
+      if ("musicShelfRenderer" in res) {
+        const results = j(res, "musicShelfRenderer.contents");
+        let new_filter = parser_filter;
+        const category = jo(res, MUSIC_SHELF, TITLE_TEXT);
+
+        if (!filter && scope == scopes[0]) {
+          new_filter = category;
+        }
+
+        const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
+
+        const bottom_params = jo(
+          res,
+          "musicShelfRenderer.bottomEndpoint.searchEndpoint.params",
+        );
+
+        console.log("bottom_params", category, bottom_params);
+
+        const category_search_results = parse_search_results2(
+          results,
+          scope ?? null,
+          filter ?? null,
+          bottom_params,
+        );
+
+        if (category_search_results.length > 0) {
+          search_results.categories.push({
+            title: category?.toLowerCase(),
             results: category_search_results,
           });
         }

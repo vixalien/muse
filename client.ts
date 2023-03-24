@@ -1,5 +1,13 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_artist, get_explore, get_home, get_option, setup } from "./mod.ts";
+import { search2 } from "./mixins/search.ts";
+import {
+  get_artist,
+  get_explore,
+  get_home,
+  get_option,
+  search,
+  setup,
+} from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -118,7 +126,10 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_explore()
+search2("drake", {
+  ignore_spelling: false,
+  filter: "featured_playlists",
+})
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
