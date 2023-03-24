@@ -18,6 +18,9 @@ search("drake")
   });
 ```
 
+For the complete list of operations, see
+[the docs](https://deno.land/x/muse/mod.ts?doc).
+
 ## Auth
 
 Currently, muse supports oauth authentication by posing as the YouTube TV app.
@@ -30,10 +33,16 @@ Here's the flow:
 3. Get the OAuth token & refresh tokens
 
 ```ts
-import { get_option } from "https://deno.land/x/muse/mod.ts";
+import { get_option, setup } from "https://deno.land/x/muse/mod.ts";
 import { RequiresLoginEvent } from "https://deno.land/x/muse/auth.ts";
 
 const auth = get_option("auth");
+
+setup({
+  // make sure to persist the token
+  store: new DenoFileStore("store/muse-store.json"),
+  debug: true,
+});
 
 // this is the authentication flow
 const auth_flow = async () => {
@@ -43,10 +52,7 @@ const auth_flow = async () => {
   const loginCode = await auth.get_login_code();
 
   console.log(
-    `Go to %c${loginCode.verification_url}%c and enter the code %c${loginCode.user_code}`,
-    css.underline,
-    css.normal,
-    css.bold,
+    `Go to ${loginCode.verification_url} and enter the code: ${loginCode.user_code}`,
   );
 
   // not necessary, but saves some requests
