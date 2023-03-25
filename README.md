@@ -7,14 +7,30 @@ A library to interact with the YouTube Music (InnerTube) api.
 
 ## Usage
 
-Requires Deno.
+Deno
 
 ```ts
-import { get_album, search } from "https://deno.land/x/muse/mod.ts";
+import { search, get_song } from "https://deno.land/x/muse/mod.ts";
 
 search("drake")
   .then((data) => {
     console.log("search results", data);
+  });
+
+get_song("dQw4w9WgXcQ")
+  .then((data) => {
+    console.log("song", data);
+  });
+```
+
+Node
+
+```js
+const { get_artist } = require("libmuse");
+
+get_artist("UCvyjk7zKlaFyNIPZ-Pyvkng")
+  .then((data) => {
+    console.log("artist", data);
   });
 ```
 

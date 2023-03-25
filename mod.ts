@@ -1,5 +1,9 @@
 export * from "./setup.ts";
 
+export * from "./auth.ts";
+export * from "./store.ts";
+export * from "./request.ts";
+
 export * from "./mixins/browsing.ts";
 export * from "./mixins/explore.ts";
 export * from "./mixins/library.ts";

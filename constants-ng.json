@@ -15,7 +15,6 @@
     "Sec-Fetch-Dest": "empty",
     "Sec-Fetch-Mode": "same-origin",
     "Sec-Fetch-Site": "same-origin",
-    "Connection": "keep-alive",
     "TE": "trailers"
   },
   "DATA": {
