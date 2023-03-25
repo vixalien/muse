@@ -10,6 +10,8 @@ import {
   MTRIR,
   SECTION_LIST,
   SINGLE_COLUMN_TAB,
+  TAB_CONTENT,
+  TEXT_RUN_TEXT,
   THUMBNAIL_RENDERER,
   THUMBNAILS,
 } from "../nav.ts";
@@ -24,6 +26,50 @@ setup({
 
 function get_thumbnail_url(thumbnails: any[]) {
   return thumbnails.sort((a, b) => a.width - b.width)[0].url;
+}
+
+export async function get_search_strings(data: Record<string, any> = {}) {
+  const response = await request_json("search", {
+    // this is so that the first result is always a radio
+    data: { query: "world radio", params: "QgIIAQ%3D%3D", ...data },
+  });
+
+  return j(
+    response,
+    "contents.tabbedSearchResultsRenderer",
+    TAB_CONTENT,
+    SECTION_LIST,
+  ).map((item: any) => {
+    const shelf = jo(item, "musicShelfRenderer") ||
+      jo(item, "musicCardShelfRenderer");
+
+    if (!shelf) return;
+
+    const first_content = jo(shelf, "contents", "[0]");
+
+    // may happen in case of "top result"
+    if (!first_content) return;
+
+    const first_data = jo(first_content, MRLIR) ?? jo(first_content, MTRIR) ??
+      jo(first_content, "musicNavigationButtonRenderer");
+
+    if (!first_data) {
+      return null;
+    }
+
+    return {
+      title: jo(
+        first_data,
+        "flexColumns.1.musicResponsiveListItemFlexColumnRenderer",
+        TEXT_RUN_TEXT,
+      ).toLowerCase(),
+      id: jo(shelf, "bottomEndpoint.searchEndpoint.params"),
+    };
+  }).filter(Boolean)
+    .sort((a: any, b: any) => a.id.localeCompare(b.id))
+    .filter((item: any, index: number, array: any[]) => {
+      return index === array.findIndex((i) => i.title === item.title);
+    });
 }
 
 export async function get_content_strings(
@@ -91,36 +137,51 @@ const base_map = new Map([
   ["top artists", "top artists"],
   ["genres", "genres"],
   /// trending is duplicated
+  // search
+  ["station", "station"],
+  ["playlist", "playlist"],
+  ["artist", "artist"],
+  ["song", "song"],
+  ["video", "video"],
 ]);
 
 export async function get_base_strings() {
   set_option("language", "en");
 
-  const [explore, charts, artist] = await Promise.all([
-    get_content_strings("FEmusic_explore"),
-    get_content_strings("FEmusic_charts", {
-      formData: {
-        // to get genres
-        selectedValues: ["US"],
-      },
-    }),
-    // BTS (because they have playlists on their channel)
-    // also don't forget to add atleast one song to your library
-    // and make sure the item you add is NOT the first item in any category
-    get_content_strings("UC9vrvNSL3xcWGSkV86REBSg"),
-  ]);
+  const [explore, charts, artist, search_radio, search_hello] = await Promise
+    .all([
+      get_content_strings("FEmusic_explore"),
+      get_content_strings("FEmusic_charts", {
+        formData: {
+          // to get genres
+          selectedValues: ["US"],
+        },
+      }),
+      // BTS (because they have playlists on their channel)
+      // also don't forget to add atleast one song to your library
+      // and make sure the item you add is NOT the first item in any category
+      get_content_strings("UC9vrvNSL3xcWGSkV86REBSg"),
+      get_search_strings(),
+      // to make sure we also get stuff like artists (because there is no artist
+      // named "global radio" yet..)
+      get_search_strings({ query: "hello" }),
+    ]);
+
+  const search = [...search_radio, ...search_hello]
+    .filter((item: any, index: number, array: any[]) => {
+      return index === array.findIndex((i) => i.title === item.title);
+    });
 
   const id_map: Record<string, any> = {};
 
-  const ids = [...explore, ...charts, ...artist];
-
-  console.log("ids", { explore, charts, artist });
+  const ids = [...explore, ...charts, ...artist, ...search];
 
   base_map.forEach((value, key) => {
     const item = ids.find((i) => i.title.toLowerCase() === value);
 
     if (!item) {
       console.error("missing", key, value);
+      console.log("base id map", ids);
       return;
     }
 
@@ -136,30 +197,63 @@ export async function get_strings_for_language(
 ) {
   set_option("language", language);
 
-  const [explore, charts, artist] = await Promise.all([
-    get_content_strings("FEmusic_explore", { lang: language }),
-    get_content_strings("FEmusic_charts", {
-      lang: language,
-      formData: {
-        selectedValues: ["US"],
-      },
-    }),
-    get_content_strings("UC9vrvNSL3xcWGSkV86REBSg", {
-      lang: language,
-    }),
-  ]);
+  const [explore, charts, artist, search_radio, search_hello] = await Promise
+    .all([
+      get_content_strings("FEmusic_explore", { lang: language }),
+      get_content_strings("FEmusic_charts", {
+        lang: language,
+        formData: {
+          selectedValues: ["US"],
+        },
+      }),
+      get_content_strings("UC9vrvNSL3xcWGSkV86REBSg", {
+        lang: language,
+      }),
+      get_search_strings({ lang: language }),
+      get_search_strings({ query: "hello" }),
+    ]);
 
   const id_map: Record<string, any> = {};
 
-  const ids = [...explore, ...charts, ...artist];
+  const search = [...search_radio, ...search_hello]
+    .filter((item: any, index: number, array: any[]) => {
+      return index === array.findIndex((i) => i.title === item.title);
+    });
+
+  const ids = [...explore, ...charts, ...artist, ...search];
 
   for (const key in base_id_map) {
     const id = base_id_map[key];
 
-    const item = ids.find((i) => i.id === id);
+    const item = ids.find((i) => {
+      if (i.id === id) return true;
+      // handling search edge cases
+      if (typeof id === "string") {
+        if (id == "EgWKAQIgAWoMEAMQBBAJEA4QChAF") {
+          // artist
+          return i.id === "EgWKAQIgAWoKEAMQBBAJEAoQBQ%3D%3D" ||
+            i.id === "EgWKAQIgAWoKEAMQBBAKEAkQBQ%3D%3D" ||
+            i.id === "EgWKAQIgAWoKEAMQCRAEEAoQBQ%3D%3D";
+        } else if (id === "EgWKAQIIAWoMEAMQBBAJEA4QChAF") {
+          // song
+          return i.id === "EgWKAQIIAWoIEAMQBBAJEAo%3D" ||
+            i.id === "EgWKAQIYAWoKEAMQBBAJEAoQBQ%3D%3D";
+        } else if (id === "EgWKAQIQAWoMEAMQBBAJEA4QChAF") {
+          // video
+          return i.id === "EgWKAQIQAWoIEAMQBBAJEAo%3D" ||
+            i.id === "EgWKAQIQAWoKEAMQBBAJEAoQBQ%3D%3D";
+        } else if (id === "EgeKAQQoADgBagwQAxAEEAkQDhAKEAU%3D") {
+          // playlist
+          return i.id === "EgeKAQQoAEABaggQAxAEEAkQCg%3D%3D" ||
+            i.id === "EgeKAQQoAEABagoQAxAEEAkQChAF";
+        }
+      }
+      return false;
+    });
 
     if (!item) {
       console.error("missing", key, id);
+      console.log(language, "id map", ids);
       continue;
     }
 
@@ -193,7 +287,14 @@ export async function get_all_strings() {
     if (language === "en-GB") continue;
 
     strings[language] = await get_strings_for_language(base_id_map, language);
-    console.log("got", language);
+
+    console.log(
+      Object.keys(strings).length - 1,
+      "/",
+      languages.length,
+      ":",
+      language,
+    );
   }
 
   // a version that allows a max of 5 requests at a time
@@ -228,3 +329,8 @@ await get_all_strings()
   .then((data) => {
     Deno.writeTextFile("locales/strings.json", JSON.stringify(data));
   });
+
+// await get_search_strings()
+//   .then((data) => {
+//     Deno.writeTextFile("locales/strings.json", JSON.stringify(data, null, 2));
+//   });
