@@ -7,7 +7,7 @@ A library to interact with the YouTube Music (InnerTube) api.
 
 ## Usage
 
-Deno
+### Deno
 
 ```ts
 import { search, get_song } from "https://deno.land/x/muse/mod.ts";
@@ -23,7 +23,15 @@ get_song("dQw4w9WgXcQ")
   });
 ```
 
-Node
+### Node
+
+First install using your preferred package manager (npm, yarn, pnpm etc.)
+
+```bash
+npm install libmuse
+```
+
+Then use it in by importing `libmuse`. The Node version has the exact same features as the Deno version.
 
 ```js
 const { get_artist } = require("libmuse");
