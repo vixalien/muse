@@ -4,7 +4,16 @@ import { build, emptyDir } from "https://deno.land/x/dnt@0.33.1/mod.ts";
 await emptyDir("./npm");
 
 await build({
-  entryPoints: ["./mod.ts"],
+  entryPoints: ["./mod.ts", {
+    name: "auth",
+    path: "./auth.ts",
+  }, {
+    name: "request",
+    path: "./request.ts",
+  }, {
+    name: "store",
+    path: "./store.ts",
+  }],
   outDir: "./npm",
   shims: {
     // see JS docs for overview and more options
@@ -45,7 +54,7 @@ await build({
       "/types",
       "LICENSE",
       "README.md",
-    ]
+    ],
   },
 });
 

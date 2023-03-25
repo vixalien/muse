@@ -10,7 +10,7 @@ A library to interact with the YouTube Music (InnerTube) api.
 ### Deno
 
 ```ts
-import { search, get_song } from "https://deno.land/x/muse/mod.ts";
+import { get_song, search } from "https://deno.land/x/muse/mod.ts";
 
 search("drake")
   .then((data) => {
@@ -31,10 +31,12 @@ First install using your preferred package manager (npm, yarn, pnpm etc.)
 npm install libmuse
 ```
 
-Then use it in by importing `libmuse`. The Node version has the exact same features as the Deno version.
+Then use it in by importing `libmuse`. The Node version has the exact same
+features as the Deno version.
 
 ```js
-const { get_artist } = require("libmuse");
+import { get_song, search } from "libmuse";
+// commonjs: const { get_artist } = require("libmuse");
 
 get_artist("UCvyjk7zKlaFyNIPZ-Pyvkng")
   .then((data) => {
@@ -59,6 +61,17 @@ Here's the flow:
 ```ts
 import { get_option, setup } from "https://deno.land/x/muse/mod.ts";
 import { RequiresLoginEvent } from "https://deno.land/x/muse/auth.ts";
+/*
+node imports:
+
+import { get_option, setup } from "libmuse";
+import { RequiresLoginEvent } from "libmuse/auth";
+
+commonjs imports:
+
+const { get_option, setup } = require("libmuse");
+const { RequiresLoginEvent } = require("libmuse/auth");
+*/
 
 const auth = get_option("auth");
 
@@ -117,6 +130,29 @@ import {
   MemoryStore,
   Store,
 } from "https://deno.land/x/muse/store.ts";
+/*
+npm imports:
+
+import { setup } from "libmuse";
+import {
+  DenoFileStore,
+  get_default_store,
+  LocalStorageStore,
+  MemoryStore,
+  Store,
+} from "libmuse/store";
+
+commonjs imports:
+
+const { setup } = require("libmuse");
+const {
+  DenoFileStore,
+  get_default_store,
+  LocalStorageStore,
+  MemoryStore,
+  Store,
+} = require("libmuse/store");
+*/
 
 // you can use the default store, which is DenoFileStore if available, then LocalStorageStore, then MemoryStore
 const client = setup({ store: get_default_store() });
