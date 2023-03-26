@@ -11,23 +11,35 @@ import {
   THUMBNAILS,
   TITLE_TEXT,
 } from "../nav.ts";
-import { _, parse_search_results } from "../parsers/browsing.ts";
+import { _ } from "../parsers/browsing.ts";
 import {
   Filter,
   filters,
   get_search_params,
-  parse_search_results2,
+  parse_search_results,
   Scope,
   scopes,
+  SearchContent,
 } from "../parsers/search.ts";
 import { j, jo } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
 import { PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
-export type Query = {
+export type {
+  SearchAlbum,
+  SearchArtist,
+  SearchContent,
+  SearchPlaylist,
+  SearchRadio,
+  SearchSong,
+  SearchVideo,
+} from "../parsers/search.ts";
+
+export type SearchRuns = {
   text: string;
   bold?: true;
+  italics?: true;
 }[];
 
 export interface ArtistQuickLink {
@@ -53,13 +65,13 @@ export type SearchQuickLink = ArtistQuickLink | SongQuickLink;
 
 export interface SearchSuggestions {
   history: {
-    search: string;
+    search: SearchRuns;
     feedback_token: string;
-    query: Query;
+    query: string;
   }[];
   suggestions: {
-    query: Query;
-    search: string;
+    query: string;
+    search: SearchRuns;
   }[];
   quick_links: SearchQuickLink[];
 }
@@ -100,8 +112,8 @@ export async function get_search_suggestions(
         const query = j(item, "searchSuggestionRenderer");
 
         suggestions.suggestions.push({
-          query: j(query, "suggestion.runs"),
-          search: j(query, "navigationEndpoint.searchEndpoint.query"),
+          search: j(query, "suggestion.runs"),
+          query: j(query, "navigationEndpoint.searchEndpoint.query"),
         });
       }
     }
@@ -170,12 +182,22 @@ export interface SearchOptions extends PaginationOptions {
 }
 
 export interface SearchResults {
-  did_you_mean: { search: string; query: Query } | null;
+  did_you_mean: { search: SearchRuns; query: string } | null;
   categories: {
     title: string;
-    results: Record<string, any>[];
+    results: SearchContent[];
   }[];
   continuation: string | null;
+  autocorrect: {
+    original: { search: SearchRuns; query: string };
+    corrected: { search: SearchRuns; query: string };
+  } | null;
+}
+
+export interface SearchOptions extends PaginationOptions {
+  filter?: Filter;
+  scope?: Scope;
+  autocorrect?: boolean;
 }
 
 export async function search(
@@ -185,7 +207,7 @@ export async function search(
   const {
     filter,
     scope,
-    ignore_spelling = true,
+    autocorrect = true,
     limit = 20,
     continuation: _continuation = null,
   } = options;
@@ -199,6 +221,7 @@ export async function search(
     did_you_mean: null,
     categories: [],
     continuation: null,
+    autocorrect: null,
   };
 
   if (filter != null && !filters.includes(filter)) {
@@ -223,11 +246,7 @@ export async function search(
     );
   }
 
-  console.log("ignore spelling", ignore_spelling);
-
-  const params = get_search_params(filter, scope, !ignore_spelling);
-
-  console.log("params", params);
+  const params = get_search_params(filter, scope, autocorrect);
 
   if (params) {
     data.params = params;
@@ -261,220 +280,20 @@ export async function search(
       return search_results;
     }
 
-    // set filter for parser
-    let parser_filter = filter as string;
-
-    if (filter && filter.includes("playlist")) {
-      parser_filter = "playlists";
-    } else if (scope == "uploads") {
-      parser_filter = "uploads";
-    }
-
     for (const res of section_list) {
       if ("musicShelfRenderer" in res) {
         const results = j(res, "musicShelfRenderer.contents");
-        let new_filter = parser_filter;
         const category = jo(res, MUSIC_SHELF, TITLE_TEXT);
 
-        if (!filter && scope == scopes[0]) {
-          new_filter = category;
-        }
-
-        const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
-
-        const bottom_params = jo(
-          res,
-          "musicShelfRenderer.bottomEndpoint.searchEndpoint.params",
-        );
-
-        console.log("bottom_params", category, bottom_params);
-
-        const category_search_results = parse_search_results(results, type);
-
-        if (category_search_results.length > 0) {
-          search_results.categories.push({
-            title: category?.toLowerCase(),
-            results: category_search_results,
-          });
-        }
-
-        if ("continuations" in res["musicShelfRenderer"]) {
-          continuation = res.musicShelfRenderer;
-        }
-      } else if ("itemSectionRenderer" in res) {
-        const did_you_mean = jo(
-          res,
-          "itemSectionRenderer.contents[0].didYouMeanRenderer",
-        );
-
-        if (did_you_mean) {
-          search_results.did_you_mean = {
-            search: j(did_you_mean, "correctedQuery.runs"),
-            query: j(
-              did_you_mean,
-              "correctedQueryEndpoint.searchEndpoint.query",
-            ),
-          };
-        }
-      }
-    }
-  }
-
-  // limit only works when there's a filter
-  if (continuation && filter) {
-    const continued_data = await get_continuations(
-      continuation,
-      "musicShelfContinuation",
-      limit -
-        search_results.categories.reduce(
-          (acc, curr) => acc + curr.results.length,
-          0,
-        ),
-      (params) => {
-        return request_json(endpoint, { data, params });
-      },
-      (contents) => {
-        return parse_search_results(contents);
-      },
-    );
-
-    const category = search_results.categories.find((category) =>
-      category.title === filter
-    ) ?? search_results.categories[
-      search_results.categories.push({
-        title: filter,
-        results: [],
-      })
-    ];
-
-    search_results.continuation = continued_data.continuation;
-    category.results.push(...continued_data.items);
-  }
-
-  return search_results;
-}
-
-export async function search2(
-  query: string,
-  options: SearchOptions = {},
-): Promise<SearchResults> {
-  const {
-    filter,
-    scope,
-    ignore_spelling = true,
-    limit = 20,
-    continuation: _continuation = null,
-  } = options;
-
-  let continuation: any = _continuation;
-
-  const data = { query } as any;
-  const endpoint = "search";
-
-  const search_results: SearchResults = {
-    did_you_mean: null,
-    categories: [],
-    continuation: null,
-  };
-
-  if (filter != null && !filters.includes(filter)) {
-    throw new Error(
-      `Invalid filter provided. Please use one of the following filters or leave out the parameter: ${
-        filters.join(", ")
-      }`,
-    );
-  }
-
-  if (scope != null && !scopes.includes(scope)) {
-    throw new Error(
-      `Invalid scope provided. Please use one of the following scopes or leave out the parameter: ${
-        scopes.join(", ")
-      }`,
-    );
-  }
-
-  if (scope == "uploads" && filter != null) {
-    throw new Error(
-      "No filter can be set when searching uploads. Please unset the filter parameter when scope is set to uploads",
-    );
-  }
-
-  console.log("ignore spelling", ignore_spelling);
-
-  const params = get_search_params(filter, scope, !ignore_spelling);
-
-  console.log("params", params);
-
-  if (params) {
-    data.params = params;
-  }
-
-  if (!continuation) {
-    const response = await request_json(endpoint, { data });
-
-    let results;
-
-    // no results
-    if (!("contents" in response)) {
-      return search_results;
-    } else if ("tabbedSearchResultsRenderer" in response.contents) {
-      const tab_index = (!scope || filter)
-        ? 0
-        : scopes.indexOf(scope as any) + 1;
-      results = response.contents.tabbedSearchResultsRenderer.tabs[tab_index]
-        .tabRenderer.content;
-    } else {
-      results = response.contents;
-    }
-
-    const section_list = j(results, SECTION_LIST);
-
-    // no results
-    if (
-      !section_list ||
-      (section_list.length == 1 && ("itemSectionRenderer" in section_list[0]))
-    ) {
-      return search_results;
-    }
-
-    // set filter for parser
-    let parser_filter = filter as string;
-
-    if (filter && filter.includes("playlist")) {
-      parser_filter = "playlists";
-    } else if (scope == "uploads") {
-      parser_filter = "uploads";
-    }
-
-    for (const res of section_list) {
-      if ("musicShelfRenderer" in res) {
-        const results = j(res, "musicShelfRenderer.contents");
-        let new_filter = parser_filter;
-        const category = jo(res, MUSIC_SHELF, TITLE_TEXT);
-
-        if (!filter && scope == scopes[0]) {
-          new_filter = category;
-        }
-
-        const type = new_filter ? new_filter.slice(0, -1).toLowerCase() : null;
-
-        const bottom_params = jo(
-          res,
-          "musicShelfRenderer.bottomEndpoint.searchEndpoint.params",
-        );
-
-        console.log("bottom_params", category, bottom_params);
-
-        const category_search_results = parse_search_results2(
+        const category_search_results = parse_search_results(
           results,
           scope ?? null,
           filter ?? null,
-          bottom_params,
         );
 
         if (category_search_results.length > 0) {
           search_results.categories.push({
-            title: category?.toLowerCase(),
+            title: category?.toLowerCase() ?? null,
             results: category_search_results,
           });
         }
@@ -482,6 +301,9 @@ export async function search2(
         if ("continuations" in res["musicShelfRenderer"]) {
           continuation = res.musicShelfRenderer;
         }
+      } else if ("musicCardShelfRenderer" in res) {
+        // top result with details
+        // const results = j(res, "musicCardShelfRenderer.contents");
       } else if ("itemSectionRenderer" in res) {
         const did_you_mean = jo(
           res,
@@ -495,6 +317,30 @@ export async function search2(
               did_you_mean,
               "correctedQueryEndpoint.searchEndpoint.query",
             ),
+          };
+        }
+
+        const autocorrect = jo(
+          res,
+          "itemSectionRenderer.contents[0].showingResultsForRenderer",
+        );
+
+        if (autocorrect) {
+          search_results.autocorrect = {
+            corrected: {
+              search: j(autocorrect, "correctedQuery.runs"),
+              query: j(
+                autocorrect,
+                "correctedQueryEndpoint.searchEndpoint.query",
+              ),
+            },
+            original: {
+              search: j(autocorrect, "originalQuery.runs"),
+              query: j(
+                autocorrect,
+                "originalQueryEndpoint.searchEndpoint.query",
+              ),
+            },
           };
         }
       }
@@ -515,7 +361,7 @@ export async function search2(
         return request_json(endpoint, { data, params });
       },
       (contents) => {
-        return parse_search_results(contents);
+        return parse_search_results(contents, scope ?? null, filter ?? null);
       },
     );
 

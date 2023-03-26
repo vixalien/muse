@@ -9,18 +9,27 @@ import {
   NAVIGATION_VIDEO_TYPE,
   PLAY_BUTTON,
   TEXT_RUN,
+  TEXT_RUN_TEXT,
   TEXT_RUNS,
   THUMBNAILS,
   TOGGLE_MENU,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
-import { _ } from "./browsing.ts";
+import { _, __, AlbumType } from "./browsing.ts";
 import {
+  ArtistRun,
+  MenuTokens,
   parse_song_artists_runs,
   parse_song_menu_tokens,
   parse_song_runs,
+  SongRuns,
 } from "./songs.ts";
-import { get_flex_column_item, get_menu_playlists } from "./util.ts";
+import {
+  get_flex_column_item,
+  get_menu_playlists,
+  MenuPlaylists,
+  Thumbnail,
+} from "./util.ts";
 
 export const filters = [
   "albums",
@@ -117,180 +126,18 @@ export function _get_param2(filter: Filter) {
   }
 }
 
-/*
+export interface SearchAlbum {
+  type: "album";
+  title: string;
+  browseId: string;
+  isExplicit: boolean;
+  thumbnails: Thumbnail[];
+  album_type: AlbumType;
+  year: string;
+  artists: ArtistRun[];
+}
 
-for (const result of results) {
-    const data = result[MRLIR];
-    let search_result: Record<string, any> = {};
-
-    let result_type = passed_result_type;
-
-    if (!result_type) {
-      result_type = get_item_text(data, 1).toLowerCase();
-      const result_types = ["artist", "playlist", "song", "video", "station"];
-      const result_types_local = [
-        _("artist"),
-        _("playlist"),
-        _("song"),
-        _("video"),
-        _("station"),
-      ];
-
-      // default to album since it's labeled with multiple values ('Single', 'EP' etc)
-      if (!result_types_local.includes(result_type ?? "")) {
-        const first_sub = j(get_flex_column_item(data, 1), "text.runs[0]");
-
-        result_type = first_sub.navigationEndpoint ? "song" : "album";
-      } else {
-        result_type =
-          result_types[result_types_local.indexOf(result_type ?? "")];
-      }
-    }
-
-    search_result.type = result_type;
-
-    if (result_type != "artist") {
-      search_result.title = get_item_text(data, 0);
-    }
-
-    if (result_type == "artist") {
-      search_result.artist = get_item_text(data, 0);
-      search_result.subscribers =
-        jo(data, "flexColumns[1]", MRLITFC, "runs[2].text")?.split(" ")[0];
-      search_result = { ...search_result, ...get_menu_playlists(data) };
-    } else if (result_type == "album") {
-      search_result.type = "album";
-      search_result.album_type = get_item_text(data, 1).toLowerCase();
-    } else if (result_type == "playlist") {
-      const flex_item = get_flex_column_item(data, 1).text.runs;
-      const has_author = flex_item.length == default_offset + 3;
-      search_result.songs = j(
-        flex_item,
-        (default_offset + Number(has_author) * 2).toString(),
-        "text",
-      ).split(" ")[0];
-      search_result.author = has_author
-        ? j(flex_item, default_offset.toString(), "text")
-        : null;
-    } else if (result_type == "station") {
-      search_result.videoId = j(data, NAVIGATION_VIDEO_ID);
-      search_result.playlistId = j(data, NAVIGATION_PLAYLIST_ID);
-    } else if (result_type == "song") {
-      search_result.album = null;
-      if ("menu" in data) {
-        const toggle_menu = find_object_by_key(
-          j(data, MENU_ITEMS),
-          TOGGLE_MENU,
-        );
-        if (toggle_menu != null) {
-          search_result.feedbackTokens = parse_song_menu_tokens(toggle_menu);
-        }
-      }
-    } else if (result_type == "video") {
-      search_result.views = null;
-      search_result.videoType = jo(data, PLAY_BUTTON, NAVIGATION_VIDEO_TYPE);
-    } else if (result_type == "upload") {
-      const browse_id = jo(data, NAVIGATION_BROWSE_ID);
-
-      if (!browse_id) {
-        // song result
-        const flex_items = [...Array(2).keys()].map((i) =>
-          jo(get_flex_column_item(data, i), "text.runs")
-        );
-
-        if (flex_items[0]) {
-          search_result.videoId = jo(flex_items[0][0], NAVIGATION_VIDEO_ID);
-          search_result.playlistId = jo(
-            flex_items[0][0],
-            NAVIGATION_PLAYLIST_ID,
-          );
-        }
-
-        if (flex_items[1]) {
-          search_result = {
-            ...search_result,
-            ...parse_song_runs(flex_items[1]),
-          };
-        }
-        search_result.type = "song";
-      } else {
-        // artist or album result
-        search_result.browseId = browse_id;
-
-        if (search_result.browseId.includes("artist")) {
-          search_result.type = "artist";
-        } else {
-          const flex_item = get_flex_column_item(data, 1);
-          const runs = flex_item.text.runs
-            .filter((_: any, i: number) => i % 2 == 0)
-            .map((run: any) => run.text);
-
-          if (runs.length > 1) {
-            // TODO: validate this
-            search_result.release_date = runs[1];
-          }
-          if (runs.length > 2) {
-            // artist may be missing
-            search_result.artist = runs[2];
-          }
-
-          search_result.type = "album";
-        }
-      }
-    }
-
-    if (["song", "video"].includes(result_type)) {
-      search_result.videoId = jo(
-        data,
-        PLAY_BUTTON,
-        "playNavigationEndpoint.watchEndpoint.videoId",
-      );
-      search_result.videoType = jo(
-        data,
-        PLAY_BUTTON,
-        "playNavigationEndpoint",
-        NAVIGATION_VIDEO_TYPE,
-      );
-    }
-
-    if (["song", "video", "album"].includes(result_type)) {
-      search_result.duration = null;
-      search_result.year = null;
-
-      const flex_item = get_flex_column_item(data, 1);
-      const first_run = jo(flex_item, "text.runs[0]");
-
-      const has_offset = result_type == "album" ||
-        (default_offset && search_result.videoId != null &&
-          !first_run.navigationEndpoint);
-
-      const runs = flex_item.text.runs.slice(2 * Number(has_offset));
-
-      search_result = {
-        ...search_result,
-        ...parse_song_runs(runs),
-      };
-    }
-
-    if (["artist", "album", "playlist"].includes(result_type)) {
-      search_result.browseId = jo(data, NAVIGATION_BROWSE_ID);
-
-      if (!search_result.browseId) {
-        continue;
-      }
-    }
-
-    if (["song", "album"].includes(result_type)) {
-      search_result.isExplicit = jo(data, BADGE_LABEL) != null;
-    }
-
-    search_result.thumbnails = jo(data, THUMBNAILS);
-    search_results.push(search_result);
-  }
-
-*/
-
-export function parse_search_album(result: any) {
+export function parse_search_album(result: any): SearchAlbum {
   const flex = get_flex_column_item(result, 0);
   const flex1 = get_flex_column_item(result, 1);
 
@@ -310,14 +157,22 @@ export function parse_search_album(result: any) {
   };
 }
 
-export function parse_search_video(result: any) {
-  return {
-    ...parse_search_song(result),
-    type: "video",
-  };
+export interface SearchSongOrVideo extends SongRuns {
+  type: "song" | "video";
+  title: string;
+  videoId: string;
+  playlistId: string | null;
+  thumbnails: Thumbnail[];
+  isExplicit: boolean;
+  feedbackTokens: MenuTokens | null;
+  videoType: string;
 }
 
-export function parse_search_song(result: any) {
+export interface SearchSong extends SearchSongOrVideo {
+  type: "song";
+}
+
+export function parse_search_song(result: any, has_label = false): SearchSong {
   const flex = get_flex_column_item(result, 0);
   const flex1 = get_flex_column_item(result, 1);
 
@@ -335,18 +190,40 @@ export function parse_search_song(result: any) {
     playlistId: jo(title, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     isExplicit: jo(result, BADGE_LABEL) != null,
-    feedbackTokens: parse_song_menu_tokens(toggle_menu),
+    feedbackTokens: toggle_menu ? parse_song_menu_tokens(toggle_menu) : null,
     videoType: j(
       result,
       PLAY_BUTTON,
       "playNavigationEndpoint",
       NAVIGATION_VIDEO_TYPE,
     ),
-    ...parse_song_runs(flex1.text.runs),
+    ...parse_song_runs(flex1.text.runs, has_label ? 2 : 0),
   };
 }
 
-export function parse_search_artist(result: any) {
+export interface SearchVideo extends SearchSongOrVideo {
+  type: "video";
+}
+
+export function parse_search_video(
+  result: any,
+  has_label = false,
+): SearchVideo {
+  return {
+    ...parse_search_song(result, has_label),
+    type: "video",
+  };
+}
+
+export interface SearchArtist extends MenuPlaylists {
+  type: "artist";
+  name: string;
+  subscribers: string | null;
+  browseId: string;
+  thumbnails: Thumbnail[];
+}
+
+export function parse_search_artist(result: any): SearchArtist {
   const flex = get_flex_column_item(result, 0);
   const flex1 = get_flex_column_item(result, 1);
 
@@ -355,20 +232,34 @@ export function parse_search_artist(result: any) {
   return {
     type: "artist",
     name: j(title, "text"),
-    subscribers: flex1.text.runs[2]?.text.split(" ")[0] ?? null,
+    subscribers: (flex1 && flex1.text.runs[2]?.text.split(" ")[0]) ?? null,
     browseId: j(result, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAILS),
     ...get_menu_playlists(result),
   };
 }
 
-export function parse_search_playlist(result: any) {
+export interface SearchPlaylist {
+  type: "playlist";
+  title: string;
+  songs: string | null;
+  authors: ArtistRun[];
+  browseId: string;
+  thumbnails: Thumbnail[];
+}
+
+export function parse_search_playlist(
+  result: any,
+  has_label = false,
+): SearchPlaylist {
   const flex = get_flex_column_item(result, 0);
   const flex1 = get_flex_column_item(result, 1);
 
   const title = j(flex, TEXT_RUN);
 
-  const authors = parse_song_artists_runs(flex1.text.runs.slice(0, -1));
+  const authors = parse_song_artists_runs(
+    flex1.text.runs.slice(has_label ? 2 : 0, -1),
+  );
 
   return {
     type: "playlist",
@@ -380,19 +271,83 @@ export function parse_search_playlist(result: any) {
   };
 }
 
-export function parse_search_content(result: any) {
-  return result;
+export interface SearchRadio {
+  type: "radio";
+  title: string;
+  videoId: string;
+  playlistId: string;
+  thumbnails: Thumbnail[];
 }
 
-export function parse_search_results2(
+export function parse_search_radio(result: any): SearchRadio {
+  const flex = get_flex_column_item(result, 0);
+  const title = j(flex, TEXT_RUN);
+
+  return {
+    type: "radio",
+    title: j(title, "text"),
+    videoId: j(result, NAVIGATION_VIDEO_ID),
+    playlistId: j(result, NAVIGATION_PLAYLIST_ID),
+    thumbnails: j(result, THUMBNAILS),
+  };
+}
+
+export type SearchContent =
+  | SearchAlbum
+  | SearchSong
+  | SearchVideo
+  | SearchArtist
+  | SearchPlaylist
+  | SearchRadio;
+
+export function parse_search_content(
+  result: any,
+  upload = false,
+): SearchContent {
+  const flex1 = get_flex_column_item(result, 1);
+
+  // uploads artist won't have the second flex column
+  const entity = flex1 ? __(j(flex1, TEXT_RUN_TEXT).toLowerCase()) : "artist";
+
+  let parser: (e: any, has_label?: boolean) => SearchContent;
+
+  switch (entity) {
+    case "station":
+      parser = parse_search_radio;
+      break;
+    case "playlist":
+      parser = parse_search_playlist;
+      break;
+    case "artist":
+      parser = parse_search_artist;
+      break;
+    case "song":
+      parser = parse_search_song;
+      break;
+    case "video":
+      parser = parse_search_video;
+      break;
+    default:
+      parser = (e: any) => {
+        if (upload && flex1.text.runs.length > 3) {
+          return parse_search_song(e);
+        }
+
+        return parse_search_album(e);
+      };
+  }
+
+  return parser(result, true);
+}
+
+export function parse_search_results(
   results: any[],
   scope: Scope | null,
   filter: Filter | null,
-  bottom_params: string | null,
 ) {
-  const search_results: any[] = [];
+  const search_results: SearchContent[] = [];
 
-  let parser: (e: any) => any;
+  let parser: (e: any) => SearchContent;
 
   if (scope == null || scope == "library") {
     switch (filter) {
@@ -417,7 +372,7 @@ export function parse_search_results2(
         parser = parse_search_content;
     }
   } else {
-    parser = parse_search_content;
+    parser = (e: any) => parse_search_content(e, true);
   }
 
   for (const result of results) {

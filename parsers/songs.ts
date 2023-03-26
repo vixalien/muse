@@ -57,7 +57,7 @@ export interface SongRuns {
   year: string | null;
 }
 
-export function parse_song_runs(runs: any[]) {
+export function parse_song_runs(runs: any[], slice_start = 0) {
   const parsed: SongRuns = {
     artists: [],
     album: null,
@@ -67,8 +67,10 @@ export function parse_song_runs(runs: any[]) {
     year: null,
   };
 
-  for (const i in runs) {
-    const run = runs[i];
+  const sliced = runs.slice(slice_start);
+
+  for (const i in sliced) {
+    const run = sliced[i];
 
     // uneven items are always separators
     if (Number(i) % 2) {
