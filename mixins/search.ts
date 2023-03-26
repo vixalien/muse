@@ -349,34 +349,61 @@ export async function search(
 
   // limit only works when there's a filter
   if (continuation && filter) {
-    const continued_data = await get_continuations(
-      continuation,
-      "musicShelfContinuation",
-      limit -
+    const continued_data = await get_more_search_results({
+      scope: scope ?? null,
+      filter,
+      limit: limit -
         search_results.categories.reduce(
           (acc, curr) => acc + curr.results.length,
           0,
         ),
-      (params) => {
-        return request_json(endpoint, { data, params });
-      },
-      (contents) => {
-        return parse_search_results(contents, scope ?? null, filter ?? null);
-      },
+      continuation,
+    });
+
+    let category = search_results.categories.find((category) =>
+      category.title === filter
     );
 
-    const category = search_results.categories.find((category) =>
-      category.title === filter
-    ) ?? search_results.categories[
-      search_results.categories.push({
-        title: filter,
-        results: [],
-      })
-    ];
+    if (!category) {
+      category = search_results.categories[
+        search_results.categories.push({
+          title: filter,
+          results: [],
+        }) - 1
+      ];
+    }
 
     search_results.continuation = continued_data.continuation;
-    category.results.push(...continued_data.items);
+    category.results.push(...continued_data.results);
   }
 
   return search_results;
+}
+
+export interface MoreSearchResultOptions extends Required<PaginationOptions> {
+  filter: Filter | null;
+  scope: Scope | null;
+}
+
+export async function get_more_search_results(
+  options: Required<MoreSearchResultOptions>,
+) {
+  const { limit = 20, continuation, scope, filter } = options;
+
+  const continued_data = await get_continuations(
+    continuation,
+    "musicShelfContinuation",
+    limit,
+    (params) => {
+      return request_json("search", { params });
+    },
+    (contents) => {
+      return parse_search_results(contents, scope ?? null, filter ?? null);
+    },
+  );
+
+  return {
+    continuation: continued_data.continuation,
+    results: continued_data.items as SearchContent[],
+  };
 }
