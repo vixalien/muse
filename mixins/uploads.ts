@@ -5,6 +5,7 @@ import {
   SINGLE_COLUMN_TAB,
   TITLE_TEXT,
 } from "../nav.ts";
+import { AlbumHeader, parse_album_header } from "../parsers/albums.ts";
 import {
   fetch_library_contents,
   parse_albums,
@@ -13,7 +14,7 @@ import {
   ParsedLibraryArtist,
 } from "../parsers/library.ts";
 import { parse_uploaded_items, UploadedItem } from "../parsers/uploads.ts";
-import { j } from "../util.ts";
+import { j, sum_total_duration } from "../util.ts";
 import { request_json } from "./_request.ts";
 import {
   get_library_items,
@@ -124,4 +125,30 @@ export async function get_library_upload_artist(
   }
 
   return artist;
+}
+
+export interface LibraryUploadAlbum extends AlbumHeader {
+  tracks: UploadedItem[];
+}
+
+export async function get_library_upload_album(
+  browseId: string,
+): Promise<LibraryUploadAlbum> {
+  await check_auth();
+
+  const data = { browseId };
+  const endpoint = "browse";
+
+  const json = await request_json(endpoint, { data });
+
+  const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST_ITEM, MUSIC_SHELF);
+
+  const album: LibraryUploadAlbum = {
+    ...parse_album_header(json),
+    tracks: parse_uploaded_items(results.contents),
+  };
+
+  album.duration_seconds = sum_total_duration(album);
+
+  return album;
 }

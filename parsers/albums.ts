@@ -43,7 +43,7 @@ export function parse_album_header(response: any) {
     title: j(header, TITLE_TEXT),
     album_type: j(header, SUBTITLE).toLowerCase(),
     thumbnails: j(header, THUMBNAIL_CROPPED),
-    isExplicit: j(header, "subtitleBadges", BADGE_PATH) != null,
+    isExplicit: jo(header, "subtitleBadges", BADGE_PATH) != null,
     description: null,
     trackCount: null,
     duration: null,
