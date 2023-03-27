@@ -18,6 +18,7 @@ import {
   SECTION_LIST,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN_TAB,
+  THUMBNAIL,
   THUMBNAILS,
   TITLE,
   TITLE_TEXT,
@@ -51,6 +52,7 @@ import { request_json } from "./_request.ts";
 export interface Home {
   continuation: string | null;
   moods: Mood[];
+  thumbnails: Thumbnail[];
   results: MixedContent[];
 }
 
@@ -75,6 +77,7 @@ export async function get_home(
     continuation: null,
     results: [],
     moods: [],
+    thumbnails: [],
   };
 
   let section_list;
@@ -98,6 +101,13 @@ export async function get_home(
     );
 
     home.results = parse_mixed_content(results);
+
+    home.thumbnails = j(
+      json,
+      "background",
+      "musicThumbnailRenderer",
+      THUMBNAIL,
+    );
   }
 
   if (home.continuation) {
