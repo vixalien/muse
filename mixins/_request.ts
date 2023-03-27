@@ -3,6 +3,7 @@ import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 import { get_option } from "../setup.ts";
 
 import { RequestInit } from "../request.ts";
+import { use_proxy } from "../util.ts";
 
 export function get_auth_headers() {
   return get_option("auth").get_headers();
@@ -11,10 +12,12 @@ export function get_auth_headers() {
 export async function request(endpoint: string, options: RequestInit) {
   const auth_headers = await get_auth_headers();
 
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${CONSTANTS2.API_URL}/${endpoint}`;
+
   return get_option("client").request(
-    endpoint.startsWith("http")
-      ? endpoint
-      : `${CONSTANTS2.API_URL}/${endpoint}`,
+    use_proxy(url),
     {
       method: options.method || "post",
       data: options.method === "get" ? undefined : {

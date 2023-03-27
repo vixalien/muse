@@ -25,14 +25,22 @@ get_song("dQw4w9WgXcQ")
 
 ### Browser
 
-Muse isn't currently very browser friendly because you will get CORS errors when
-trying to use the library. This is because the library uses the fetch api to
-make requests, and the browser will not allow you to make requests to the
-youtube music API, you will need to proxy the requests through a server (planned
-feature)
+You'll need to use a CDN that supports ES modules, such as
+[esm.sh](https://esm.sh/), [jspm.io](https://jspm.io/) or
+[skypack.dev](https://skypack.dev/).
+
+You'll also need to use a proxy server to get around CORS errors. It's a good
+idea to self host the proxy server
+([cors-anywhere](https://github.com/Rob--W/cors-anywhere) and
+[deno_deploy_cors_proxy](https://github.com/justjavac/deno_deploy_cors_proxy/)
+are good options).
 
 ```js
-import { search } from "https://esm.sh/libmuse";
+import { search, set_option } from "https://esm.sh/libmuse";
+// import { search, set_option } from "https://jspm.dev/npm:libmuse";
+// import { search, set_option } from "https://cdn.skypack.dev/libmuse";
+
+set_option("proxy", "https://proxy.example.com/");
 
 search("top radio")
   .then((data) => {

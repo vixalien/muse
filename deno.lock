@@ -82,8 +82,8 @@
     "https://deno.land/x/ts_morph@17.0.1/common/ts_morph_common.js": "49a79124b941ba2b35d81ac9eb90fc33c957b2640cdb97569c1941bac5a3bbdb",
     "https://deno.land/x/ts_morph@17.0.1/common/typescript.d.ts": "57e52a0882af4e835473dda27e4316cc31149866970210f9f79b940e916b7838",
     "https://deno.land/x/ts_morph@17.0.1/common/typescript.js": "5dd669eb199ee2a539924c63a92e23d95df43dfe2fbe3a9d68c871648be1ad5e",
-    "https://esm.sh/jsonpath-plus@7.2.0": "05c20ad600722f56ce1f4fc0fedba39674e7ed0d258f4ba109cd455d6990783a",
-    "https://esm.sh/v110/jsonpath-plus@7.2.0/deno/jsonpath-plus.js": "ff119f68e17fcca318dec7bfc4bd2bfcc0857c763c03e69dc9066d31929f5399",
-    "https://esm.sh/v110/jsonpath-plus@7.2.0/src/jsonpath.d.ts": "12e131b5f9ecafe5d0d3386cd33ce57842ecad58a486e7e5e242f4e3b1ec404b"
+    "https://esm.sh/jsonpath-plus@7.2.0": "491370a926a5e289d8db369dca216e7eaa6b4856bb053d45d980df83bbfe0578",
+    "https://esm.sh/v113/jsonpath-plus@7.2.0/deno/jsonpath-plus.mjs": "bcd1bf9e282d271834229dc1fd6e6a8d444250309d1abdc2cd37684faafcb4cc",
+    "https://esm.sh/v113/jsonpath-plus@7.2.0/src/jsonpath.d.ts": "12e131b5f9ecafe5d0d3386cd33ce57842ecad58a486e7e5e242f4e3b1ec404b"
   }
 }

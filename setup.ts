@@ -9,6 +9,7 @@ export interface Options {
   language: string;
   location: string;
   debug: boolean;
+  proxy: string | null;
 }
 
 const default_store = new MemoryStore();
@@ -24,6 +25,7 @@ const options: Options = {
   language: "en",
   location: "US",
   debug: false,
+  proxy: null,
 };
 
 export function get_options() {
