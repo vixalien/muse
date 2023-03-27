@@ -18,6 +18,9 @@ export enum ERROR_CODE {
   /* Locales */
   UNSUPPORTED_LOCATION,
   UNSUPPORTED_LANGUAGE,
+
+  /* Uploads */
+  UPLOADS_INVALID_FILETYPE,
 }
 
 export class MuseError extends Error {

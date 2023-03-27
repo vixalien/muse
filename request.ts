@@ -14,8 +14,9 @@ export interface RequestInit {
     "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS" | "TRACE"
   >;
   headers?: Record<string, string>;
-  data?: Record<string, any>;
+  data?: Record<string, any> | Uint8Array;
   params?: Record<string, string>;
+  raw_data?: boolean;
 }
 
 export type RequestFunction = (
@@ -47,6 +48,8 @@ export class FetchClient extends RequestClient {
     (new URLSearchParams(options.params)).forEach((value, key) => {
       url.searchParams.set(key, value);
     });
+
+    console.log("constructing headers", options.headers);
 
     const headers = new Headers(options.headers);
 
@@ -85,7 +88,7 @@ export class FetchClient extends RequestClient {
 
     const hasData = options.data != null;
 
-    if (Object.keys(config).length > 0 && hasData) {
+    if (!options.raw_data && Object.keys(config).length > 0 && hasData) {
       options.data = options.data ?? {};
       options.data.context = options.data.context ?? {};
       options.data.context.client = options.data.context.client ?? {};
@@ -102,7 +105,11 @@ export class FetchClient extends RequestClient {
     const response = await fetch(url, {
       method: options.method,
       headers,
-      body: hasData ? JSON.stringify(options.data) : undefined,
+      body: hasData
+        ? (options.raw_data || options.data instanceof Uint8Array)
+          ? options.data as Uint8Array
+          : JSON.stringify(options.data)
+        : undefined,
     });
 
     debug("DONE", options.method, path);
