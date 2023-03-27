@@ -7,10 +7,19 @@ A library to interact with the YouTube Music (InnerTube) api.
 
 ## Usage
 
+Don't forget to replace `VERSION` with the
+[latest version](https://github.com/vixalien/muse/tags)
+
 ### Deno
 
 ```ts
-import { get_song, search } from "https://deno.land/x/muse/mod.ts";
+import { get_song, search } from "https://deno.land/x/muse@VERSION/mod.ts";
+
+// you can also use the latest version (not recommended) with
+// import { get_song, search } from "https://deno.land/x/muse/mod.ts";
+
+// you can also import directly from github
+// import { get_song, search } from "https://raw.githubusercontent.com/vixalien/muse/VERSION/mod.ts";
 
 search("drake")
   .then((data) => {
@@ -36,9 +45,10 @@ idea to self host the proxy server
 are good options).
 
 ```js
-import { search, set_option } from "https://esm.sh/libmuse";
-// import { search, set_option } from "https://jspm.dev/npm:libmuse";
-// import { search, set_option } from "https://cdn.skypack.dev/libmuse";
+import { search, set_option } from "https://esm.sh/libmuse@VERSION";
+
+// import { search, set_option } from "https://jspm.dev/npm:libmuse@VERSION";
+// import { search, set_option } from "https://cdn.skypack.dev/libmuse@VERSION";
 
 set_option("proxy", "https://proxy.example.com/");
 
@@ -84,8 +94,9 @@ Here's the flow:
 3. Get the OAuth token & refresh tokens
 
 ```ts
-import { get_option, setup } from "https://deno.land/x/muse/mod.ts";
-import { RequiresLoginEvent } from "https://deno.land/x/muse/auth.ts";
+import { get_option, setup } from "https://deno.land/x/muse@VERSION/mod.ts";
+import { RequiresLoginEvent } from "https://deno.land/x/muse@VERSION/auth.ts";
+
 /*
 node imports:
 
@@ -147,14 +158,15 @@ Youtube TV login codes.
 You can pass in a storage object to the client to persist the auth token.
 
 ```ts
-import { setup } from "https://deno.land/x/muse/mod.ts";
+import { setup } from "https://deno.land/x/muse@VERSION/mod.ts";
 import {
   DenoFileStore,
   get_default_store,
   LocalStorageStore,
   MemoryStore,
   Store,
-} from "https://deno.land/x/muse/store.ts";
+} from "https://deno.land/x/muse@VERSION/store.ts";
+
 /*
 npm imports:
 
