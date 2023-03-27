@@ -20,6 +20,7 @@ export class DenoFileStore extends Store {
     super();
     // Load the file if it exists
     try {
+      // dnt-shim-ignore
       const content = Deno.readTextFileSync(path);
 
       const json = JSON.parse(content);
@@ -54,6 +55,7 @@ export class DenoFileStore extends Store {
   private save() {
     const json = JSON.stringify(Object.fromEntries(this.map), null, 2);
 
+    // dnt-shim-ignore
     Deno.writeTextFileSync(this.path, json);
   }
 }
@@ -121,8 +123,10 @@ export class LocalStorageStore extends Store {
 }
 
 export const get_default_store = (): Store => {
+  // dnt-shim-ignore
   if ("Deno" in globalThis) {
     return new DenoFileStore("muse-store.json");
+    // dnt-shim-ignore
   } else if ("localStorage" in globalThis) {
     return new LocalStorageStore();
   } else {
