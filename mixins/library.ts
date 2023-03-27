@@ -9,7 +9,7 @@ import {
   MTRIR,
   SECTION_LIST,
   SECTION_LIST_CONTINUATION,
-  SINGLE_COLUMN_TAB,
+  SINGLE_COLUMN,
 } from "../nav.ts";
 import {
   MixedItem,
@@ -30,7 +30,7 @@ import {
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { LikeStatus } from "../parsers/songs.ts";
-import { j } from "../util.ts";
+import { j, jo } from "../util.ts";
 import { Song } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions, Playlist } from "./playlist.ts";
 import {
@@ -55,15 +55,17 @@ export interface Library {
   results: MixedItem[];
 }
 
-export async function get_library(
+export async function get_library_items(
+  browseId: string,
+  tab_index: number,
   options: GetLibraryOptions = {},
 ): Promise<Library> {
-  const { order, limit = 25, continuation } = options;
+  const { order, limit = 20, continuation } = options;
 
   await check_auth();
   const endpoint = "browse";
   const data: Record<string, unknown> = {
-    browseId: "FEmusic_library_landing",
+    browseId,
   };
 
   const order_continuation = prepare_library_sort_params(order);
@@ -85,9 +87,24 @@ export async function get_library(
     let grid: any;
 
     if (order_continuation) {
-      grid = j(json, SECTION_LIST_CONTINUATION, "[0]", GRID);
+      grid = j(
+        json,
+        SECTION_LIST_CONTINUATION,
+        `[${tab_index.toString()}]`,
+        GRID,
+      );
     } else {
-      grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST, "[0]", GRID);
+      console.log("here");
+      grid = j(
+        json,
+        SINGLE_COLUMN,
+        "tabs",
+        `[${tab_index.toString()}]`,
+        "tabRenderer.content",
+        SECTION_LIST,
+        "[0]",
+        GRID,
+      );
     }
 
     const results = j(grid, "items") as any[];
@@ -96,7 +113,7 @@ export async function get_library(
       parse_mixed_item(j(result, MTRIR))
     );
 
-    library.continuation = j(
+    library.continuation = jo(
       grid,
       "continuations[0].nextContinuationData.continuation",
     );
@@ -186,6 +203,12 @@ export async function get_library_playlists(
   }
 
   return library_playlists;
+}
+
+export function get_library(
+  options: GetLibraryOptions = {},
+): Promise<Library> {
+  return get_library_items("FEmusic_library_landing", 0, options);
 }
 
 export interface GetLibrarySongOptions extends PaginationAndOrderOptions {

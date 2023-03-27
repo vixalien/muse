@@ -285,9 +285,10 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 
 ### uploads
 
-- [ ] get library upload songs
-- [ ] get library upload artists
-- [ ] get library upload albums
+- [x] get library uploads
+- [x] get library upload songs
+- [x] get library upload artists
+- [x] get library upload albums
 - [ ] get library upload artist
 - [ ] get library upload album
 - [ ] upload song

@@ -73,7 +73,7 @@ export interface ParsedLibraryAlbum extends SongRuns {
   playlistId: string | null;
   title: string;
   thumbnails: Thumbnail[];
-  type: AlbumType | null;
+  album_type: AlbumType | null;
 }
 
 export function parse_albums(results: any) {
@@ -88,11 +88,11 @@ export function parse_albums(results: any) {
       playlistId: jo(data, MENU_PLAYLIST_ID),
       title: j(data, TITLE_TEXT),
       thumbnails: j(data, THUMBNAIL_RENDERER),
-      type: null,
+      album_type: null,
     };
 
     if ("runs" in data.subtitle) {
-      album.type = j(data, SUBTITLE);
+      album.album_type = j(data, SUBTITLE);
     }
 
     albums.push(album);

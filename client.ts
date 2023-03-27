@@ -1,5 +1,15 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_option, search, setup } from "./mod.ts";
+import { get_library } from "./mixins/library.ts";
+import {
+  get_library_upload_artists,
+  get_library_uploads,
+} from "./mixins/uploads.ts";
+import {
+  get_library_upload_albums,
+  get_library_upload_songs,
+  get_option,
+  setup,
+} from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -118,7 +128,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-search("rich flex")
+get_library()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
