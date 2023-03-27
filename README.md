@@ -292,7 +292,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get library upload artist
 - [x] get library upload album
 - [x] upload song (doesn't currectly work because the TV client can't do uploads)
-- [ ] delete upload entity
+- [x] delete upload entity
 
 ## Acknowledgements
 

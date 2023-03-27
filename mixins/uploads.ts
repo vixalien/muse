@@ -206,3 +206,18 @@ export async function upload_song(
 
   return response;
 }
+
+export async function delete_upload_entity(entityId: string) {
+  await check_auth();
+
+  const json = await request_json("music/delete_privately_owned_entity", {
+    data: {
+      entityId:
+        entityId.startsWith("FEmusic_library_privately_owned_release_detail")
+          ? entityId.slice(47)
+          : entityId,
+    },
+  });
+
+  return json;
+}
