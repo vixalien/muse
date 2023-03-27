@@ -162,6 +162,7 @@ export interface MixedContent {
   thumbnails: Thumbnail[] | null;
   browseId: string | null;
   contents: string | MixedItem[];
+  display: "list" | null;
 }
 
 export function parse_mixed_content(rows: any[]) {
@@ -172,7 +173,8 @@ export function parse_mixed_content(rows: any[]) {
       contents,
       browseId = null,
       subtitle = null,
-      thumbnails = null;
+      thumbnails = null,
+      display: MixedContent["display"] = null;
 
     if (DESCRIPTION_SHELF in row) {
       const results = j(row, DESCRIPTION_SHELF);
@@ -212,6 +214,7 @@ export function parse_mixed_content(rows: any[]) {
           }
         } else {
           const data = j(result, MRLIR);
+          display = "list";
 
           item = {
             type: "song",
@@ -229,6 +232,7 @@ export function parse_mixed_content(rows: any[]) {
       thumbnails,
       browseId,
       contents,
+      display,
     });
   }
 
