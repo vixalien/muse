@@ -23,6 +23,23 @@ get_song("dQw4w9WgXcQ")
   });
 ```
 
+### Browser
+
+Muse isn't currently very browser friendly because you will get CORS errors when
+trying to use the library. This is because the library uses the fetch api to
+make requests, and the browser will not allow you to make requests to the
+youtube music API, you will need to proxy the requests through a server (planned
+feature)
+
+```js
+import { search } from "https://esm.sh/libmuse";
+
+search("top radio")
+  .then((data) => {
+    console.log("search results", data);
+  });
+```
+
 ### Node
 
 First install using your preferred package manager (npm, yarn, pnpm etc.)
