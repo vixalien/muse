@@ -49,8 +49,6 @@ export class FetchClient extends RequestClient {
       url.searchParams.set(key, value);
     });
 
-    console.log("constructing headers", options.headers);
-
     const headers = new Headers(options.headers);
 
     const config: Record<string, any> = {};
