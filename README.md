@@ -289,7 +289,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get library upload songs
 - [x] get library upload artists
 - [x] get library upload albums
-- [ ] get library upload artist
+- [x] get library upload artist
 - [ ] get library upload album
 - [ ] upload song
 - [ ] delete upload entity
