@@ -1,9 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import {
-  get_more_search_results,
-  get_option,
-  setup,
-} from "./mod.ts";
+import { get_option, search, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -122,13 +118,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_more_search_results({
-  continuation:
-    "Ep4DEgVoZWxsbxqUA0VnV0tBUUlJQVVoa2Fnd1FBeEFFRUFrUURoQUtFQVdDQVF0T00yMXFWSEJhYXpOQmI0SUJDM05PZVRGbVVYUjJVMTgwZ2dFTGF6bFRWSGxqV1ZWRFpuT0NBUXR2VVdGM1lqQjNPVkV5WjRJQkMzSktOVTFKWVRKMlMycFpnZ0VMVGxsc2RYcEJYMnRKUjBtQ0FRczNkMUpwVG1wYVJVYzVWWUlCQzJOVVgzQldaWE0zYVdGSmdnRUxlWGRhY1VKSFNFUlViRUdDQVFzMWFYQklaWHBuTnpWS1k0SUJDeTE1U2xCdE9HdHRaSEpyZ2dFTGIweHZVR3RuUWxvNVR6Q0NBUXN5VVhoS1RuQkZhbGhKWjRJQkN6TXlRbGxTUm1seVIyWjNnZ0VMYUZKeE5URkZaV0pTUkRDQ0FRdDNibGhxZUVoV1MyZERNSUlCQzFKcVNHdFRSMk4wVDJSQmdnRUxRMVUyWVhBeWJtcFRWRm1DQVF0cWJFVlFTRnBSUW01SGM0SUJDM3BxZWxKTGJFWndZemRCGPHq0C4%3D",
-  filter: "songs",
-  limit: 1,
-  scope: null,
-})
+search("rich flex")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

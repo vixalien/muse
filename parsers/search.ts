@@ -3,15 +3,21 @@ import {
   find_object_by_key,
   MENU_ITEMS,
   MRLIR,
+  NAVIGATION_BROWSE,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PLAYLIST_ID,
   NAVIGATION_VIDEO_ID,
   NAVIGATION_VIDEO_TYPE,
+  PAGE_TYPE,
   PLAY_BUTTON,
+  SUBTITLE2,
+  SUBTITLE_BADGE_LABEL,
   TEXT_RUN,
   TEXT_RUN_TEXT,
   TEXT_RUNS,
   THUMBNAILS,
+  TITLE,
+  TITLE_TEXT,
   TOGGLE_MENU,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
@@ -133,7 +139,7 @@ export interface SearchAlbum {
   isExplicit: boolean;
   thumbnails: Thumbnail[];
   album_type: AlbumType;
-  year: string;
+  year: string | null;
   artists: ArtistRun[];
 }
 
@@ -303,11 +309,13 @@ export type SearchContent =
 export function parse_search_content(
   result: any,
   upload = false,
+  passed_entity?: string,
 ): SearchContent {
   const flex1 = get_flex_column_item(result, 1);
 
   // uploads artist won't have the second flex column
-  const entity = flex1 ? __(j(flex1, TEXT_RUN_TEXT).toLowerCase()) : "artist";
+  const entity = passed_entity ||
+    (flex1 ? __(j(flex1, TEXT_RUN_TEXT).toLowerCase()) : "artist");
 
   let parser: (e: any, has_label?: boolean) => SearchContent;
 
@@ -382,4 +390,145 @@ export function parse_search_results(
   }
 
   return search_results;
+}
+
+export function parse_top_result_more(result: any) {
+  const more: SearchContent[] = [];
+
+  if (!("contents" in result)) return more;
+
+  const contents =
+    j(result, "contents").map((content: any) =>
+      content.musicResponsiveListItemRenderer
+    ).filter(Boolean) ?? [];
+
+  if (contents && contents.length > 0) {
+    let last_entity: string | null = null;
+
+    for (const content of contents) {
+      const flex1 = get_flex_column_item(content, 1);
+
+      const entity = flex1
+        ? __(jo(flex1, TEXT_RUN_TEXT).toLowerCase()) as string
+        : null;
+
+      if (entity) {
+        more.push(parse_search_content(content, false));
+
+        last_entity = entity;
+      } else {
+        try {
+          more.push(
+            parse_search_content(content, false, last_entity ?? undefined),
+          );
+        } catch {
+          // try as song
+          try {
+            more.push(
+              parse_search_content(content, false, "song"),
+            );
+          } catch {
+            // ignore
+          }
+        }
+      }
+    }
+  }
+
+  return more;
+}
+
+export interface TopResultArtist extends SearchArtist {
+  more: SearchContent[];
+}
+
+export function parse_top_result_artist(result: any): TopResultArtist {
+  const subscribers = jo(result, SUBTITLE2)?.split(" ")[0];
+
+  const buttons = j(result, "buttons").map((button: any) =>
+    button.buttonRenderer
+  );
+
+  const shuffleButton = buttons.find((button: any) =>
+    button.icon.iconType === "MUSIC_SHUFFLE"
+  );
+  const radioButton = buttons.find((button: any) =>
+    button.icon.iconType === "MIX"
+  );
+
+  return {
+    type: "artist",
+    name: j(result, TITLE_TEXT),
+    browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
+    subscribers,
+    thumbnails: j(result, THUMBNAILS),
+    shuffleId: j(shuffleButton, "command.watchPlaylistEndpoint.playlistId"),
+    radioId: j(radioButton, "command.watchPlaylistEndpoint.playlistId"),
+    more: parse_top_result_more(result),
+  };
+}
+
+export interface TopResultSong extends SearchSong {
+  more: SearchContent[];
+}
+
+export function parse_top_result_song(result: any): TopResultSong {
+  const toggle_menu = find_object_by_key(
+    j(result, MENU_ITEMS),
+    TOGGLE_MENU,
+  );
+
+  return {
+    type: "song",
+    title: j(result, TITLE_TEXT),
+    videoId: j(result, TITLE, NAVIGATION_VIDEO_ID),
+    playlistId: jo(result, TITLE, NAVIGATION_PLAYLIST_ID),
+    thumbnails: j(result, THUMBNAILS),
+    isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
+    feedbackTokens: toggle_menu ? parse_song_menu_tokens(toggle_menu) : null,
+    videoType: j(result, TITLE, "navigationEndpoint", NAVIGATION_VIDEO_TYPE),
+    ...parse_song_runs(result.subtitle.runs),
+    more: parse_top_result_more(result),
+  };
+}
+
+export interface TopResultAlbum extends SearchAlbum {
+  more: SearchContent[];
+}
+
+export function parse_top_result_album(result: any): TopResultAlbum {
+  return {
+    type: "album",
+    title: j(result, TITLE_TEXT),
+    browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
+    thumbnails: j(result, THUMBNAILS),
+    isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
+    // TODO: stop lowercasing for no reason (album_type, category title etc...)
+    album_type: result.subtitle.runs[0].text,
+    year: null,
+    artists: parse_song_artists_runs(result.subtitle.runs.slice(2, -1)),
+    more: parse_top_result_more(result),
+  };
+}
+
+export type TopResult = TopResultSong | TopResultAlbum | TopResultArtist;
+
+export function parse_top_result(result: any) {
+  const page_type = jo(result, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
+
+  switch (page_type) {
+    case "MUSIC_PAGE_TYPE_ARTIST":
+      return parse_top_result_artist(result);
+    case "MUSIC_PAGE_TYPE_ALBUM":
+      return parse_top_result_album(result);
+    default:
+      if (
+        jo(result, TITLE, "navigationEndpoint", NAVIGATION_VIDEO_TYPE) != null
+      ) {
+        return parse_top_result_song(result);
+      } else {
+        console.warn("unsupported search top result", page_type);
+        return null;
+      }
+  }
 }

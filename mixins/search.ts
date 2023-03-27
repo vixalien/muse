@@ -17,6 +17,7 @@ import {
   filters,
   get_search_params,
   parse_search_results,
+  parse_top_result,
   Scope,
   scopes,
   SearchContent,
@@ -25,6 +26,7 @@ import { j, jo } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
 import { PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
+import { TopResult } from "../mod.ts";
 
 export type {
   SearchAlbum,
@@ -34,6 +36,10 @@ export type {
   SearchRadio,
   SearchSong,
   SearchVideo,
+  TopResult,
+  TopResultAlbum,
+  TopResultArtist,
+  TopResultSong,
 } from "../parsers/search.ts";
 
 export type SearchRuns = {
@@ -182,6 +188,7 @@ export interface SearchOptions extends PaginationOptions {
 }
 
 export interface SearchResults {
+  top_result: TopResult | null;
   did_you_mean: { search: SearchRuns; query: string } | null;
   categories: {
     title: string;
@@ -218,6 +225,7 @@ export async function search(
   const endpoint = "search";
 
   const search_results: SearchResults = {
+    top_result: null,
     did_you_mean: null,
     categories: [],
     continuation: null,
@@ -302,8 +310,12 @@ export async function search(
           continuation = res.musicShelfRenderer;
         }
       } else if ("musicCardShelfRenderer" in res) {
+        console.log("got top result");
+
         // top result with details
-        // const results = j(res, "musicCardShelfRenderer.contents");
+        search_results.top_result = parse_top_result(
+          j(res, "musicCardShelfRenderer"),
+        );
       } else if ("itemSectionRenderer" in res) {
         const did_you_mean = jo(
           res,
@@ -360,6 +372,9 @@ export async function search(
       continuation,
     });
 
+    // TODO: don't lowercase translations
+    // and this wont work when filters are translated (should default)
+    // to the first category
     let category = search_results.categories.find((category) =>
       category.title === filter
     );
