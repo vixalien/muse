@@ -101,12 +101,12 @@ import { RequiresLoginEvent } from "https://deno.land/x/muse@VERSION/auth.ts";
 node imports:
 
 import { get_option, setup } from "libmuse";
-import { RequiresLoginEvent } from "libmuse/auth";
+import { RequiresLoginEvent } from "libmuse/auth.js";
 
 commonjs imports:
 
 const { get_option, setup } = require("libmuse");
-const { RequiresLoginEvent } = require("libmuse/auth");
+const { RequiresLoginEvent } = require("libmuse/auth.js");
 */
 
 const auth = get_option("auth");
@@ -177,7 +177,7 @@ import {
   LocalStorageStore,
   MemoryStore,
   Store,
-} from "libmuse/store";
+} from "libmuse/store.js";
 
 commonjs imports:
 
@@ -188,7 +188,7 @@ const {
   LocalStorageStore,
   MemoryStore,
   Store,
-} = require("libmuse/store");
+} = require("libmuse/store.js");
 */
 
 // you can use the default store, which is DenoFileStore if available, then LocalStorageStore, then MemoryStore
