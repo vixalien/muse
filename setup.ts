@@ -28,7 +28,7 @@ const options: Options = {
   location: "US",
   debug: false,
   proxy: null,
-  visitor_id: encodeURIComponent(atob(randomString(22))),
+  visitor_id: encodeURIComponent(btoa(randomString(22))),
 };
 
 export function get_options() {
