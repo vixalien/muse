@@ -49,6 +49,17 @@ import { Thumbnail } from "./playlist.ts";
 import { PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
+export type {
+  FlatSong,
+  MixedContent,
+  MixedItem,
+  ParsedAlbum,
+  ParsedPlaylist,
+  ParsedSong,
+  RelatedArtist,
+  WatchPlaylist,
+} from "../parsers/browsing.ts";
+
 export interface Home {
   continuation: string | null;
   moods: Mood[];
