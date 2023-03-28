@@ -1,5 +1,4 @@
 import { Authenticator, PureAuthenticatorOptions } from "./auth.ts";
-import { randomString } from "./mixins/utils.ts";
 import { FetchClient, RequestClient } from "./request.ts";
 import { MemoryStore, Store } from "./store.ts";
 
@@ -11,7 +10,7 @@ export interface Options {
   location: string;
   debug: boolean;
   proxy: string | null;
-  visitor_id: string;
+  visitor_id: string | null;
 }
 
 const default_store = new MemoryStore();
@@ -28,7 +27,7 @@ const options: Options = {
   location: "US",
   debug: false,
   proxy: null,
-  visitor_id: encodeURIComponent(btoa(randomString(22))),
+  visitor_id: null,
 };
 
 export function get_options() {
@@ -59,6 +58,13 @@ export function setup(passed_options: Partial<SetupOptions> = {}) {
   delete options_without_auth.auth;
 
   set_options(options_without_auth as Omit<Options, "auth">);
+
+  if (passed_options.store) {
+    const visitor_id = passed_options.store.get("visitor_id");
+    if (visitor_id) {
+      set_option("visitor_id", visitor_id as string);
+    }
+  }
 
   if (passed_options.auth || passed_options.client || passed_options.store) {
     if (passed_options.auth instanceof Authenticator) {

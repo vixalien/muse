@@ -102,7 +102,9 @@ export class FetchClient extends RequestClient {
 
     const hasData = options.data != null;
 
-    headers.set("X-Goog-Visitor-Id", get_option("visitor_id"));
+    const visitor_id = get_option("visitor_id");
+
+    if (visitor_id) headers.set("X-Goog-Visitor-Id", visitor_id);
 
     if (!options.raw_data && hasData && !(options.data instanceof Uint8Array)) {
       if (Object.keys(config).length > 0) {
@@ -112,11 +114,13 @@ export class FetchClient extends RequestClient {
         });
       }
 
-      setNestedValue(
-        options.data!,
-        "context.client.visitorData",
-        get_option("visitor_id"),
-      );
+      if (visitor_id) {
+        setNestedValue(
+          options.data!,
+          "context.client.visitorData",
+          visitor_id,
+        );
+      }
     }
 
     // if (this.auth_header) headers.set("Authorization", this.auth_header);
