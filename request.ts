@@ -35,9 +35,23 @@ export abstract class RequestClient {
   }
 }
 
+export interface FetchInit {
+  method: string | undefined;
+  headers: Headers;
+  data: string | Uint8Array | undefined;
+}
+
 export class FetchClient extends RequestClient {
   constructor() {
     super();
+  }
+
+  do_request(url: string, options: FetchInit) {
+    return fetch(url, {
+      method: options.method,
+      headers: options.headers,
+      body: options.data,
+    });
   }
 
   async request(path: string, options: RequestInit) {
@@ -55,6 +69,8 @@ export class FetchClient extends RequestClient {
 
     const lang = get_option("language");
     const location = get_option("location");
+
+    // headers.set("X-Goog-Visitor-Id", get_option("visitor_id"));
 
     if (lang) {
       if (LOCALES.languages.findIndex((e) => e.value === lang) < 0) {
@@ -86,24 +102,31 @@ export class FetchClient extends RequestClient {
 
     const hasData = options.data != null;
 
-    if (!options.raw_data && Object.keys(config).length > 0 && hasData) {
-      options.data = options.data ?? {};
-      options.data.context = options.data.context ?? {};
-      options.data.context.client = options.data.context.client ?? {};
-      options.data.context.client = {
-        ...options.data.context.client,
-        ...config,
-      };
+    headers.set("X-Goog-Visitor-Id", get_option("visitor_id"));
+
+    if (!options.raw_data && hasData && !(options.data instanceof Uint8Array)) {
+      if (Object.keys(config).length > 0) {
+        setNestedValue(options.data!, "context.client", {
+          ...options.data!.context?.client,
+          ...config,
+        });
+      }
+
+      setNestedValue(
+        options.data!,
+        "context.client.visitorData",
+        get_option("visitor_id"),
+      );
     }
 
-    if (this.auth_header) headers.set("Authorization", this.auth_header);
+    // if (this.auth_header) headers.set("Authorization", this.auth_header);
 
     // debug(`Requesting ${options.method} with ${JSON.stringify(options)}`);
 
-    const response = await fetch(url, {
+    const response = await this.do_request(url.toString(), {
       method: options.method,
       headers,
-      body: hasData
+      data: hasData
         ? (options.raw_data || options.data instanceof Uint8Array)
           ? options.data as Uint8Array
           : JSON.stringify(options.data)
@@ -119,4 +142,23 @@ export class FetchClient extends RequestClient {
 
     return response;
   }
+}
+
+function setNestedValue(obj: Record<string, any>, path: string, value: any) {
+  const keys = path.split(".");
+  let currentObj = obj;
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (!Object.hasOwn(currentObj, key)) {
+      currentObj[key] = {};
+    }
+    if (i === keys.length - 1) {
+      currentObj[key] = value;
+    } else {
+      currentObj = currentObj[key];
+    }
+  }
+
+  return obj;
 }

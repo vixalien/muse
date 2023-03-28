@@ -1,4 +1,5 @@
 import { Authenticator, PureAuthenticatorOptions } from "./auth.ts";
+import { randomString } from "./mixins/utils.ts";
 import { FetchClient, RequestClient } from "./request.ts";
 import { MemoryStore, Store } from "./store.ts";
 
@@ -10,6 +11,7 @@ export interface Options {
   location: string;
   debug: boolean;
   proxy: string | null;
+  visitor_id: string;
 }
 
 const default_store = new MemoryStore();
@@ -26,6 +28,7 @@ const options: Options = {
   location: "US",
   debug: false,
   proxy: null,
+  visitor_id: encodeURIComponent(atob(randomString(22))),
 };
 
 export function get_options() {
