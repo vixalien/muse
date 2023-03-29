@@ -31,7 +31,7 @@ function get_thumbnail_url(thumbnails: any[]) {
 export async function get_search_strings(data: Record<string, any> = {}) {
   const response = await request_json("search", {
     // this is so that the first result is always a radio
-    data: { query: "world radio", params: "QgIIAQ%3D%3D", ...data },
+    data: { query: "1980s radio", params: "QgIIAQ%3D%3D", ...data },
   });
 
   return j(
@@ -62,7 +62,7 @@ export async function get_search_strings(data: Record<string, any> = {}) {
         first_data,
         "flexColumns.1.musicResponsiveListItemFlexColumnRenderer",
         TEXT_RUN_TEXT,
-      ).toLowerCase(),
+      ),
       id: jo(shelf, "bottomEndpoint.searchEndpoint.params"),
     };
   }).filter(Boolean)
@@ -109,7 +109,7 @@ export async function get_content_strings(
       return;
     }
 
-    return { title: title.toLowerCase(), id };
+    return { title, id };
   };
 
   const items = j(response, SINGLE_COLUMN_TAB, SECTION_LIST);
@@ -119,30 +119,31 @@ export async function get_content_strings(
 
 const base_map = new Map([
   // artist
-  ["albums", "albums"],
-  ["singles", "singles"],
-  ["videos", "videos"],
-  ["library", "from your library"],
-  ["featured", "featured on"],
-  ["playlists", "playlists"],
-  ["related", "fans might also like"],
+  ["albums", "Albums"],
+  ["singles", "Singles"],
+  ["videos", "Videos"],
+  ["library", "From your library"],
+  ["featured", "Featured on"],
+  ["playlists", "Playlists"],
+  ["related", "Fans might also like"],
   // explore
-  ["new albums", "new albums & singles"],
-  ["top songs", "top songs"],
-  ["moods", "moods & genres"],
-  ["trending", "trending"],
+  ["new albums", "New albums & singles"],
+  ["top songs", "Top songs"],
+  ["moods", "Moods & genres"],
+  ["trending", "Trending"],
   // charts
-  ["top songs", "top songs"],
-  ["top videos", "top music videos"],
-  ["top artists", "top artists"],
-  ["genres", "genres"],
+  ["top songs", "Top songs"],
+  ["top videos", "Top music videos"],
+  ["top artists", "Top artists"],
+  // TODO: YTM is misbehaving at the moment
+  ["genres", "Genres"],
   /// trending is duplicated
   // search
-  ["station", "station"],
-  ["playlist", "playlist"],
-  ["artist", "artist"],
-  ["song", "song"],
-  ["video", "video"],
+  ["station", "Station"],
+  ["playlist", "Playlist"],
+  ["artist", "Artist"],
+  ["song", "Song"],
+  ["video", "Video"],
 ]);
 
 export async function get_base_strings() {
@@ -177,7 +178,7 @@ export async function get_base_strings() {
   const ids = [...explore, ...charts, ...artist, ...search];
 
   base_map.forEach((value, key) => {
-    const item = ids.find((i) => i.title.toLowerCase() === value);
+    const item = ids.find((i) => i.title === value);
 
     if (!item) {
       console.error("missing", key, value);
@@ -190,6 +191,25 @@ export async function get_base_strings() {
 
   return id_map;
 }
+
+const known_params = new Map([
+  ["artist", [
+    "EgWKAQIgAWoMEAMQBBAJEA4QChAF",
+    "EgWKAQIgAWoKEAMQBBAJEAoQBQ%3D%3D",
+  ]],
+  ["song", [
+    "EgWKAQIIAWoMEAMQBBAJEA4QChAF",
+    "EgWKAQIIAWoKEAMQBBAJEA4QCg%3D%3D",
+  ]],
+  ["video", [
+    "EgWKAQIQAWoMEAMQBBAJEA4QChAF",
+    "EgWKAQIQAWoKEAMQBBAJEA4QCg%3D%3D",
+  ]],
+  ["playlist", [
+    "EgeKAQQoADgBagwQAxAEEAkQDhAKEAU%3D",
+    "EgeKAQQoADgBagoQAxAEEAkQDhAK",
+  ]],
+]);
 
 export async function get_strings_for_language(
   base_id_map: Record<string, string>,
@@ -222,38 +242,31 @@ export async function get_strings_for_language(
 
   const ids = [...explore, ...charts, ...artist, ...search];
 
+  let logged_missing = false;
+
   for (const key in base_id_map) {
     const id = base_id_map[key];
 
     const item = ids.find((i) => {
       if (i.id === id) return true;
+
       // handling search edge cases
       if (typeof id === "string") {
-        if (id == "EgWKAQIgAWoMEAMQBBAJEA4QChAF") {
-          // artist
-          return i.id === "EgWKAQIgAWoKEAMQBBAJEAoQBQ%3D%3D" ||
-            i.id === "EgWKAQIgAWoKEAMQBBAKEAkQBQ%3D%3D" ||
-            i.id === "EgWKAQIgAWoKEAMQCRAEEAoQBQ%3D%3D";
-        } else if (id === "EgWKAQIIAWoMEAMQBBAJEA4QChAF") {
-          // song
-          return i.id === "EgWKAQIIAWoIEAMQBBAJEAo%3D" ||
-            i.id === "EgWKAQIYAWoKEAMQBBAJEAoQBQ%3D%3D";
-        } else if (id === "EgWKAQIQAWoMEAMQBBAJEA4QChAF") {
-          // video
-          return i.id === "EgWKAQIQAWoIEAMQBBAJEAo%3D" ||
-            i.id === "EgWKAQIQAWoKEAMQBBAJEAoQBQ%3D%3D";
-        } else if (id === "EgeKAQQoADgBagwQAxAEEAkQDhAKEAU%3D") {
-          // playlist
-          return i.id === "EgeKAQQoAEABaggQAxAEEAkQCg%3D%3D" ||
-            i.id === "EgeKAQQoAEABagoQAxAEEAkQChAF";
+        for (const [_type, ids] of known_params) {
+          if (ids.includes(id)) {
+            return ids.includes(i.id);
+          }
         }
       }
       return false;
     });
 
     if (!item) {
+      if (!logged_missing) {
+        console.log(language, "id map", ids);
+        logged_missing = true;
+      }
       console.error("missing", key, id);
-      console.log(language, "id map", ids);
       continue;
     }
 
@@ -265,6 +278,8 @@ export async function get_strings_for_language(
 
 export async function get_all_strings() {
   const base_id_map = await get_base_strings();
+
+  console.log("base", base_id_map);
 
   const languages = LOCALES.languages.map((l) => l.value);
 
