@@ -414,7 +414,7 @@ export function parse_album(result: any): ParsedAlbum {
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
-    album_type: j(result, SUBTITLE).toString().toLowerCase(),
+    album_type: j(result, SUBTITLE),
     artists: runs,
   };
 }

@@ -41,7 +41,7 @@ export function parse_album_header(response: any) {
     ...album_info,
     ...get_menu_playlists(header),
     title: j(header, TITLE_TEXT),
-    album_type: j(header, SUBTITLE).toLowerCase(),
+    album_type: j(header, SUBTITLE),
     thumbnails: j(header, THUMBNAIL_CROPPED),
     isExplicit: jo(header, "subtitleBadges", BADGE_PATH) != null,
     description: null,
