@@ -91,9 +91,6 @@ export type MixedItem =
   } & RelatedArtist)
   | ({
     type: "flat-song";
-  } & ParsedSong)
-  | ({
-    type: "song";
   } & FlatSong)
   | ({
     type: "playlist";
@@ -217,7 +214,7 @@ export function parse_mixed_content(rows: any[]) {
           display = "list";
 
           item = {
-            type: "song",
+            type: "flat-song",
             ...parse_song_flat(data),
           };
         }
@@ -460,6 +457,7 @@ export interface ParsedSong extends SongRuns {
   title: string;
   videoId: string | null;
   playlistId: string | null;
+  isExplicit: boolean;
   thumbnails: Thumbnail[];
 }
 
@@ -469,6 +467,7 @@ export function parse_song(result: any): ParsedSong {
     videoId: j(result, NAVIGATION_VIDEO_ID),
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
+    isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     ...parse_song_runs(result.subtitle.runs),
   };
 }
