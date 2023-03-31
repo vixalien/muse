@@ -7,6 +7,12 @@ A library to interact with the YouTube Music (InnerTube) api.
 
 ## Usage
 
+muse works on Deno, Node.js, the browser and any javascript environment that
+supports ES modules and fetch.
+
+You can read [the docs](https://deno.land/x/muse) for more information about the
+usage of each function.
+
 Don't forget to replace `VERSION` with the
 [latest version](https://github.com/vixalien/muse/tags)
 
@@ -291,7 +297,8 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 - [x] get library upload albums
 - [x] get library upload artist
 - [x] get library upload album
-- [x] upload song (doesn't currectly work because the TV client can't do uploads)
+- [x] upload song (doesn't currectly work because the TV client can't do
+      uploads)
 - [x] delete upload entity
 
 ## Acknowledgements
