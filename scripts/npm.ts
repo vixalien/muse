@@ -10,7 +10,7 @@ await build({
     // see JS docs for overview and more options
     deno: false,
   },
-  packageManager: "bun",
+  packageManager: "npm",
   test: false,
   typeCheck: false,
   compilerOptions: {
