@@ -27,6 +27,8 @@ import { j, jo, sum_total_duration } from "../util.ts";
 import { check_auth, html_to_text, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
+export type { PlaylistItem };
+
 export interface GetPlaylistOptions {
   limit?: number;
   suggestions_limit?: number;
