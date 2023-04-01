@@ -52,7 +52,7 @@ export interface Playlist {
   year: string | null;
   trackCount: number;
   duration_seconds: number;
-  tracks: any[];
+  tracks: PlaylistItem[];
   continuation: string | null;
   suggestions: any;
   suggestions_continuation: string | null;
