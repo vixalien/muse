@@ -60,6 +60,8 @@ export type {
   WatchPlaylist,
 } from "../parsers/browsing.ts";
 
+export type { Thumbnail };
+
 export interface Home {
   continuation: string | null;
   moods: Mood[];
