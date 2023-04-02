@@ -361,7 +361,11 @@ export function parse_content_list<T extends any>(
   const contents: T[] = [];
 
   for (const result of results) {
-    contents.push(parse_func(result[key as any]));
+    const list = result?.[key as any];
+
+    if (!list) continue;
+
+    contents.push(parse_func(list));
   }
 
   return contents;

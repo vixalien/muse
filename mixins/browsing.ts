@@ -276,20 +276,22 @@ export async function get_album(
     CAROUSEL,
   );
 
+  const header = parse_album_header(response);
+
   const album: AlbumResult = {
-    ...parse_album_header(response),
+    ...header,
     tracks: parse_playlist_items(results.contents).map((track) => {
       return {
         ...track,
-        album_name: album.title,
-        artists: album.artists,
+        album_name: header.title,
+        artists: header.artists,
       };
     }),
     other_versions: null,
   };
 
   if (carousel != null) {
-    album.other_versions = parse_content_list(results.contents, parse_album);
+    album.other_versions = parse_content_list(carousel.contents, parse_album);
   }
 
   album.duration_seconds = sum_total_duration(album);
