@@ -9,12 +9,12 @@ import {
 import { j, jo } from "../util.ts";
 import { VideoType } from "./playlists.ts";
 import {
-LikeStatus,
-MenuTokens,
+  LikeStatus,
+  MenuTokens,
   parse_like_status,
   parse_song_menu_tokens,
   parse_song_runs,
-SongRuns,
+  SongRuns,
 } from "./songs.ts";
 import { parse_duration, Thumbnail } from "./util.ts";
 
@@ -100,7 +100,7 @@ export function parse_queue_track(data: any) {
     videoType: jo(data, "navigationEndpoint", NAVIGATION_VIDEO_ID),
     isExplicit: jo(data, BADGE_LABEL) != null,
     counterpart: null,
-  } as QueueTrack
+  } as QueueTrack;
 }
 
 export function get_tab_browse_id(

@@ -7,7 +7,7 @@ export interface AudioFormat extends BaseFormat {
   audio_codec: string | null;
 }
 
-export interface VideoFormat extends BaseFormat  {
+export interface VideoFormat extends BaseFormat {
   has_video: true;
   has_audio: true;
   width: number;

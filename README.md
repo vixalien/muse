@@ -10,8 +10,8 @@ A library to interact with the YouTube Music (InnerTube) api.
 muse works on Deno, Node.js, the browser and any javascript environment that
 supports ES modules and fetch.
 
-You can read [the docs](https://deno.land/x/muse?doc) for more information about the
-usage of each function.
+You can read [the docs](https://deno.land/x/muse?doc) for more information about
+the usage of each function.
 
 Don't forget to replace `VERSION` with the
 [latest version](https://github.com/vixalien/muse/tags)

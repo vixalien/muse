@@ -1,6 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_library_upload_album } from "./mixins/uploads.ts";
-import { get_library_upload_artist, get_option, setup } from "./mod.ts";
+import { get_album, get_album_browse_id, get_option, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -119,9 +118,13 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_library_upload_album(
-  "FEmusic_library_privately_owned_release_detailb_po_CJGMhsy2sJPn3AESB2Nlc2FpcmUiDWh0dHAgdXBsb2FkZXI",
-)
+const id = await get_album_browse_id(
+  "OLAK5uy_nF6-ijLz9eO-DMZzhzneNclNBj74Jvjgo",
+);
+
+console.log("album browse id", id);
+
+get_album(id!)
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

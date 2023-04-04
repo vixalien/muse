@@ -71,30 +71,14 @@ export function parse_moods(results: any[]) {
 }
 
 export type MixedItem =
-  | ({
-    type: "watch-playlist";
-  } & WatchPlaylist)
-  | ({
-    type: "video";
-  } & ParsedSong)
-  | ({
-    type: "song";
-  } & ParsedSong)
-  | ({
-    type: "album";
-  } & ParsedAlbum)
-  | ({
-    type: "artist";
-  } & RelatedArtist)
-  | ({
-    type: "channel";
-  } & RelatedArtist)
-  | ({
-    type: "flat-song";
-  } & FlatSong)
-  | ({
-    type: "playlist";
-  } & ParsedPlaylist)
+  | WatchPlaylist
+  | ParsedSong
+  | ParsedSong
+  | ParsedAlbum
+  | RelatedArtist
+  | RelatedArtist
+  | FlatSong
+  | ParsedPlaylist
   | null;
 
 export function parse_mixed_item(data: any) {
@@ -106,45 +90,36 @@ export function parse_mixed_item(data: any) {
     case undefined:
       // song or watch playlist
       if (jo(data, NAVIGATION_WATCH_PLAYLIST_ID) != null) {
-        item = {
-          type: "watch-playlist",
-          ...parse_watch_playlist(data),
-        };
+        item = parse_watch_playlist(data);
       } else {
         const content = parse_song(data);
         if (content.views != null) {
           item = {
-            type: "video",
             ...content,
+            type: "video",
           };
         } else {
           item = {
-            type: "song",
             ...content,
+            type: "song",
           };
         }
       }
       break;
     case "MUSIC_PAGE_TYPE_ALBUM":
-      item = {
-        type: "album",
-        ...parse_album(data),
-      };
+      item = parse_album(data);
       break;
     case "MUSIC_PAGE_TYPE_USER_CHANNEL":
     case "MUSIC_PAGE_TYPE_ARTIST":
       item = {
+        ...parse_related_artist(data),
         type: page_type === "MUSIC_PAGE_TYPE_USER_CHANNEL"
           ? "channel"
           : "artist",
-        ...parse_related_artist(data),
       };
       break;
     case "MUSIC_PAGE_TYPE_PLAYLIST":
-      item = {
-        type: "playlist",
-        ...parse_playlist(data),
-      };
+      item = parse_playlist(data);
       break;
     default:
       console.error("Unknown page type", page_type);
@@ -213,10 +188,7 @@ export function parse_mixed_content(rows: any[]) {
           const data = j(result, MRLIR);
           display = "list";
 
-          item = {
-            type: "flat-song",
-            ...parse_song_flat(data),
-          };
+          item = parse_song_flat(data);
         }
 
         contents.push(item);
@@ -388,6 +360,7 @@ export function parse_mood_or_genre(result: any[]): ParsedMoodOrGenre {
 export type AlbumType = "album" | "single" | "ep";
 
 export interface ParsedAlbum {
+  type: "album";
   title: string;
   year: string | null;
   browseId: string;
@@ -413,6 +386,7 @@ export function parse_album(result: any): ParsedAlbum {
   }
 
   return {
+    type: "album",
     title: j(result, TITLE_TEXT),
     year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
@@ -458,6 +432,7 @@ export function parse_single(result: any): ParsedSingle {
 }
 
 export interface ParsedSong extends SongRuns {
+  type: "video" | "song";
   title: string;
   videoId: string | null;
   playlistId: string | null;
@@ -467,6 +442,7 @@ export interface ParsedSong extends SongRuns {
 
 export function parse_song(result: any): ParsedSong {
   return {
+    type: "song",
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
@@ -477,6 +453,7 @@ export function parse_song(result: any): ParsedSong {
 }
 
 export interface FlatSong {
+  type: "flat-song";
   title: string;
   videoId: string | null;
   artists: SongArtist[] | null;
@@ -496,6 +473,7 @@ export function parse_song_flat(data: any) {
   }
 
   const song: FlatSong = {
+    type: "flat-song",
     title: j(columns[0], TEXT_RUN_TEXT),
     videoId: jo(columns[0], TEXT_RUN, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists(data, 1),
@@ -701,6 +679,7 @@ export function parse_trending(result: any): TrendingSong {
 }
 
 export interface ParsedPlaylist {
+  type: "playlist";
   title: string;
   playlistId: string;
   thumbnails: Thumbnail[];
@@ -718,6 +697,7 @@ export function parse_playlist(data: any) {
   const has_songs = subtitles.length > 3;
 
   const playlist: ParsedPlaylist = {
+    type: "playlist",
     title: j(data, TITLE_TEXT),
     playlistId: j(data, TITLE, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),
@@ -753,6 +733,7 @@ export function parse_playlist(data: any) {
 }
 
 export interface RelatedArtist {
+  type: "artist" | "channel";
   name: string;
   browseId: string;
   subscribers: string | null;
@@ -763,6 +744,7 @@ export function parse_related_artist(data: any): RelatedArtist {
   const subscribers = jo(data, SUBTITLE2)?.split(" ")[0];
 
   return {
+    type: "artist",
     name: j(data, TITLE_TEXT),
     browseId: j(data, TITLE, NAVIGATION_BROWSE_ID),
     subscribers,
@@ -771,6 +753,7 @@ export function parse_related_artist(data: any): RelatedArtist {
 }
 
 export interface WatchPlaylist {
+  type: "watch-playlist";
   title: string;
   playlistId: string;
   thumbnails: Thumbnail[];
@@ -778,6 +761,7 @@ export interface WatchPlaylist {
 
 export function parse_watch_playlist(data: any): WatchPlaylist {
   return {
+    type: "watch-playlist",
     title: j(data, TITLE_TEXT),
     playlistId: j(data, NAVIGATION_WATCH_PLAYLIST_ID),
     thumbnails: j(data, THUMBNAIL_RENDERER),
