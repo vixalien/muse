@@ -73,6 +73,7 @@ export function parse_moods(results: any[]) {
 export type MixedItem =
   | WatchPlaylist
   | ParsedSong
+  | ParsedVideo
   | ParsedAlbum
   | RelatedArtist
   | FlatSong
@@ -94,7 +95,7 @@ export function parse_mixed_item(data: any) {
         if (content.views != null) {
           item = {
             ...content,
-            type: "video",
+            type: "inline-video",
           };
         } else {
           item = {
@@ -423,7 +424,7 @@ export function parse_single(result: any): ParsedAlbum {
 }
 
 export interface ParsedSong extends SongRuns {
-  type: "video" | "song";
+  type: "inline-video" | "song";
   title: string;
   videoId: string | null;
   playlistId: string | null;
@@ -490,6 +491,7 @@ export function parse_song_flat(data: any) {
 }
 
 export interface ParsedVideo {
+  type: "video";
   title: string;
   videoId: string;
   artists: SongArtist[] | null;
@@ -503,6 +505,7 @@ export function parse_video(result: any): ParsedVideo {
   const artists_len = get_dot_separator_index(runs);
 
   return {
+    type: "video",
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),

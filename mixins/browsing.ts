@@ -56,6 +56,7 @@ export type {
   ParsedAlbum,
   ParsedPlaylist,
   ParsedSong,
+  ParsedVideo,
   RelatedArtist,
   WatchPlaylist,
 } from "../parsers/browsing.ts";
