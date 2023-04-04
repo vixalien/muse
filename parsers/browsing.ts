@@ -239,8 +239,7 @@ export function parse_categories<
     const data = results
       .filter((r) =>
         "musicCarouselShelfRenderer" in r &&
-        j(r, `${CAROUSEL}.${CAROUSEL_TITLE}`).text.toLowerCase() ==
-          category_local
+        j(r, `${CAROUSEL}.${CAROUSEL_TITLE}`).text == category_local
       )
       .map((r) => r.musicCarouselShelfRenderer);
 
