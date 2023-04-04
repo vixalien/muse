@@ -73,9 +73,7 @@ export function parse_moods(results: any[]) {
 export type MixedItem =
   | WatchPlaylist
   | ParsedSong
-  | ParsedSong
   | ParsedAlbum
-  | RelatedArtist
   | RelatedArtist
   | FlatSong
   | ParsedPlaylist
@@ -397,16 +395,7 @@ export function parse_album(result: any): ParsedAlbum {
   };
 }
 
-export interface ParsedSingle {
-  title: string;
-  year: string | null;
-  browseId: string;
-  thumbnails: Thumbnail[];
-  isExplicit: boolean;
-  artists: ArtistRun[];
-}
-
-export function parse_single(result: any): ParsedSingle {
+export function parse_single(result: any): ParsedAlbum {
   const SUBTITLE_RUNS = "subtitle.runs";
 
   const subtitles = j(result, SUBTITLE_RUNS);
@@ -422,12 +411,14 @@ export function parse_single(result: any): ParsedSingle {
   }
 
   return {
+    type: "album",
     title: j(result, TITLE_TEXT),
     year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     artists: runs,
+    album_type: "single",
   };
 }
 
