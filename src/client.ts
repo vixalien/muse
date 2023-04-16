@@ -1,5 +1,5 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_album, get_album_browse_id, get_option, setup } from "./mod.ts";
+import { get_artist, get_option, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -118,13 +118,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-const id = await get_album_browse_id(
-  "OLAK5uy_nF6-ijLz9eO-DMZzhzneNclNBj74Jvjgo",
-);
-
-console.log("album browse id", id);
-
-get_album(id!)
+get_artist("UCzARU-Ev3-yyu3LovaxxaaA")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
