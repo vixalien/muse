@@ -1,4 +1,4 @@
-import STRINGS from "../locales/strings.json" assert { type: "json" };
+import STRINGS from "../../locales/strings.json" assert { type: "json" };
 
 import {
   BADGE_LABEL,
