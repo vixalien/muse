@@ -1,11 +1,13 @@
-import { auth, init } from "../mod.ts";
+import { get_option, setup } from "../mod.ts";
 import { DenoFileStore } from "../store.ts";
 
 export * from "./asserts.ts";
 export * from "./deps.ts";
 export * from "../mod.ts";
 
-export const setup = async () => {
+export const auth_flow = async () => {
+  const auth = get_option("auth");
+
   const css = {
     normal: "font-weight: normal",
     bold: "font-weight: bold",
@@ -38,11 +40,11 @@ export const setup = async () => {
 };
 
 export const init_client = () => {
-  const client = init({
+  const client = setup({
     store: new DenoFileStore("store/muse-store.json"),
   });
 
-  setup();
+  auth_flow();
 
   return client;
 };
