@@ -381,11 +381,13 @@ export function add_history_item(
 
 export async function remove_history_items(
   feedbackTokens: string[],
+  options: AbortOptions = {},
 ): Promise<string | null> {
   await check_auth();
 
   const json = request_json("feedback", {
     data: { feedbackTokens },
+    signal: options.signal,
   });
 
   return parse_toast(json);
