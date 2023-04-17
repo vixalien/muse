@@ -361,7 +361,7 @@ export async function search(
 
   // limit only works when there's a filter
   if (continuation && filter) {
-    const continued_data = await get_more_search_results(continuation,{
+    const continued_data = await get_more_search_results(continuation, {
       scope: scope ?? null,
       filter,
       limit: limit -
@@ -403,14 +403,14 @@ export async function get_more_search_results(
   continuation: string,
   options: Omit<MoreSearchResultOptions, "continuation">,
 ) {
-  const { limit = 20, scope, filter } = options;
+  const { limit = 20, scope, filter, signal } = options;
 
   const continued_data = await get_continuations(
     continuation,
     "musicShelfContinuation",
     limit,
     (params) => {
-      return request_json("search", { params });
+      return request_json("search", { params, signal });
     },
     (contents) => {
       return parse_search_results(contents, scope ?? null, filter ?? null);
