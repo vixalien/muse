@@ -305,7 +305,7 @@ export async function create_playlist(
   return json.playlistId;
 }
 
-export interface EditPlaylistOptions {
+export interface EditPlaylistOptions extends AbortOptions {
   title?: string;
   description?: string;
   privacy_status?: PlaylistPrivacyStatus;
@@ -327,6 +327,7 @@ export async function edit_playlist(
     add_videos,
     remove_videos,
     add_source_playlists,
+    signal,
   } = options;
   await check_auth();
 
@@ -397,7 +398,7 @@ export async function edit_playlist(
 
   data.actions = actions;
 
-  const json = await request_json("browse/edit_playlist", { data });
+  const json = await request_json("browse/edit_playlist", { data, signal });
 
   return "status" in json ? json.status : json;
 }
@@ -424,8 +425,9 @@ export function add_playlist_sources(
 export function add_playlist_items(
   playlistId: string,
   video_ids: string[],
+  options: AbortOptions = {},
 ): Promise<any> {
-  return edit_playlist(playlistId, { add_videos: video_ids });
+  return edit_playlist(playlistId, { add_videos: video_ids, ...options });
 }
 
 export function remove_playlist_items(
