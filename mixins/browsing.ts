@@ -491,12 +491,14 @@ export async function get_user(
 export async function get_user_playlists(
   channelId: string,
   params: string,
+  options: AbortOptions = {},
 ): Promise<ParsedPlaylist[]> {
   const json = await request_json("browse", {
     data: {
       browseId: channelId,
       params,
     },
+    signal: options.signal,
   });
 
   const results = j(
