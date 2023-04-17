@@ -219,6 +219,7 @@ export async function search(
     autocorrect = true,
     limit = 20,
     continuation: _continuation = null,
+    signal,
   } = options;
 
   let continuation: any = _continuation;
@@ -263,7 +264,7 @@ export async function search(
   }
 
   if (!continuation) {
-    const response = await request_json(endpoint, { data });
+    const response = await request_json(endpoint, { data, signal });
 
     let results;
 
@@ -371,6 +372,7 @@ export async function search(
           (acc, curr) => acc + curr.results.length,
           0,
         ),
+      signal,
     });
 
     // TODO: don't lowercase translations
