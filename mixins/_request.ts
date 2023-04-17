@@ -9,7 +9,7 @@ export function get_auth_headers() {
   return get_option("auth").get_headers();
 }
 
-async function load_visitor_id() {
+async function load_visitor_id(signal?: AbortSignal) {
   if (!get_option("auth").has_token() && !get_option("visitor_id")) {
     const visitor_id = await get_option("client").request(
       `${CONSTANTS2.API_URL}/browse`,
@@ -18,6 +18,7 @@ async function load_visitor_id() {
         data: {
           ...CONSTANTS2.DATA,
         },
+        signal,
       },
     ).then((result) => result.json())
       .then((json) => json.responseContext.visitorData);
@@ -30,7 +31,7 @@ async function load_visitor_id() {
 export async function request(endpoint: string, options: RequestInit) {
   const auth_headers = await get_auth_headers();
 
-  await load_visitor_id();
+  await load_visitor_id(options.signal);
 
   const url = endpoint.startsWith("http")
     ? endpoint
