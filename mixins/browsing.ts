@@ -348,6 +348,7 @@ export async function get_album_browse_id(
 
 export async function get_song(
   video_id: string,
+  options: AbortOptions = {},
 ): Promise<Song> {
   const response = await request_json("player", {
     data: {
@@ -356,6 +357,7 @@ export async function get_song(
       racyCheckOk: true,
       video_id,
     },
+    signal: options.signal,
   });
 
   const song: Song = {
