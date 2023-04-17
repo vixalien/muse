@@ -160,9 +160,12 @@ export interface NewReleases {
   categories: MixedContent[];
 }
 
-export async function get_new_releases(): Promise<NewReleases> {
+export async function get_new_releases(
+  options: AbortOptions = {},
+): Promise<NewReleases> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_new_releases" },
+    signal: options.signal,
   });
 
   const new_releases: NewReleases = {
