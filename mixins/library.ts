@@ -404,11 +404,13 @@ export async function rate_song(
 
 export async function edit_song_library_status(
   feedbackTokens: string[],
+  options: AbortOptions = {},
 ): Promise<string | null> {
   await check_auth();
 
   const json = await request_json("feedback", {
     data: { feedbackTokens },
+    signal: options.signal,
   });
 
   return parse_toast(json);
