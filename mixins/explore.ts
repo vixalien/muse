@@ -97,9 +97,12 @@ export interface MoodCategories {
   }[];
 }
 
-export async function get_mood_categories(): Promise<MoodCategories> {
+export async function get_mood_categories(
+  options: AbortOptions = {},
+): Promise<MoodCategories> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_moods_and_genres" },
+    signal: options.signal,
   });
 
   const mood_categories: MoodCategories = {
