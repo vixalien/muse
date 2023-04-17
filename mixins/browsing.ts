@@ -46,7 +46,7 @@ import { ArtistRun, parse_format } from "../parsers/songs.ts";
 import { Format } from "../parsers/types.d.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
-import { PaginationOptions } from "./utils.ts";
+import { AbortOptions, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export type {
@@ -256,11 +256,13 @@ export interface AlbumResult extends AlbumHeader {
 
 export async function get_album(
   browseId: string,
+  options: AbortOptions = {},
 ): Promise<AlbumResult> {
   const response = await request_json("browse", {
     data: {
       browseId,
     },
+    signal: options.signal,
   });
 
   const results = j(
