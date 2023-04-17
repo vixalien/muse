@@ -28,9 +28,12 @@ import { j, jo } from "../util.ts";
 import { request_json } from "./_request.ts";
 import { AbortOptions } from "./utils.ts";
 
-export async function get_explore(): Promise<ExploreContents> {
+export async function get_explore(
+  options: AbortOptions = {},
+): Promise<ExploreContents> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_explore" },
+    signal: options.signal,
   });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
