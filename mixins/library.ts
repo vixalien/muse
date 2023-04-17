@@ -394,6 +394,7 @@ export async function remove_history_items(
 export async function rate_song(
   videoId: string,
   status: LikeStatus,
+  options: AbortOptions = {},
 ): Promise<string | null> {
   await check_auth();
 
@@ -403,6 +404,7 @@ export async function rate_song(
         videoId,
       },
     },
+    signal: options.signal,
   });
 
   return parse_toast(json);
