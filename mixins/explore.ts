@@ -135,12 +135,14 @@ export interface MoodPlaylists {
 
 export async function get_mood_playlists(
   params: string,
+  options: AbortOptions = {},
 ): Promise<MoodPlaylists> {
   const json = await request_json("browse", {
     data: {
       browseId: "FEmusic_moods_and_genres_category",
       params,
     },
+    signal: options.signal,
   });
 
   const mood_playlists: MoodPlaylists = {
