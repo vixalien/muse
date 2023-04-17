@@ -164,6 +164,7 @@ export async function get_library_upload_album(
 export async function upload_song(
   filename: string,
   contents: Uint8Array,
+  options: AbortOptions = {},
 ) {
   await check_auth();
 
@@ -191,6 +192,7 @@ export async function upload_song(
     },
     raw_data: true,
     data: encoder.encode("filename=" + basename(filename)),
+    signal: options.signal,
   });
 
   console.log("data");
@@ -205,6 +207,7 @@ export async function upload_song(
       "X-Goog-Upload-Offset": "0",
     },
     raw_data: true,
+    signal: options.signal,
   });
 
   return response;
