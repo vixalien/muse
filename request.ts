@@ -17,6 +17,7 @@ export interface RequestInit {
   data?: Record<string, any> | Uint8Array;
   params?: Record<string, string>;
   raw_data?: boolean;
+  signal?: AbortSignal;
 }
 
 export type RequestFunction = (
@@ -39,6 +40,7 @@ export interface FetchInit {
   method: string | undefined;
   headers: Headers;
   data: string | Uint8Array | undefined;
+  signal: AbortSignal | undefined;
 }
 
 export class FetchClient extends RequestClient {
@@ -51,6 +53,7 @@ export class FetchClient extends RequestClient {
       method: options.method,
       headers: options.headers,
       body: options.data,
+      signal: options.signal,
     });
   }
 
@@ -135,6 +138,7 @@ export class FetchClient extends RequestClient {
           ? options.data as Uint8Array
           : JSON.stringify(options.data)
         : undefined,
+      signal: options.signal,
     });
 
     debug("DONE", options.method, path);

@@ -78,7 +78,7 @@ export interface HomeOptions extends PaginationOptions {
 export async function get_home(
   options: HomeOptions = {},
 ): Promise<Home> {
-  const { params, limit = 3, continuation } = options;
+  const { params, limit = 3, continuation, signal } = options;
 
   const endpoint = "browse";
   const data: Record<string, any> = { browseId: "FEmusic_home" };
@@ -99,7 +99,7 @@ export async function get_home(
   if (continuation) {
     home.continuation = continuation;
   } else {
-    const json = await request_json(endpoint, { data });
+    const json = await request_json(endpoint, { data, signal });
 
     const tab = j(json, SINGLE_COLUMN_TAB);
 
@@ -133,6 +133,7 @@ export async function get_home(
         return request_json(endpoint, {
           data,
           params,
+          signal,
         });
       },
       (contents) => {

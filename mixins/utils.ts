@@ -116,7 +116,11 @@ export function randomString(len: number) {
   return [...Array(len)].reduce((a) => a + p[~~(Math.random() * p.length)], "");
 }
 
-export interface PaginationOptions {
+export interface AbortOptions {
+  signal?: AbortSignal;
+}
+
+export interface PaginationOptions extends AbortOptions {
   limit?: number;
   continuation?: string;
 }

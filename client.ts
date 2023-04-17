@@ -1,5 +1,11 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import { get_album, get_album_browse_id, get_option, setup } from "./mod.ts";
+import {
+  get_album,
+  get_album_browse_id,
+  get_home,
+  get_option,
+  setup,
+} from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -118,13 +124,16 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-const id = await get_album_browse_id(
-  "OLAK5uy_nF6-ijLz9eO-DMZzhzneNclNBj74Jvjgo",
-);
+const controller = new AbortController();
 
-console.log("album browse id", id);
+setTimeout(() => {
+  controller.abort();
+  console.log("signal", controller.signal.aborted);
+}, 2000);
 
-get_album(id!)
+console.log("idk", await auth.get_headers());
+
+get_home({ signal: controller.signal })
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
