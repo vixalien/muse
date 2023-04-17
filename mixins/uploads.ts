@@ -98,7 +98,7 @@ export async function get_library_upload_artist(
   };
 
   if (!continuation) {
-    const json = await request_json(endpoint, { data });
+    const json = await request_json(endpoint, { data, signal: options.signal });
     const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST_ITEM, MUSIC_SHELF);
 
     artist.name = j(json, "header.musicHeaderRenderer", TITLE_TEXT);
@@ -119,7 +119,8 @@ export async function get_library_upload_artist(
       artist.continuation,
       "musicShelfContinuation",
       limit - artist.items.length,
-      (params) => request_json(endpoint, { data, params }),
+      (params) =>
+        request_json(endpoint, { data, params, signal: options.signal }),
       (contents) => parse_uploaded_items(contents),
     );
 
@@ -136,13 +137,14 @@ export interface LibraryUploadAlbum extends AlbumHeader {
 
 export async function get_library_upload_album(
   browseId: string,
+  options: AbortOptions = {},
 ): Promise<LibraryUploadAlbum> {
   await check_auth();
 
   const data = { browseId };
   const endpoint = "browse";
 
-  const json = await request_json(endpoint, { data });
+  const json = await request_json(endpoint, { data, signal: options.signal });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST_ITEM, MUSIC_SHELF);
 
