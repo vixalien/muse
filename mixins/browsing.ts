@@ -402,14 +402,20 @@ export interface Lyrics {
   source: string;
 }
 
-export async function get_lyrics(browseId: string): Promise<Lyrics> {
+export async function get_lyrics(
+  browseId: string,
+  options: AbortOptions = {},
+): Promise<Lyrics> {
   if (!browseId) {
     throw new TypeError(
       "Invalid browseId provided. This song might not have lyrics.",
     );
   }
 
-  const json = await request_json("browse", { data: { browseId } });
+  const json = await request_json("browse", {
+    data: { browseId },
+    signal: options.signal,
+  });
 
   const lyrics: Lyrics = {
     lyrics: jo(
