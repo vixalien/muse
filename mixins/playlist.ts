@@ -24,12 +24,17 @@ import {
   validate_playlist_id,
 } from "../parsers/playlists.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
-import { check_auth, html_to_text, PaginationOptions } from "./utils.ts";
+import {
+  AbortOptions,
+  check_auth,
+  html_to_text,
+  PaginationOptions,
+} from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export type { PlaylistItem };
 
-export interface GetPlaylistOptions {
+export interface GetPlaylistOptions extends AbortOptions {
   limit?: number;
   suggestions_limit?: number;
   related?: boolean;
@@ -68,9 +73,10 @@ export interface PlaylistSuggestions {
 
 export async function get_playlist_suggestions(
   playlistId: string,
-  options: Required<PaginationOptions>,
+  continuation: string,
+  options: Omit<PaginationOptions, "continuation">,
 ): Promise<PlaylistSuggestions> {
-  const { continuation, limit } = options;
+  const { signal, limit = 20 } = options;
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
   const data = { browseId };
@@ -80,7 +86,7 @@ export async function get_playlist_suggestions(
     continuation,
     "musicShelfContinuation",
     limit,
-    (params: any) => request_json(endpoint, { data, params }),
+    (params: any) => request_json(endpoint, { data, params, signal }),
     parse_playlist_items,
     undefined,
     true,
@@ -101,9 +107,10 @@ export interface MorePlaylistTracks {
 
 export async function get_more_playlist_tracks(
   playlistId: string,
-  options: Required<PaginationOptions>,
+  continuation: string,
+  options: Omit<PaginationOptions, "continuation">,
 ): Promise<MorePlaylistTracks> {
-  const { continuation, limit } = options;
+  const { signal, limit = 100 } = options;
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
   const data = { browseId };
@@ -113,7 +120,7 @@ export async function get_more_playlist_tracks(
     continuation,
     "musicPlaylistShelfContinuation",
     limit,
-    (params: any) => request_json(endpoint, { data, params }),
+    (params: any) => request_json(endpoint, { data, params, signal }),
     (contents) => parse_playlist_items(contents),
   );
 
@@ -129,13 +136,14 @@ export async function get_playlist(
   playlistId: string,
   options?: GetPlaylistOptions,
 ): Promise<Playlist> {
-  const { limit = 100, related = false, suggestions_limit = 0 } = options || {};
+  const { limit = 100, related = false, suggestions_limit = 0, signal } =
+    options || {};
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
   const data = { browseId };
   const endpoint = "browse";
 
-  const json = await request_json(endpoint, { data });
+  const json = await request_json(endpoint, { data, signal });
 
   const results = j(
     json,
@@ -183,7 +191,8 @@ export async function get_playlist(
     related: [],
   };
 
-  const request = (params: any) => request_json(endpoint, { data, params });
+  const request = (params: any) =>
+    request_json(endpoint, { data, params, signal });
 
   // suggestions and related are missing e.g. on liked songs
   const section_list = j(json, SINGLE_COLUMN_TAB, "sectionListRenderer");
@@ -210,9 +219,10 @@ export async function get_playlist(
 
       const continued_suggestions = await get_playlist_suggestions(
         playlistId,
+        suggestions_shelf,
         {
-          continuation: suggestions_shelf,
           limit: suggestions_limit - playlist.suggestions.length,
+          signal,
         },
       );
 
@@ -237,9 +247,10 @@ export async function get_playlist(
     if ("continuations" in results) {
       const continued_data = await get_more_playlist_tracks(
         playlistId,
+        results,
         {
-          continuation: results,
           limit: songs_to_get - playlist.tracks.length,
+          signal,
         },
       );
 
