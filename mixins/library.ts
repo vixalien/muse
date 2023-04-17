@@ -425,6 +425,7 @@ export async function edit_song_library_status(
 export async function rate_playlist(
   playlistId: string,
   status: LikeStatus,
+  options: AbortOptions = {},
 ): Promise<string | null> {
   await check_auth();
 
@@ -434,6 +435,7 @@ export async function rate_playlist(
         playlistId,
       },
     },
+    signal: options.signal,
   });
 
   return parse_toast(json);
