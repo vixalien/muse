@@ -435,12 +435,14 @@ export async function get_lyrics(browseId: string): Promise<Lyrics> {
 export async function get_artist_albums(
   channelId: string,
   params: string,
+  options: AbortOptions = {},
 ): Promise<ParsedAlbum[]> {
   const json = await request_json("browse", {
     data: {
       browseId: channelId,
       params,
     },
+    signal: options.signal,
   });
 
   const results = j(
