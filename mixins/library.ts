@@ -463,6 +463,7 @@ export async function subscribe_artists(
 
 export async function unsubscribe_artists(
   channelIds: string[],
+  options: AbortOptions = {},
 ): Promise<string | null> {
   await check_auth();
 
@@ -470,6 +471,7 @@ export async function unsubscribe_artists(
     data: {
       channelIds,
     },
+    signal: options.signal,
   });
 
   return parse_toast(json);
