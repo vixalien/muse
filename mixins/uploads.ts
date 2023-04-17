@@ -25,6 +25,7 @@ import {
   LibraryItems,
 } from "./library.ts";
 import {
+  AbortOptions,
   check_auth,
   PaginationAndOrderOptions,
   PaginationOptions,
@@ -207,7 +208,10 @@ export async function upload_song(
   return response;
 }
 
-export async function delete_upload_entity(entityId: string) {
+export async function delete_upload_entity(
+  entityId: string,
+  options: AbortOptions = {},
+) {
   await check_auth();
 
   const json = await request_json("music/delete_privately_owned_entity", {
@@ -217,6 +221,7 @@ export async function delete_upload_entity(entityId: string) {
           ? entityId.slice(47)
           : entityId,
     },
+    signal: options.signal,
   });
 
   return json;
