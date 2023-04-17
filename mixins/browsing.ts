@@ -332,6 +332,7 @@ export interface Song {
 
 export async function get_album_browse_id(
   audio_playlist_id: string,
+  options: AbortOptions = {},
 ): Promise<string | null> {
   const json = await request_json("browse", {
     data: {
@@ -339,6 +340,7 @@ export async function get_album_browse_id(
         ? audio_playlist_id
         : "VL" + audio_playlist_id,
     },
+    signal: options.signal,
   });
 
   return jo(
