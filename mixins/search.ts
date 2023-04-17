@@ -361,7 +361,7 @@ export async function search(
 
   // limit only works when there's a filter
   if (continuation && filter) {
-    const continued_data = await get_more_search_results({
+    const continued_data = await get_more_search_results(continuation,{
       scope: scope ?? null,
       filter,
       limit: limit -
@@ -369,7 +369,6 @@ export async function search(
           (acc, curr) => acc + curr.results.length,
           0,
         ),
-      continuation,
     });
 
     // TODO: don't lowercase translations
@@ -395,15 +394,16 @@ export async function search(
   return search_results;
 }
 
-export interface MoreSearchResultOptions extends Required<PaginationOptions> {
-  filter: Filter | null;
-  scope: Scope | null;
+export interface MoreSearchResultOptions extends PaginationOptions {
+  filter?: Filter | null;
+  scope?: Scope | null;
 }
 
 export async function get_more_search_results(
-  options: Required<MoreSearchResultOptions>,
+  continuation: string,
+  options: Omit<MoreSearchResultOptions, "continuation">,
 ) {
-  const { limit = 20, continuation, scope, filter } = options;
+  const { limit = 20, scope, filter } = options;
 
   const continued_data = await get_continuations(
     continuation,
