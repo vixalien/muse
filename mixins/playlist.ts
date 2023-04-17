@@ -266,7 +266,7 @@ export async function get_playlist(
 
 type PlaylistPrivacyStatus = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
-interface CreatePlaylistOptions {
+interface CreatePlaylistOptions extends AbortOptions {
   description?: string;
   privacy_status?: PlaylistPrivacyStatus;
   video_ids?: string[];
@@ -282,6 +282,7 @@ export async function create_playlist(
     privacy_status = "PUBLIC",
     video_ids,
     source_playlist,
+    signal,
   } = options;
 
   await check_auth();
@@ -300,7 +301,7 @@ export async function create_playlist(
     data.sourcePlaylistId = source_playlist;
   }
 
-  const json = await request_json("playlist/create", { data });
+  const json = await request_json("playlist/create", { data, signal });
 
   return json.playlistId;
 }
