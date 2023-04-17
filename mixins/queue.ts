@@ -49,6 +49,7 @@ export async function get_queue(
     shuffle = false,
     autoplay = false,
     params,
+    signal,
   } = options;
 
   let continuation = _continuation as any;
@@ -132,7 +133,7 @@ export async function get_queue(
   };
 
   if (!continuation) {
-    const json = await request_json(endpoint, { data });
+    const json = await request_json(endpoint, { data, signal });
 
     const watchNextRenderer = j(
       json,
@@ -196,7 +197,7 @@ export async function get_queue(
       "playlistPanelContinuation",
       limit - queue.tracks.length,
       async (params) => {
-        const response = await request_json(endpoint, { data, params });
+        const response = await request_json(endpoint, { data, params, signal });
 
         if (!("continuationContents" in response)) {
           const data = jo(
