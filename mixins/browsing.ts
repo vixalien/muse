@@ -164,13 +164,17 @@ export interface Artist extends ArtistContents {
   };
 }
 
-export async function get_artist(artistId: string): Promise<Artist> {
+export async function get_artist(
+  artistId: string,
+  options: AbortOptions = {},
+): Promise<Artist> {
   if (artistId.startsWith("MPLA")) artistId = artistId.slice(4);
 
   const json = await request_json("browse", {
     data: {
       browseId: artistId,
     },
+    signal: options.signal,
   });
 
   const results = j(json, `${SINGLE_COLUMN_TAB}.${SECTION_LIST}`);
@@ -227,21 +231,6 @@ export async function get_artist(artistId: string): Promise<Artist> {
   }
 
   return artist;
-  // const subscription_button = j(
-  //   header,
-  //   "subscriptionButton.subscribeButtonRenderer",
-  // );
-
-  // console.log("results", results);
-
-  // const artist = {
-  //   description: null,
-  //   views: null,
-  //   // channelId: subscription_button.channelId,
-  //   // thumbnails: j(header, THUMBNAILS),
-  // };
-
-  // return artist;
 }
 
 export interface AlbumResultTrack extends PlaylistItem {
