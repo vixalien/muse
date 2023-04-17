@@ -447,6 +447,7 @@ export async function rate_playlist(
 
 export async function subscribe_artists(
   channelIds: string[],
+  options: AbortOptions = {},
 ): Promise<string | null> {
   await check_auth();
 
@@ -454,6 +455,7 @@ export async function subscribe_artists(
     data: {
       channelIds,
     },
+    signal: options.signal,
   });
 
   return parse_toast(json);
