@@ -418,8 +418,12 @@ export async function delete_playlist(playlistId: string): Promise<any> {
 export function add_playlist_sources(
   playlistId: string,
   source_playlists: string[],
+  options: AbortOptions = {},
 ): Promise<any> {
-  return edit_playlist(playlistId, { add_source_playlists: source_playlists });
+  return edit_playlist(playlistId, {
+    add_source_playlists: source_playlists,
+    ...options,
+  });
 }
 
 export function add_playlist_items(
