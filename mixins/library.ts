@@ -34,6 +34,7 @@ import { j, jo } from "../util.ts";
 import { Song } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions, Playlist } from "./playlist.ts";
 import {
+  AbortOptions,
   check_auth,
   LibraryOrder,
   PaginationAndOrderOptions,
@@ -355,7 +356,10 @@ export async function get_liked_songs(
   return get_playlist("LM", options);
 }
 
-export function add_history_item(song: Song | string): Promise<Response> {
+export function add_history_item(
+  song: Song | string,
+  options: AbortOptions = {},
+): Promise<Response> {
   const url = typeof song === "string" ? song : song.videostatsPlaybackUrl;
 
   return request(url, {
@@ -365,6 +369,7 @@ export function add_history_item(song: Song | string): Promise<Response> {
       cpn: randomString(16),
       c: "WEB_REMIX",
     },
+    signal: options.signal,
   });
 }
 
