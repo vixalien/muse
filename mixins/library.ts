@@ -171,7 +171,10 @@ export async function get_library_playlists(
   };
 
   if (!continuation) {
-    const json = await request_json(endpoint, { data: body });
+    const json = await request_json(endpoint, {
+      data: body,
+      signal: options.signal,
+    });
 
     const results = get_library_contents(json, GRID);
     library_playlists.playlists = parse_content_list(
@@ -193,6 +196,7 @@ export async function get_library_playlists(
         return request_json(endpoint, {
           data: body,
           params,
+          signal: options.signal,
         });
       },
       (contents) => {
