@@ -385,6 +385,7 @@ export async function get_song(
 
 export async function get_song_related(
   browseId: string,
+  options: AbortOptions = {},
 ): Promise<MixedContent[]> {
   if (!browseId) throw new Error("No browseId provided");
 
@@ -392,6 +393,7 @@ export async function get_song_related(
     data: {
       browseId,
     },
+    signal: options.signal,
   });
 
   const sections = j(json, "contents", SECTION_LIST);
