@@ -107,7 +107,7 @@ export async function fetch_library_contents<T extends any>(
   parse: (results: any) => T[],
   grid: boolean,
 ) {
-  const { order, limit = 25, continuation = null } = options;
+  const { order, limit = 25, continuation = null, signal } = options;
 
   await check_auth();
 
@@ -124,7 +124,7 @@ export async function fetch_library_contents<T extends any>(
   };
 
   if (!library_contents.continuation) {
-    const json = await request_json(endpoint, { data, signal: options.signal });
+    const json = await request_json(endpoint, { data, signal });
 
     const results = get_library_contents(json, grid ? GRID : MUSIC_SHELF);
 
@@ -144,7 +144,7 @@ export async function fetch_library_contents<T extends any>(
       grid ? "gridContinuation" : "musicShelfContinuation",
       limit - library_contents.items.length,
       (params) => {
-        return request_json(endpoint, { data, params, signal: options.signal });
+        return request_json(endpoint, { data, params, signal });
       },
       (contents) => {
         return parse(contents.items ?? contents.contents);
