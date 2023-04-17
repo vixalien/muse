@@ -3,6 +3,7 @@ import {
   get_album,
   get_album_browse_id,
   get_home,
+  get_library_artists,
   get_option,
   setup,
 } from "./mod.ts";
@@ -131,9 +132,7 @@ setTimeout(() => {
   console.log("signal", controller.signal.aborted);
 }, 2000);
 
-console.log("idk", await auth.get_headers());
-
-get_home({ signal: controller.signal })
+get_library_artists({ signal: controller.signal })
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
