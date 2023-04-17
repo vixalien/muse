@@ -26,6 +26,7 @@ import {
 import { color_to_hex } from "../parsers/util.ts";
 import { j, jo } from "../util.ts";
 import { request_json } from "./_request.ts";
+import { AbortOptions } from "./utils.ts";
 
 export async function get_explore(): Promise<ExploreContents> {
   const json = await request_json("browse", {
@@ -46,7 +47,10 @@ export interface Charts {
 }
 
 // any section may be missing
-export async function get_charts(country?: string): Promise<Charts> {
+export async function get_charts(
+  country?: string,
+  options: AbortOptions = {},
+): Promise<Charts> {
   const endpoint = "browse";
   const data: Record<string, unknown> = { browseId: "FEmusic_charts" };
 
@@ -56,7 +60,7 @@ export async function get_charts(country?: string): Promise<Charts> {
     };
   }
 
-  const json = await request_json(endpoint, { data });
+  const json = await request_json(endpoint, { data, signal: options.signal });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
