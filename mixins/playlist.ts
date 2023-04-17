@@ -404,14 +404,20 @@ export async function edit_playlist(
   return "status" in json ? json.status : json;
 }
 
-export async function delete_playlist(playlistId: string): Promise<any> {
+export async function delete_playlist(
+  playlistId: string,
+  options: AbortOptions = {},
+): Promise<any> {
   await check_auth();
 
   const data = {
     playlistId: validate_playlist_id(playlistId),
   };
 
-  const json = await request_json("playlist/delete", { data });
+  const json = await request_json("playlist/delete", {
+    data,
+    signal: options.signal,
+  });
 
   return "status" in json ? json.status : json;
 }
