@@ -83,7 +83,7 @@ export async function get_library_items(
   if (continuation) {
     library.continuation = continuation;
   } else {
-    const json = await request_json(endpoint, { data });
+    const json = await request_json(endpoint, { data, signal: options.signal });
 
     let grid: any;
 
@@ -129,6 +129,7 @@ export async function get_library_items(
         return request_json(endpoint, {
           data,
           params,
+          signal: options.signal,
         });
       },
       (contents) => {
