@@ -24,7 +24,7 @@ import {
 } from "../parsers/search.ts";
 import { j, jo } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
-import { PaginationOptions } from "./utils.ts";
+import { AbortOptions, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 import { TopResult } from "../mod.ts";
 
@@ -84,11 +84,13 @@ export interface SearchSuggestions {
 
 export async function get_search_suggestions(
   query: string,
+  options: AbortOptions = {},
 ): Promise<SearchSuggestions> {
   const json = await request_json("music/get_search_suggestions", {
     params: {
       input: query,
     },
+    signal: options.signal,
   });
 
   const results = j(json, "contents");
