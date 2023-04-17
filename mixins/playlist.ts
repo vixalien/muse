@@ -444,8 +444,10 @@ export function add_playlist_items(
 export function remove_playlist_items(
   playlistId: string,
   video_ids: { videoId: string; setVideoId: string }[],
+  options: AbortOptions = {},
 ): Promise<any> {
   return edit_playlist(playlistId, {
     remove_videos: video_ids,
+    ...options,
   });
 }
