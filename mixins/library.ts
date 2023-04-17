@@ -249,6 +249,7 @@ export async function get_library_songs(
   const request = (_params: Record<string, string> = {}) =>
     request_json(endpoint, {
       data,
+      signal: options.signal,
     });
   const parse = (response: any) => parse_library_songs(response);
 
@@ -278,7 +279,7 @@ export async function get_library_songs(
 
   if (library_songs.continuation) {
     const request_continuations = (params: any) =>
-      request_json(endpoint, { data, params });
+      request_json(endpoint, { data, params, signal: options.signal });
     const parse_continuations = (contents: any) =>
       parse_playlist_items(contents);
 
