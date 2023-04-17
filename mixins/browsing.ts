@@ -469,8 +469,14 @@ export interface User extends ArtistContents {
   name: string;
 }
 
-export async function get_user(channelId: string): Promise<User> {
-  const json = await request_json("browse", { data: { browseId: channelId } });
+export async function get_user(
+  channelId: string,
+  options: AbortOptions = {},
+): Promise<User> {
+  const json = await request_json("browse", {
+    data: { browseId: channelId },
+    signal: options.signal,
+  });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
