@@ -315,7 +315,7 @@ export function parse_search_content(
 
   // uploads artist won't have the second flex column
   const entity = passed_entity ||
-    (flex1 ? __(j(flex1, TEXT_RUN_TEXT).toLowerCase()) : "artist");
+    (flex1 ? __(j(flex1, TEXT_RUN_TEXT)) : "artist");
 
   let parser: (e: any, has_label?: boolean) => SearchContent;
 
@@ -409,7 +409,7 @@ export function parse_top_result_more(result: any) {
       const flex1 = get_flex_column_item(content, 1);
 
       const entity = flex1
-        ? __(jo(flex1, TEXT_RUN_TEXT).toLowerCase()) as string
+        ? __(jo(flex1, TEXT_RUN_TEXT)) as string
         : null;
 
       if (entity) {
