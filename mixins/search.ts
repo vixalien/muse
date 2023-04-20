@@ -304,7 +304,7 @@ export async function search(
 
         if (category_search_results.length > 0) {
           search_results.categories.push({
-            title: category?.toLowerCase() ?? null,
+            title: category ?? null,
             results: category_search_results,
           });
         }

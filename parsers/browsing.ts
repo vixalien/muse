@@ -686,7 +686,7 @@ export interface ParsedPlaylist {
 export function parse_playlist(data: any) {
   const subtitles = j(data, "subtitle.runs");
 
-  const has_data = subtitles[0]?.text.toLowerCase() === _("playlist");
+  const has_data = subtitles[0]?.text === _("playlist");
   const has_songs = subtitles.length > 3;
 
   const playlist: ParsedPlaylist = {

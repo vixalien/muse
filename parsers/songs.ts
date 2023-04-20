@@ -1,5 +1,6 @@
 import { FEEDBACK_TOKEN, NAVIGATION_BROWSE_ID, TOGGLE_MENU } from "../nav.ts";
 import { jo } from "../util.ts";
+import { _ } from "./browsing.ts";
 import type { AudioFormat, BaseFormat, VideoFormat } from "./types.d.ts";
 import {
   get_browse_id,
@@ -102,7 +103,7 @@ export function parse_song_runs(runs: any[], slice_start = 0) {
         parsed.duration_seconds = parse_duration(text);
       } else if (text.match(/^\d{4}$/)) {
         parsed.year = text;
-      } else if (text.toLowerCase() != "song") {
+      } else if (text != _("song")) {
         // artist without id
         parsed.artists.push({
           name: text,

@@ -157,7 +157,7 @@ export function parse_search_album(result: any): SearchAlbum {
     browseId: j(result, NAVIGATION_BROWSE_ID),
     isExplicit: jo(result, BADGE_LABEL) != null,
     thumbnails: j(result, THUMBNAILS),
-    album_type: runs[0].text.toLowerCase(),
+    album_type: runs[0].text,
     year: runs[runs.length - 1].text,
     artists: parse_song_artists_runs(runs.slice(2, -1)),
   };
