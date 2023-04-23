@@ -313,8 +313,6 @@ export async function search(
           continuation = res.musicShelfRenderer;
         }
       } else if ("musicCardShelfRenderer" in res) {
-        console.log("got top result");
-
         // top result with details
         search_results.top_result = parse_top_result(
           j(res, "musicCardShelfRenderer"),
