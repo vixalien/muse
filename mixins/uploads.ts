@@ -195,8 +195,6 @@ export async function upload_song(
     signal: options.signal,
   });
 
-  console.log("data");
-
   const upload_url = get_response.headers.get("X-Goog-Upload-URL")!;
 
   const response = await request(upload_url, {

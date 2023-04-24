@@ -341,7 +341,11 @@ export function parse_search_content(
           return parse_search_song(e);
         }
 
-        return parse_search_album(e);
+        try {
+          return parse_search_album(e);
+        } catch {
+          return parse_search_song(e);
+        }
       };
   }
 
@@ -408,9 +412,7 @@ export function parse_top_result_more(result: any) {
     for (const content of contents) {
       const flex1 = get_flex_column_item(content, 1);
 
-      const entity = flex1
-        ? __(jo(flex1, TEXT_RUN_TEXT)) as string
-        : null;
+      const entity = flex1 ? __(jo(flex1, TEXT_RUN_TEXT)) as string : null;
 
       if (entity) {
         more.push(parse_search_content(content, false));

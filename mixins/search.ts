@@ -11,7 +11,7 @@ import {
   THUMBNAILS,
   TITLE_TEXT,
 } from "../nav.ts";
-import { _ } from "../parsers/browsing.ts";
+import { _, __ } from "../parsers/browsing.ts";
 import {
   Filter,
   filters,
@@ -194,6 +194,7 @@ export interface SearchResults {
   did_you_mean: { search: SearchRuns; query: string } | null;
   categories: {
     title: string;
+    filter: Filter | null;
     results: SearchContent[];
   }[];
   continuation: string | null;
@@ -305,6 +306,7 @@ export async function search(
         if (category_search_results.length > 0) {
           search_results.categories.push({
             title: category ?? null,
+            filter: __(category) as Filter ?? null,
             results: category_search_results,
           });
         }
@@ -383,7 +385,8 @@ export async function search(
     if (!category) {
       category = search_results.categories[
         search_results.categories.push({
-          title: filter,
+          title: __(filter) ?? filter,
+          filter,
           results: [],
         }) - 1
       ];

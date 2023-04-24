@@ -95,7 +95,6 @@ export async function get_library_items(
         GRID,
       );
     } else {
-      console.log("here");
       grid = j(
         json,
         SINGLE_COLUMN,

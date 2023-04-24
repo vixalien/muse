@@ -1,17 +1,12 @@
 import { RequiresLoginEvent } from "./auth.ts";
-import {
-  get_album,
-  get_album_browse_id,
-  get_home,
-  get_library_artists,
-  get_option,
-  setup,
-} from "./mod.ts";
+import { get_option, search, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
 
 const encoder = new TextEncoder();
+
+const CACHE = true;
 
 async function hash(string: string) {
   // use the subtle crypto API to generate a 512 bit hash
@@ -36,7 +31,7 @@ class CustomFetch extends FetchClient {
       JSON.stringify({ ...options.data, ...options.params, path } || {}),
     )}.json`;
 
-    const cache = !path.startsWith("like/");
+    const cache = CACHE && !path.startsWith("like/");
 
     const cached = await Deno.readTextFile(cache_path)
       .then(JSON.parse).catch(() => null);
@@ -125,14 +120,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-const controller = new AbortController();
-
-setTimeout(() => {
-  controller.abort();
-  console.log("signal", controller.signal.aborted);
-}, 2000);
-
-get_library_artists({ signal: controller.signal })
+search("h", { scope: "library" })
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
