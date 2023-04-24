@@ -3,6 +3,20 @@ import { build, emptyDir } from "https://deno.land/x/dnt@0.33.1/mod.ts";
 
 await emptyDir("./npm");
 
+function get_latest_version() {
+  const p = Deno.run({
+    cmd: ["git", "describe", "--tags", "--abbrev=0"],
+    stdout: "piped",
+  });
+
+  const decoder = new TextDecoder("utf-8");
+  return p
+    .output()
+    .then((result) => decoder.decode(result))
+    // remove \n from end of string
+    .then((result) => result.slice(0, -1));
+}
+
 await build({
   entryPoints: ["./mod.ts", "./auth.ts", "./request.ts", "./store.ts"],
   outDir: "./npm",
@@ -19,7 +33,7 @@ await build({
   package: {
     // package.json properties
     name: "libmuse",
-    version: Deno.args[0],
+    version: Deno.args[0] || await get_latest_version(),
     description:
       "A library to interact with the YouTube Music (InnerTube) api.",
     tags: [
