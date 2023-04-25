@@ -379,13 +379,13 @@ export async function search(
     // and this wont work when filters are translated (should default)
     // to the first category
     let category = search_results.categories.find((category) =>
-      category.title === filter
+      category.filter === filter
     );
 
     if (!category) {
       category = search_results.categories[
         search_results.categories.push({
-          title: __(filter) ?? filter,
+          title: _(filter) ?? filter,
           filter,
           results: [],
         }) - 1
