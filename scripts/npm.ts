@@ -3,18 +3,23 @@ import { build, emptyDir } from "https://deno.land/x/dnt@0.33.1/mod.ts";
 
 await emptyDir("./npm");
 
-function get_latest_version() {
+async function get_latest_version() {
   const p = Deno.run({
     cmd: ["git", "describe", "--tags", "--abbrev=0"],
     stdout: "piped",
   });
 
   const decoder = new TextDecoder("utf-8");
-  return p
+
+  const latest = await p
     .output()
     .then((result) => decoder.decode(result))
     // remove \n from end of string
     .then((result) => result.slice(0, -1));
+
+  console.log(`No version provided, using latest: ${latest}`);
+
+  return latest;
 }
 
 await build({
