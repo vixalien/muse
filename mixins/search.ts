@@ -29,6 +29,8 @@ import { request_json } from "./_request.ts";
 import { TopResult } from "../mod.ts";
 
 export type {
+  Filter,
+  Scope,
   SearchAlbum,
   SearchArtist,
   SearchContent,
@@ -41,6 +43,8 @@ export type {
   TopResultArtist,
   TopResultSong,
 } from "../parsers/search.ts";
+
+export { filters, scopes } from "../parsers/search.ts";
 
 export type SearchRuns = {
   text: string;
