@@ -482,14 +482,20 @@ export interface TopResultSong extends SearchSong {
   more: SearchContent[];
 }
 
-export function parse_top_result_song(result: any): TopResultSong {
+export interface TopResultVideo extends SearchVideo {
+  more: SearchContent[];
+}
+
+export function parse_top_result_song(
+  result: any,
+): TopResultSong | TopResultVideo {
   const toggle_menu = find_object_by_key(
     j(result, MENU_ITEMS),
     TOGGLE_MENU,
   );
 
   return {
-    type: "song",
+    type: __(result.subtitle.runs[0].text) as "song" | "video" ?? "song",
     title: j(result, TITLE_TEXT),
     videoId: j(result, TITLE, NAVIGATION_VIDEO_ID),
     playlistId: jo(result, TITLE, NAVIGATION_PLAYLIST_ID),
@@ -497,7 +503,7 @@ export function parse_top_result_song(result: any): TopResultSong {
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     feedbackTokens: toggle_menu ? parse_song_menu_tokens(toggle_menu) : null,
     videoType: j(result, TITLE, "navigationEndpoint", NAVIGATION_VIDEO_TYPE),
-    ...parse_song_runs(result.subtitle.runs),
+    ...parse_song_runs(result.subtitle.runs, 2),
     more: parse_top_result_more(result),
   };
 }
@@ -521,7 +527,11 @@ export function parse_top_result_album(result: any): TopResultAlbum {
   };
 }
 
-export type TopResult = TopResultSong | TopResultAlbum | TopResultArtist;
+export type TopResult =
+  | TopResultSong
+  | TopResultAlbum
+  | TopResultArtist
+  | TopResultVideo;
 
 export function parse_top_result(result: any) {
   const page_type = jo(result, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
