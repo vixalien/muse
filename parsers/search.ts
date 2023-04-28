@@ -424,12 +424,20 @@ export function parse_top_result_more(result: any) {
             parse_search_content(content, false, last_entity ?? undefined),
           );
         } catch {
-          // try as song
+          // try as album
           try {
             more.push(
-              parse_search_content(content, false, "song"),
+              parse_search_content(content, false, "album"),
             );
           } catch {
+            // try as song
+            try {
+              more.push(
+                parse_search_content(content, false, "song"),
+              );
+            } catch {
+              // ignore
+            }
             // ignore
           }
         }
