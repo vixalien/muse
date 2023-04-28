@@ -516,7 +516,7 @@ export function parse_top_result_album(result: any): TopResultAlbum {
     // TODO: stop lowercasing for no reason (album_type, category title etc...)
     album_type: result.subtitle.runs[0].text,
     year: null,
-    artists: parse_song_artists_runs(result.subtitle.runs.slice(2, -1)),
+    artists: parse_song_artists_runs(result.subtitle.runs.slice(2)),
     more: parse_top_result_more(result),
   };
 }
