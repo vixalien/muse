@@ -50,6 +50,7 @@ import { AbortOptions, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export type {
+  Category,
   FlatSong,
   MixedContent,
   MixedItem,
