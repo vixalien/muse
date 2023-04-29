@@ -364,7 +364,7 @@ export interface ParsedAlbum {
   browseId: string;
   thumbnails: Thumbnail[];
   isExplicit: boolean;
-  album_type: AlbumType;
+  album_type: AlbumType | null;
   artists: ArtistRun[];
 }
 
@@ -418,7 +418,7 @@ export function parse_single(result: any): ParsedAlbum {
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     artists: runs,
-    album_type: "single",
+    album_type: null,
   };
 }
 
