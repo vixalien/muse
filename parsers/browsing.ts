@@ -282,7 +282,7 @@ export function parse_artist_contents(results: any[]) {
     videos: [_("videos"), parse_video],
     playlists: [_("playlists"), parse_playlist],
     related: [_("related"), parse_related_artist],
-    featured: [_("featured"), parse_featured],
+    featured: [_("featured"), parse_playlist],
     library: [_("library"), parse_mixed_item],
   } satisfies CategoryMap;
 
@@ -758,28 +758,6 @@ export function parse_watch_playlist(data: any): WatchPlaylist {
     title: j(data, TITLE_TEXT),
     playlistId: j(data, NAVIGATION_WATCH_PLAYLIST_ID),
     thumbnails: j(data, THUMBNAIL_RENDERER),
-  };
-}
-
-export interface FeaturedPlaylist {
-  title: string;
-  playlistId: string;
-  thumbnails: Thumbnail[];
-  author: {
-    name: string;
-    id: string | null;
-  };
-}
-
-export function parse_featured(data: any): FeaturedPlaylist {
-  return {
-    title: j(data, TITLE_TEXT),
-    playlistId: jo(data, NAVIGATION_BROWSE_ID).slice(2),
-    thumbnails: j(data, THUMBNAIL_RENDERER),
-    author: {
-      name: j(data, SUBTITLE2),
-      id: jo(data, "subtitle.runs[2]", NAVIGATION_BROWSE_ID),
-    },
   };
 }
 
