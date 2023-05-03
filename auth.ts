@@ -33,6 +33,33 @@ export type RequiresLoginEvent = CustomEvent<
   (_fn: () => Promise<void>) => void
 >;
 
+interface AuthenticatorEventMap {
+  "requires-login": RequiresLoginEvent;
+}
+
+export interface Authenticator extends EventTarget {
+  addEventListener<K extends keyof AuthenticatorEventMap>(
+    type: K,
+    listener: (this: Authenticator, ev: AuthenticatorEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  removeEventListener<K extends keyof AuthenticatorEventMap>(
+    type: K,
+    listener: (this: Authenticator, ev: AuthenticatorEventMap[K]) => any,
+    options?: boolean | EventListenerOptions,
+  ): void;
+  removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions,
+  ): void;
+}
+
 /**
  * Authenticates with youtube's API
  */

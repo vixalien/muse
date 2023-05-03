@@ -1,5 +1,4 @@
-import { RequiresLoginEvent } from "./auth.ts";
-import { get_option, search, setup } from "./mod.ts";
+import { get_artist, get_option, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -106,7 +105,7 @@ const auth_flow = async () => {
 };
 
 auth.addEventListener("requires-login", (event) => {
-  const resolve = (event as RequiresLoginEvent).detail;
+  const resolve = event.detail;
 
   resolve(auth_flow);
 });
@@ -120,7 +119,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-search("h", { scope: "library" })
+get_artist("UCU6cE7pdJPc6DU2jSrKEsdQ")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

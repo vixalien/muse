@@ -101,18 +101,15 @@ Here's the flow:
 
 ```ts
 import { get_option, setup } from "https://deno.land/x/muse@VERSION/mod.ts";
-import { RequiresLoginEvent } from "https://deno.land/x/muse@VERSION/auth.ts";
 
 /*
 node imports:
 
 import { get_option, setup } from "libmuse";
-import { RequiresLoginEvent } from "libmuse/auth.js";
 
 commonjs imports:
 
 const { get_option, setup } = require("libmuse");
-const { RequiresLoginEvent } = require("libmuse/auth.js");
 */
 
 const auth = get_option("auth");
@@ -150,7 +147,7 @@ const auth_flow = async () => {
 // listen to the `requires-login` event, then resolve pass on a function that
 // returns a promise that will resolve when the auth flow is complete
 auth.addEventListener("requires-login", (event) => {
-  const resolve = (event as RequiresLoginEvent).detail;
+  const resolve = event.detail;
 
   resolve(auth_flow);
 });
