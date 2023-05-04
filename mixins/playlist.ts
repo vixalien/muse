@@ -8,11 +8,10 @@ import {
   CONTENT,
   DESCRIPTION,
   MUSIC_SHELF,
-  NAVIGATION_BROWSE_ID,
   SECTION_LIST_CONTINUATION,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN_TAB,
-  SUBTITLE2,
+  SUBTITLE,
   SUBTITLE3,
   THUMBNAIL_CROPPED,
   TITLE_TEXT,
@@ -54,6 +53,8 @@ export interface Playlist {
   thumbnails: Thumbnail[];
   description: string | null;
   authors: ArtistRun[];
+  /** can be `Playlist`, `Chart` or `Radio` */
+  type: string;
   year: string | null;
   trackCount: number | null;
   duration_seconds: number;
@@ -175,6 +176,7 @@ export async function get_playlist(
     title: j(header, TITLE_TEXT),
     thumbnails: j(header, THUMBNAIL_CROPPED),
     description: jo(header, DESCRIPTION),
+    type: run_count > 0 ? j(header, SUBTITLE) : null,
     authors: run_count > 1
       ? parse_song_artists_runs(header.subtitle.runs.slice(2))
       : [],
