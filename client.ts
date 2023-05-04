@@ -1,4 +1,4 @@
-import { get_artist, get_option, setup } from "./mod.ts";
+import { get_option, get_playlist, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -104,6 +104,8 @@ const auth_flow = async () => {
   console.log("Logged in!", auth._token);
 };
 
+await auth_flow();
+
 auth.addEventListener("requires-login", (event) => {
   const resolve = event.detail;
 
@@ -119,7 +121,9 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_artist("UCU6cE7pdJPc6DU2jSrKEsdQ")
+get_playlist("RDATmXa11q1vjnv0rE", {
+  limit: 500,
+})
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

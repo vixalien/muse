@@ -57,7 +57,7 @@ export interface Playlist {
     id: string;
   } | null;
   year: string | null;
-  trackCount: number;
+  trackCount: number | null;
   duration_seconds: number;
   tracks: PlaylistItem[];
   continuation: string | null;
@@ -162,9 +162,11 @@ export async function get_playlist(
 
   const run_count = header.subtitle.runs.length;
 
-  const song_count = Number(
-    header.secondSubtitle.runs[0].text.normalize("NFKD").split(" ")[0],
-  );
+  const song_count = header.secondSubtitle.runs
+    ? Number(
+      header.secondSubtitle.runs[0].text.normalize("NFKD").split(" ")[0],
+    )
+    : null;
 
   const playlist: Playlist = {
     id: results.playlistId,
@@ -184,7 +186,9 @@ export async function get_playlist(
     year: run_count === 5 ? j(header, SUBTITLE3) : null,
     trackCount: song_count,
     duration_seconds: 0,
-    tracks: song_count > 0 ? parse_playlist_items(results.contents) : [],
+    tracks: (song_count === null || song_count > 0)
+      ? parse_playlist_items(results.contents)
+      : [],
     continuation: null,
     suggestions: [],
     suggestions_continuation: null,
@@ -241,8 +245,10 @@ export async function get_playlist(
     }
   }
 
-  if (song_count > 0) {
-    const songs_to_get = Math.min(limit ?? song_count, song_count);
+  if (song_count === null || song_count > 0) {
+    const songs_to_get = song_count
+      ? Math.min(limit ?? song_count, song_count)
+      : limit;
 
     if ("continuations" in results) {
       const continued_data = await get_more_playlist_tracks(
