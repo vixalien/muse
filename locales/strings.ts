@@ -8,6 +8,7 @@ import {
   CAROUSEL_TITLE,
   MRLIR,
   MTRIR,
+  MUSIC_SHELF,
   SECTION_LIST,
   SINGLE_COLUMN_TAB,
   TAB_CONTENT,
@@ -107,11 +108,13 @@ export async function get_content_strings(
   });
 
   const extractor = (data: any) => {
-    const title = jo(data, CAROUSEL, CAROUSEL_TITLE, "text");
+    const title = jo(data, CAROUSEL, CAROUSEL_TITLE, "text") ??
+      jo(data, MUSIC_SHELF, TITLE_TEXT);
 
     if (!title) return null;
 
-    const first_content = jo(data, CAROUSEL_CONTENTS, "[0]");
+    const first_content = jo(data, CAROUSEL_CONTENTS, "[0]") ??
+      jo(data, MUSIC_SHELF, "contents.0");
     const first_data = jo(first_content, MRLIR) ?? jo(first_content, MTRIR) ??
       jo(first_content, "musicNavigationButtonRenderer");
 
@@ -144,67 +147,74 @@ export async function get_content_strings(
 }
 
 const base_map = new Map([
-  // // artist
-  // ["albums", "Albums"],
-  // ["singles", "Singles"],
-  // ["videos", "Videos"],
-  // ["library", "From your library"],
-  // ["featured", "Featured on"],
-  // ["playlists", "Playlists"],
-  // ["related", "Fans might also like"],
-  // // explore
-  // ["new albums", "New albums & singles"],
-  // ["top songs", "Top songs"],
-  // ["moods", "Moods & genres"],
-  // ["trending", "Trending"],
-  // // charts
-  // ["top songs", "Top songs"],
-  // ["top videos", "Top music videos"],
-  // ["top artists", "Top artists"],
-  // // TODO: YTM is misbehaving at the moment
-  // ["genres", "Genres"],
-  // /// trending is duplicated
-  // // search
-  // ["station", "Station"],
-  // ["playlist", "Playlist"],
-  // ["artist", "Artist"],
-  // ["song", "Song"],
-  // ["video", "Video"],
+  // artist
+  ["albums", "Albums"],
+  ["singles", "Singles"],
+  ["videos", "Videos"],
+  ["library", "From your library"],
+  ["featured", "Featured on"],
+  ["playlists", "Playlists"],
+  ["related", "Fans might also like"],
+  // explore
+  ["new albums", "New albums & singles"],
+  ["top songs", "Top songs"],
+  ["moods", "Moods & genres"],
+  ["trending", "Trending"],
+  // charts
+  ["top songs", "Top songs"],
+  ["top videos", "Top music videos"],
+  ["top artists", "Top artists"],
+  // TODO: YTM is misbehaving at the moment
+  ["genres", "Genres"],
+  /// trending is duplicated
+  // search
+  ["station", "Station"],
+  ["playlist", "Playlist"],
+  ["artist", "Artist"],
+  ["song", "Song"],
+  ["video", "Video"],
   // search titles
   ["songs", "Songs"],
   ["featured_playlists", "Featured playlists"],
   ["community_playlists", "Community playlists"],
   ["artists", "Artists"],
+  // // user
+  ["songs_on_repeat", "Songs on repeat"],
+  ["artists_on_repeat", "Artists on repeat"],
+  ["playlists_on_repeat", "Playlists on repeat"],
 ]);
 
 export async function get_base_strings() {
   set_option("language", "en");
 
-  const [explore, charts, artist, search_radio, search_hello] = await Promise
-    .all([
-      get_content_strings("FEmusic_explore"),
-      get_content_strings("FEmusic_charts", {
-        formData: {
-          // to get genres
-          selectedValues: ["US"],
-        },
-      }),
-      // BTS (because they have playlists on their channel)
-      // also don't forget to add atleast one song to your library
-      // and make sure the item you add is NOT the first item in any category
-      get_content_strings("UC9vrvNSL3xcWGSkV86REBSg"),
-      get_search_strings(),
-      // to make sure we also get stuff like artists (because there is no artist
-      // named "global radio" yet..)
-      get_search_strings({ query: "hello" }),
-    ]);
+  const [explore, charts, artist, search_radio, search_hello, channel] =
+    await Promise
+      .all([
+        get_content_strings("FEmusic_explore"),
+        get_content_strings("FEmusic_charts", {
+          formData: {
+            // to get genres
+            selectedValues: ["US"],
+          },
+        }),
+        // BTS (because they have playlists on their channel)
+        // also don't forget to add atleast one song to your library
+        // and make sure the item you add is NOT the first item in any category
+        get_content_strings("UC9vrvNSL3xcWGSkV86REBSg"),
+        get_search_strings(),
+        // to make sure we also get stuff like artists (because there is no artist
+        // named "global radio" yet..)
+        get_search_strings({ query: "hello" }),
+        // use your channel id
+        get_content_strings("UCSdIilrkpBqG01hzOU6pOTg"),
+      ]);
 
   const search = [...search_radio, ...search_hello]
     .filter(filter_fn);
 
   const id_map: Record<string, any> = {};
 
-  const ids = [...explore, ...charts, ...artist, ...search];
+  const ids = [...explore, ...charts, ...artist, ...search, ...channel];
 
   let logged = false;
 
@@ -275,28 +285,30 @@ export async function get_strings_for_language(
 ) {
   set_option("language", language);
 
-  const [explore, charts, artist, search_radio, search_hello] = await Promise
-    .all([
-      get_content_strings("FEmusic_explore", { lang: language }),
-      get_content_strings("FEmusic_charts", {
-        lang: language,
-        formData: {
-          selectedValues: ["US"],
-        },
-      }),
-      get_content_strings("UC9vrvNSL3xcWGSkV86REBSg", {
-        lang: language,
-      }),
-      get_search_strings({ lang: language }),
-      get_search_strings({ query: "hello" }),
-    ]);
+  const [explore, charts, artist, search_radio, search_hello, channel] =
+    await Promise
+      .all([
+        get_content_strings("FEmusic_explore", { lang: language }),
+        get_content_strings("FEmusic_charts", {
+          lang: language,
+          formData: {
+            selectedValues: ["US"],
+          },
+        }),
+        get_content_strings("UC9vrvNSL3xcWGSkV86REBSg", {
+          lang: language,
+        }),
+        get_search_strings({ lang: language }),
+        get_search_strings({ query: "hello" }),
+        get_content_strings("REPLACE_WITH_YOUR_CHANNEL_ID"),
+      ]);
 
   const id_map: Record<string, any> = {};
 
   const search = [...search_radio, ...search_hello]
     .filter(filter_fn);
 
-  const ids = [...explore, ...charts, ...artist, ...search];
+  const ids = [...explore, ...charts, ...artist, ...search, ...channel];
 
   let logged = false;
 
@@ -314,16 +326,19 @@ export async function get_strings_for_language(
           }
         }
       }
+
+      // handle translated thumbnails
+      if (i.id.slice(0, -3) === id.slice(0, -3)) return true;
+
       return false;
     });
 
     if (!item) {
       if (!logged) {
-        console.log(
-          language,
-          "id map",
-          Object.fromEntries(ids.map((id) => [id.title, id.id])),
-        );
+        console.log(language, "id map");
+        ids.forEach((id) => {
+          console.log("title", id.title, id.id);
+        });
         logged = true;
       }
       console.error("missing", key, id);
