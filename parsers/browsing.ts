@@ -522,7 +522,7 @@ export interface TopSong {
   artists: SongArtist[] | null;
   playlistId: string | null;
   thumbnails: Thumbnail[];
-  rank: number;
+  rank: string;
   change: TrendChange | null;
   album: {
     title: string;
@@ -547,7 +547,7 @@ export function parse_top_song(result: any): TopSong {
     artists: parse_song_artists(result, 1),
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
-    rank: Number(j(rank, TEXT_RUN_TEXT)),
+    rank: j(rank, TEXT_RUN_TEXT),
     change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
     album: album_run
       ? {
