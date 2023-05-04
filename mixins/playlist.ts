@@ -188,7 +188,9 @@ export async function get_playlist(
     description: jo(header, DESCRIPTION),
     type: run_count > 0 ? j(header, SUBTITLE) : null,
     authors: run_count > 1
-      ? parse_song_artists_runs(header.subtitle.runs.slice(2))
+      ? parse_song_artists_runs(
+        header.subtitle.runs.slice(2, run_count >= 5 ? -2 : undefined),
+      )
       : [],
     year: run_count === 5 ? j(header, SUBTITLE3) : null,
     trackCount: song_count,
