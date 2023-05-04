@@ -61,6 +61,7 @@ export interface Playlist {
   type: string;
   year: string | null;
   trackCount: number | null;
+  duration: string | null;
   duration_seconds: number;
   tracks: PlaylistItem[];
   continuation: string | null;
@@ -171,6 +172,11 @@ export async function get_playlist(
     )
     : null;
 
+  const duration =
+    header.secondSubtitle.runs && header.secondSubtitle.runs.length > 2
+      ? header.secondSubtitle.runs[2].text
+      : null;
+
   const playlist: Playlist = {
     id: results.playlistId,
     privacy: own_playlist
@@ -186,6 +192,7 @@ export async function get_playlist(
       : [],
     year: run_count === 5 ? j(header, SUBTITLE3) : null,
     trackCount: song_count,
+    duration,
     duration_seconds: 0,
     tracks: (song_count === null || song_count > 0)
       ? parse_playlist_items(results.contents)
