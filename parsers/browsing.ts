@@ -275,6 +275,22 @@ export function parse_categories<
   return categories;
 }
 
+export function parse_user_contents(results: any[]) {
+  const categories_data = {
+    artists_on_repeat: [_("artists_on_repeat"), parse_related_artist],
+    playlists_on_repeat: [_("playlists_on_repeat"), parse_playlist],
+    playlists: [_("playlists"), parse_playlist],
+  } satisfies CategoryMap;
+
+  return parse_categories(results, categories_data);
+}
+
+export type NonNUllableUserContents = ReturnType<typeof parse_user_contents>;
+
+export type UserContents = {
+  [Key in keyof NonNUllableUserContents]: NonNUllableUserContents[Key] | null;
+};
+
 export function parse_artist_contents(results: any[]) {
   const categories_data = {
     albums: [_("albums"), parse_album],

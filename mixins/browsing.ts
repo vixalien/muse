@@ -34,8 +34,10 @@ import {
   parse_mixed_content,
   parse_moods,
   parse_playlist,
+  parse_user_contents,
   ParsedAlbum,
   ParsedPlaylist,
+  UserContents,
 } from "../parsers/browsing.ts";
 import {
   parse_playlist_items,
@@ -466,8 +468,11 @@ export async function get_artist_albums(
   return results.map((result: any) => parse_album(result[MTRIR]));
 }
 
-export interface User extends ArtistContents {
+export interface User extends UserContents {
   name: string;
+  songs_on_repeat: {
+    results: PlaylistItem[];
+  } | null;
 }
 
 export async function get_user(
@@ -483,8 +488,17 @@ export async function get_user(
 
   const user: User = {
     name: j(json, "header.musicVisualHeaderRenderer", TITLE_TEXT),
-    ...parse_artist_contents(results),
+    ...parse_user_contents(results),
+    songs_on_repeat: null,
   };
+
+  if ("musicShelfRenderer" in results[0]) {
+    const musicShelf = j(results[0], `${MUSIC_SHELF}`);
+
+    user.songs_on_repeat = {
+      results: parse_playlist_items(musicShelf.contents),
+    };
+  }
 
   return user;
 }
