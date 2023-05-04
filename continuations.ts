@@ -117,9 +117,9 @@ function get_continuation_object(ctoken: string) {
   };
 }
 
-export function get_continuation_contents(
+export function get_continuation_contents<T extends any = any>(
   continuation: any,
-  parse: (data: any) => any[],
+  parse: (data: any) => T[],
 ) {
   for (const term of ["contents", "items"]) {
     if (term in continuation) {
@@ -127,7 +127,7 @@ export function get_continuation_contents(
     }
   }
 
-  return [] as any[];
+  return [] as T[];
 }
 
 export async function resend_request_until_valid(

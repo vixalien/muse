@@ -16,7 +16,11 @@ import {
   THUMBNAIL_CROPPED,
   TITLE_TEXT,
 } from "../nav.ts";
-import { parse_content_list, parse_playlist } from "../parsers/browsing.ts";
+import {
+  parse_content_list,
+  parse_playlist,
+  ParsedPlaylist,
+} from "../parsers/browsing.ts";
 import {
   parse_playlist_items,
   PlaylistItem,
@@ -62,7 +66,7 @@ export interface Playlist {
   continuation: string | null;
   suggestions: any;
   suggestions_continuation: string | null;
-  related: any;
+  related: ParsedPlaylist[];
 }
 
 export interface PlaylistSuggestions {
