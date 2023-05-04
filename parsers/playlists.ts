@@ -6,10 +6,12 @@ import {
   MRLIR,
   NAVIGATION_VIDEO_TYPE,
   PLAY_BUTTON,
+  TEXT_RUN_TEXT,
   THUMBNAILS,
   TOGGLE_MENU,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
+import { TrendChange } from "./browsing.ts";
 import {
   Album,
   LikeStatus,
@@ -46,6 +48,8 @@ export interface PlaylistItem {
   setVideoId: string | null;
   feedbackTokens: MenuTokens | null;
   feedbackToken: null;
+  rank: string | null;
+  change: TrendChange | null;
 }
 
 export const parse_playlist_items = (
@@ -136,6 +140,8 @@ export const parse_playlist_items = (
       `${MENU_ITEMS}[0].menuNavigationItemRenderer.navigationEndpoint.${NAVIGATION_VIDEO_TYPE}`,
     );
 
+    const rank = jo(data, "customIndexColumn.musicCustomIndexColumnRenderer");
+
     const song: PlaylistItem = {
       videoId,
       title,
@@ -151,6 +157,8 @@ export const parse_playlist_items = (
       setVideoId: null,
       feedbackTokens: null,
       feedbackToken: null,
+      rank: rank ? j(rank, TEXT_RUN_TEXT) : null,
+      change: jo(rank, "icon.iconType")?.split("_")[2] || null,
     };
 
     if (duration) {
