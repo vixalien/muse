@@ -31,6 +31,7 @@ import {
   PaginationOptions,
 } from "./utils.ts";
 import { request_json } from "./_request.ts";
+import { ArtistRun, parse_song_artists_runs } from "../parsers/songs.ts";
 
 export type { PlaylistItem };
 
@@ -52,10 +53,7 @@ export interface Playlist {
   title: string;
   thumbnails: Thumbnail[];
   description: string | null;
-  author: {
-    name: string;
-    id: string;
-  } | null;
+  authors: ArtistRun[];
   year: string | null;
   trackCount: number | null;
   duration_seconds: number;
@@ -177,12 +175,9 @@ export async function get_playlist(
     title: j(header, TITLE_TEXT),
     thumbnails: j(header, THUMBNAIL_CROPPED),
     description: jo(header, DESCRIPTION),
-    author: run_count > 1
-      ? {
-        name: j(header, SUBTITLE2),
-        id: jo(header, "subtitle.runs.2", NAVIGATION_BROWSE_ID),
-      }
-      : null,
+    authors: run_count > 1
+      ? parse_song_artists_runs(header.subtitle.runs.slice(2))
+      : [],
     year: run_count === 5 ? j(header, SUBTITLE3) : null,
     trackCount: song_count,
     duration_seconds: 0,
