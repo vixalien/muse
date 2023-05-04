@@ -158,7 +158,7 @@ export const parse_playlist_items = (
       feedbackTokens: null,
       feedbackToken: null,
       rank: rank ? j(rank, TEXT_RUN_TEXT) : null,
-      change: jo(rank, "icon.iconType")?.split("_")[2] || null,
+      change: rank ? jo(rank, "icon.iconType")?.split("_")[2] ?? null : null,
     };
 
     if (duration) {
