@@ -6,6 +6,7 @@ import {
 } from "../continuations.ts";
 import {
   GRID,
+  MRLIR,
   MTRIR,
   SECTION_LIST,
   SECTION_LIST_CONTINUATION,
@@ -13,6 +14,7 @@ import {
 } from "../nav.ts";
 import {
   MixedItem,
+  parse_album,
   parse_content_list,
   parse_mixed_item,
   parse_playlist,
@@ -20,18 +22,15 @@ import {
 } from "../parsers/browsing.ts";
 import {
   fetch_library_contents,
-  get_library_contents,
-  parse_albums,
-  parse_artists,
+  parse_library_artist,
   parse_library_songs,
   parse_toast,
-  ParsedLibraryAlbum,
   ParsedLibraryArtist,
 } from "../parsers/library.ts";
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { LikeStatus } from "../parsers/songs.ts";
 import { j, jo } from "../util.ts";
-import { Song } from "./browsing.ts";
+import { ParsedAlbum, Song } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions, Playlist } from "./playlist.ts";
 import {
   AbortOptions,
@@ -150,64 +149,15 @@ export interface LibraryPlaylists {
   continuation: string | null;
 }
 
-export async function get_library_playlists(
-  options: PaginationAndOrderOptions = {},
-): Promise<LibraryPlaylists> {
-  const { order, limit = 25, continuation } = options;
-
-  await check_auth();
-
-  const endpoint = "browse";
-  const body: Record<string, any> = { browseId: "FEmusic_liked_playlists" };
-
-  validate_order_parameter(order);
-
-  if (order) body.params = prepare_order_params(order);
-
-  const library_playlists: LibraryPlaylists = {
-    playlists: [],
-    continuation: continuation ?? null,
-  };
-
-  if (!continuation) {
-    const json = await request_json(endpoint, {
-      data: body,
-      signal: options.signal,
-    });
-
-    const results = get_library_contents(json, GRID);
-    library_playlists.playlists = parse_content_list(
-      results.items.slice(1),
-      parse_playlist,
-    );
-
-    if ("continuations" in results) {
-      library_playlists.continuation = results;
-    }
-  }
-
-  if (library_playlists.continuation) {
-    const continued_data = await get_continuations(
-      library_playlists.continuation,
-      "gridContinuation",
-      limit - library_playlists.playlists.length,
-      (params) => {
-        return request_json(endpoint, {
-          data: body,
-          params,
-          signal: options.signal,
-        });
-      },
-      (contents) => {
-        return parse_content_list(contents, parse_playlist);
-      },
-    );
-
-    library_playlists.continuation = continued_data.continuation;
-    library_playlists.playlists.push(...continued_data.items);
-  }
-
-  return library_playlists;
+export function get_library_playlists(
+  options?: PaginationAndOrderOptions,
+): Promise<LibraryItems<ParsedPlaylist>> {
+  return fetch_library_contents(
+    "FEmusic_liked_playlists",
+    options,
+    (playlists) => parse_content_list(playlists, parse_playlist, MTRIR),
+    true,
+  );
 }
 
 export function get_library(
@@ -322,11 +272,11 @@ export interface LibraryItems<T extends any> {
 
 export function get_library_albums(
   options?: PaginationAndOrderOptions,
-): Promise<LibraryItems<ParsedLibraryAlbum>> {
+): Promise<LibraryItems<ParsedAlbum>> {
   return fetch_library_contents(
     "FEmusic_liked_albums",
     options,
-    parse_albums,
+    (albums) => parse_content_list(albums, parse_album, MTRIR),
     true,
   );
 }
@@ -337,7 +287,7 @@ export function get_library_artists(
   return fetch_library_contents(
     "FEmusic_library_corpus_track_artists",
     options,
-    parse_artists,
+    (artists) => parse_content_list(artists, parse_library_artist, MRLIR),
     false,
   );
 }
@@ -348,7 +298,8 @@ export function get_library_subscriptions(
   return fetch_library_contents(
     "FEmusic_library_corpus_artists",
     options,
-    (results) => parse_artists(results, true),
+    (subs) =>
+      parse_content_list(subs, (sub) => parse_library_artist(sub, true), MRLIR),
     false,
   );
 }

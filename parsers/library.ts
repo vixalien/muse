@@ -10,27 +10,20 @@ import {
   find_object_by_key,
   GRID,
   ITEM_SECTION,
-  MENU_PLAYLIST_ID,
   MENU_SERVICE,
-  MRLIR,
-  MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   SECTION_LIST,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN,
   SINGLE_COLUMN_TAB,
-  SUBTITLE,
   TAB_1_CONTENT,
-  THUMBNAIL_RENDERER,
   THUMBNAILS,
   TITLE,
   TITLE_TEXT,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
-import { AlbumType } from "./browsing.ts";
 import { parse_playlist_items, PlaylistItem } from "./playlists.ts";
-import { parse_song_runs, SongRuns } from "./songs.ts";
 import {
   get_item_text,
   get_menu_playlists,
@@ -39,6 +32,7 @@ import {
 } from "./util.ts";
 
 export interface ParsedLibraryArtist extends MenuPlaylists {
+  type: "library-artist";
   browseId: string;
   name: string;
   songs: string | null;
@@ -46,59 +40,21 @@ export interface ParsedLibraryArtist extends MenuPlaylists {
   thumbnails: Thumbnail[];
 }
 
-export function parse_artists(results: any, has_subscribers = false) {
-  const artists: ParsedLibraryArtist[] = [];
-  for (const result of results) {
-    const data = result[MRLIR];
+export function parse_library_artist(
+  data: any,
+  has_subscribers = false,
+): ParsedLibraryArtist {
+  const subtitle = get_item_text(data, 1);
 
-    const subtitle = get_item_text(data, 1).split(" ")[0];
-
-    const artist: ParsedLibraryArtist = {
-      ...get_menu_playlists(data),
-      browseId: j(data, NAVIGATION_BROWSE_ID),
-      name: get_item_text(data, 0),
-      songs: !has_subscribers ? subtitle : null,
-      subscribers: has_subscribers ? subtitle : null,
-      thumbnails: jo(data, THUMBNAILS),
-    };
-
-    artists.push(artist);
-  }
-
-  return artists;
-}
-
-export interface ParsedLibraryAlbum extends SongRuns {
-  browseId: string;
-  playlistId: string | null;
-  title: string;
-  thumbnails: Thumbnail[];
-  album_type: AlbumType | null;
-}
-
-export function parse_albums(results: any) {
-  const albums: ParsedLibraryAlbum[] = [];
-
-  for (const result of results) {
-    const data = result[MTRIR];
-
-    const album: ParsedLibraryAlbum = {
-      ...parse_song_runs(data.subtitle.runs.slice(2) ?? [{}]),
-      browseId: j(data, TITLE, NAVIGATION_BROWSE_ID),
-      playlistId: jo(data, MENU_PLAYLIST_ID),
-      title: j(data, TITLE_TEXT),
-      thumbnails: j(data, THUMBNAIL_RENDERER),
-      album_type: null,
-    };
-
-    if ("runs" in data.subtitle) {
-      album.album_type = j(data, SUBTITLE);
-    }
-
-    albums.push(album);
-  }
-
-  return albums;
+  return {
+    type: "library-artist",
+    ...get_menu_playlists(data),
+    browseId: j(data, NAVIGATION_BROWSE_ID),
+    name: get_item_text(data, 0),
+    songs: !has_subscribers ? subtitle : null,
+    subscribers: has_subscribers ? subtitle : null,
+    thumbnails: jo(data, THUMBNAILS),
+  };
 }
 
 export async function fetch_library_contents<T extends any>(
@@ -107,7 +63,7 @@ export async function fetch_library_contents<T extends any>(
   parse: (results: any) => T[],
   grid: boolean,
 ) {
-  const { order, limit = 25, continuation = null, signal } = options;
+  const { order, limit = 20, continuation = null, signal } = options;
 
   await check_auth();
 
@@ -147,7 +103,7 @@ export async function fetch_library_contents<T extends any>(
         return request_json(endpoint, { data, params, signal });
       },
       (contents) => {
-        return parse(contents.items ?? contents.contents);
+        return parse(contents);
       },
     );
 
