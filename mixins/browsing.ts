@@ -44,7 +44,7 @@ import {
   PlaylistItem,
   VideoType,
 } from "../parsers/playlists.ts";
-import { ArtistRun, parse_format } from "../parsers/songs.ts";
+import { parse_format } from "../parsers/songs.ts";
 import { Format } from "../parsers/types.d.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
@@ -236,13 +236,8 @@ export async function get_artist(
   return artist;
 }
 
-export interface AlbumResultTrack extends PlaylistItem {
-  album_name: string;
-  artists: ArtistRun[];
-}
-
 export interface AlbumResult extends AlbumHeader {
-  tracks: AlbumResultTrack[];
+  tracks: PlaylistItem[];
   other_versions: ParsedAlbum[] | null;
 }
 
@@ -276,13 +271,7 @@ export async function get_album(
 
   const album: AlbumResult = {
     ...header,
-    tracks: parse_playlist_items(results.contents).map((track) => {
-      return {
-        ...track,
-        album_name: header.title,
-        artists: header.artists,
-      };
-    }),
+    tracks: parse_playlist_items(results.contents),
     other_versions: null,
   };
 
