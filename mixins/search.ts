@@ -24,9 +24,10 @@ import {
 } from "../parsers/search.ts";
 import { j, jo } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
-import { AbortOptions, PaginationOptions } from "./utils.ts";
+import { AbortOptions, check_auth, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 import { TopResult } from "../mod.ts";
+import { parse_toast } from "../parsers/library.ts";
 
 export type {
   Filter,
@@ -185,6 +186,20 @@ export async function get_search_suggestions(
   }
 
   return suggestions;
+}
+
+export async function remove_search_history(
+  token: string,
+  options: AbortOptions = {},
+): Promise<string | null> {
+  await check_auth();
+
+  const json = request_json("feedback", {
+    data: { feedbackTokens: [token] },
+    signal: options.signal,
+  });
+
+  return parse_toast(json);
 }
 
 export interface SearchOptions extends PaginationOptions {
