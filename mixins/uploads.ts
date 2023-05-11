@@ -2,22 +2,23 @@ import { get_continuations } from "../continuations.ts";
 import { basename, extname } from "../deps.ts";
 import { ERROR_CODE, MuseError } from "../errors.ts";
 import {
+  MTRIR,
   MUSIC_SHELF,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN_TAB,
   TITLE_TEXT,
 } from "../nav.ts";
 import { AlbumHeader, parse_album_header } from "../parsers/albums.ts";
+import { parse_album, parse_content_list } from "../parsers/browsing.ts";
 import {
   fetch_library_contents,
-  parse_albums,
-  parse_artists,
-  ParsedLibraryAlbum,
+  parse_library_artist,
   ParsedLibraryArtist,
 } from "../parsers/library.ts";
 import { parse_uploaded_items, UploadedItem } from "../parsers/uploads.ts";
 import { j, sum_total_duration } from "../util.ts";
 import { request, request_json } from "./_request.ts";
+import { ParsedAlbum } from "./browsing.ts";
 import {
   get_library_items,
   GetLibraryOptions,
@@ -44,11 +45,11 @@ export function get_library_upload_songs(
 
 export function get_library_upload_albums(
   options?: PaginationAndOrderOptions,
-): Promise<LibraryItems<ParsedLibraryAlbum>> {
+): Promise<LibraryItems<ParsedAlbum>> {
   return fetch_library_contents(
     "FEmusic_library_privately_owned_releases",
     options,
-    parse_albums,
+    (albums) => parse_content_list(albums, parse_album, MTRIR),
     true,
   );
 }
@@ -59,7 +60,7 @@ export function get_library_upload_artists(
   return fetch_library_contents(
     "FEmusic_library_privately_owned_artists",
     options,
-    parse_artists,
+    (artists) => parse_content_list(artists, parse_library_artist),
     false,
   );
 }

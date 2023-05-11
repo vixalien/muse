@@ -276,7 +276,7 @@ export function get_library_albums(
   return fetch_library_contents(
     "FEmusic_liked_albums",
     options,
-    (albums) => parse_content_list(albums, parse_album, MTRIR),
+    (albums) => parse_content_list(albums, parse_album),
     true,
   );
 }
