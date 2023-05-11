@@ -44,7 +44,7 @@ import {
   PlaylistItem,
   VideoType,
 } from "../parsers/playlists.ts";
-import { parse_format } from "../parsers/songs.ts";
+import { ArtistRun, parse_format } from "../parsers/songs.ts";
 import { Format } from "../parsers/types.d.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
@@ -64,7 +64,7 @@ export type {
   WatchPlaylist,
 } from "../parsers/browsing.ts";
 
-export type { Thumbnail };
+export type { ArtistRun, Thumbnail };
 
 export interface Home {
   continuation: string | null;
