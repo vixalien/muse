@@ -8,6 +8,7 @@ import {
   NAVIGATION_VIDEO_ID,
   RUN_TEXT,
   SECTION_LIST,
+  TEXT_RUN_TEXT,
   THUMBNAILS,
   TITLE_TEXT,
 } from "../nav.ts";
@@ -221,6 +222,7 @@ export interface SearchResults {
     original: { search: SearchRuns; query: string };
     corrected: { search: SearchRuns; query: string };
   } | null;
+  filters: Filter[];
 }
 
 export interface SearchOptions extends PaginationOptions {
@@ -253,6 +255,7 @@ export async function search(
     categories: [],
     continuation: null,
     autocorrect: null,
+    filters: [],
   };
 
   if (filter != null && !filters.includes(filter)) {
@@ -302,6 +305,27 @@ export async function search(
     }
 
     const section_list = j(results, SECTION_LIST);
+
+    const chips = jo(
+      results,
+      "sectionListRenderer.header.chipCloudRenderer.chips",
+    );
+
+    if (chips) {
+      chips
+        .map((chip: any) => chip.chipCloudChipRenderer)
+        .forEach((chip: any) => {
+          const text = jo(chip, TEXT_RUN_TEXT);
+
+          if (!text) return;
+
+          const filter = __(text) as any | null;
+
+          if (filter && filters.includes(filter)) {
+            search_results.filters.push(filter);
+          }
+        });
+    }
 
     // no results
     if (
