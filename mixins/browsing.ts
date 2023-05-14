@@ -44,8 +44,7 @@ import {
   PlaylistItem,
   VideoType,
 } from "../parsers/playlists.ts";
-import { ArtistRun, parse_format } from "../parsers/songs.ts";
-import { Format } from "../parsers/types.d.ts";
+import { ArtistRun, Format, parse_format } from "../parsers/songs.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
 import { AbortOptions, PaginationOptions } from "./utils.ts";
@@ -63,6 +62,13 @@ export type {
   RelatedArtist,
   WatchPlaylist,
 } from "../parsers/browsing.ts";
+
+export type {
+  AudioFormat,
+  Format,
+  LikeStatus,
+  VideoFormat,
+} from "../parsers/songs.ts";
 
 export type { ArtistRun, Thumbnail };
 
