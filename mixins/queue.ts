@@ -35,6 +35,11 @@ export interface Queue {
     id: string | null;
   } | null;
   continuation: string | null;
+  current: {
+    videoId: string;
+    playlistId: string;
+    index: number;
+  } | null;
 }
 
 export async function get_queue(
@@ -136,10 +141,19 @@ export async function get_queue(
     related: null,
     author: null,
     continuation: null,
+    current: null,
   };
 
   if (!continuation) {
     const json = await request_json(endpoint, { data, signal });
+
+    const currentWatch = json.currentVideoEndpoint.watchEndpoint;
+
+    queue.current = {
+      videoId: currentWatch.videoId,
+      playlistId: currentWatch.playlistId,
+      index: currentWatch.index,
+    };
 
     const watchNextRenderer = j(
       json,
