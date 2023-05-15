@@ -11,7 +11,6 @@ import { VideoType } from "./playlists.ts";
 import {
   LikeStatus,
   MenuTokens,
-  parse_like_status,
   parse_song_menu_tokens,
   parse_song_runs,
   SongRuns,
@@ -74,12 +73,16 @@ export function parse_queue_track(data: any) {
     if (TOGGLE_MENU in item) {
       const service = item[TOGGLE_MENU].defaultServiceEndpoint;
 
+      // console.log("idk", service);
+
       if ("feedbackEndpoint" in service) {
         feedback_tokens = parse_song_menu_tokens(item);
       }
 
       if ("likeEndpoint" in service) {
-        like_status = parse_like_status(service);
+        like_status = item[TOGGLE_MENU].defaultIcon.iconType === "FAVORITE"
+          ? "INDIFFERENT"
+          : "LIKE";
       }
     }
   }
