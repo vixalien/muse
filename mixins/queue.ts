@@ -70,7 +70,7 @@ export async function get_queue(
   if (videoId != null) {
     data.videoId = videoId;
 
-    if (!playlistId) {
+    if (radio && !playlistId) {
       playlistId = "RDAMVM" + videoId;
     }
 
@@ -99,27 +99,33 @@ export async function get_queue(
   }
 
   if (autoplay) {
-    if (!params) {
-      // if (videoId) {
-      //   data.params = "OAHyAQQIAXgB";
-      if (data.playlistId.startsWith("RDAT")) {
-        data.params = "8gECeAE%3D";
-      } else {
-        data.params = "wAEB8gECeAE%3D";
+    if (data.playlistId) {
+      if (!params) {
+        // if (videoId) {
+        //   data.params = "OAHyAQQIAXgB";
+        if (data.playlistId.startsWith("RDAT")) {
+          data.params = "8gECeAE%3D";
+        } else {
+          data.params = "wAEB8gECeAE%3D";
+        }
       }
-    }
 
-    // RDAMPL is for the radio of any playlist
-    // RDAT is for a specific radio of a playlist (All, R&B, Familiar etc...)
-    if (
-      !data.playlistId.startsWith("RDAMPL") &&
-      !data.playlistId.startsWith("RDAT")
-    ) {
-      data.playlistId = "RDAMPL" + data.playlistId;
+      // RDAMPL is for the radio of any playlist
+      // RDAT is for a specific radio of a playlist (All, R&B, Familiar etc...)
+      if (
+        !data.playlistId.startsWith("RDAMPL") &&
+        !data.playlistId.startsWith("RDAT")
+      ) {
+        data.playlistId = "RDAMPL" + data.playlistId;
+      }
+    } else {
+      throw new Error("Can't autoplay without a playlistId");
     }
   }
 
-  const is_playlist = data.playlistId.match(/^(PL|OLA|RD)/) ? true : false;
+  const is_playlist = playlistId && data.playlistId.match(/^(PL|OLA|RD)/)
+    ? true
+    : false;
 
   const queue: Queue = {
     chips: [],
