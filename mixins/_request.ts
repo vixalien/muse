@@ -54,6 +54,7 @@ export async function request(endpoint: string, options: RequestInit) {
       },
       params: {
         ...options.params,
+        prettyPrint: "false",
       },
       signal: options.signal,
     },
