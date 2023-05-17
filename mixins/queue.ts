@@ -7,7 +7,7 @@ import {
   QueueTrack,
 } from "../parsers/queue.ts";
 import { j, jo } from "../util.ts";
-import { PaginationOptions } from "./utils.ts";
+import { AbortOptions, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export interface QueueOptions extends PaginationOptions {
@@ -252,4 +252,20 @@ export async function get_queue(
   queue.continuation = typeof continuation === "string" ? continuation : null;
 
   return queue;
+}
+
+export async function get_queue_ids(
+  videoIds: string[],
+  options: AbortOptions = {},
+) {
+  const response = await request_json("music/get_queue", {
+    data: {
+      videoIds,
+    },
+    signal: options.signal,
+  });
+
+  return parse_queue_playlist(
+    response.queueDatas.map((data: any) => data.content),
+  );
 }
