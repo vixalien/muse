@@ -1,7 +1,7 @@
 import {
   BADGE_LABEL,
   MENU_ITEMS,
-  NAVIGATION_VIDEO_ID,
+  NAVIGATION_VIDEO_TYPE,
   THUMBNAIL,
   TITLE_TEXT,
   TOGGLE_MENU,
@@ -100,7 +100,7 @@ export function parse_queue_track(data: any) {
     thumbnails: j(data, THUMBNAIL),
     feedbackTokens: feedback_tokens,
     likeStatus: like_status,
-    videoType: jo(data, "navigationEndpoint", NAVIGATION_VIDEO_ID),
+    videoType: jo(data, "navigationEndpoint", NAVIGATION_VIDEO_TYPE),
     isExplicit: jo(data, BADGE_LABEL) != null,
     counterpart: null,
   } as QueueTrack;
