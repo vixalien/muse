@@ -3,6 +3,7 @@ export enum ERROR_CODE {
 
   /* Params */
   INVALID_PARAMETER,
+  NOT_FOUND,
 
   /* Auth */
   AUTH_GENERIC,

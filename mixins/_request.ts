@@ -4,6 +4,7 @@ import { get_option, set_option } from "../setup.ts";
 
 import { RequestInit } from "../request.ts";
 import { use_proxy } from "../util.ts";
+import { ERROR_CODE, MuseError } from "../errors.ts";
 
 export function get_auth_headers() {
   return get_option("auth").get_headers();
@@ -37,7 +38,7 @@ export async function request(endpoint: string, options: RequestInit) {
     ? endpoint
     : `${CONSTANTS2.API_URL}/${endpoint}`;
 
-  return get_option("client").request(
+  const response = await get_option("client").request(
     use_proxy(url),
     {
       method: options.method || "post",
@@ -59,6 +60,27 @@ export async function request(endpoint: string, options: RequestInit) {
       signal: options.signal,
     },
   );
+
+  if (!response.ok) {
+    switch (response.status) {
+      case 401:
+        throw new MuseError(
+          ERROR_CODE.AUTH_REQUIRED,
+          "Authentication required",
+          { cause: await response.json() },
+        );
+      case 404:
+        throw new MuseError(ERROR_CODE.NOT_FOUND, "Not found", {
+          cause: await response.json(),
+        });
+      default:
+        throw new MuseError(ERROR_CODE.GENERIC, "Can't fetch data", {
+          cause: await response.json(),
+        });
+    }
+  }
+
+  return response;
 }
 
 export async function request_json(endpoint: string, options: RequestInit) {
