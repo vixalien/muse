@@ -1,4 +1,5 @@
 export * from "./setup.ts";
+export * from "./errors.ts";
 
 export * from "./mixins/browsing.ts";
 export * from "./mixins/explore.ts";
