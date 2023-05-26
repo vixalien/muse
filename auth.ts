@@ -142,11 +142,41 @@ export class Authenticator extends EventTarget {
   /**
    * After getting a login code, get a token
    */
-  async load_token_with_code(code: string, interval = 5) {
+  async load_token_with_code(
+    login_code: LoginCode,
+    signal?: AbortSignal,
+  ): Promise<Token>;
+
+  /**
+   * @deprecated Pass the login code directly
+   */
+  async load_token_with_code(
+    code: string,
+    interval?: number,
+    signal?: AbortSignal,
+  ): Promise<Token>;
+
+  async load_token_with_code(...args: any[]): Promise<Token> {
     let res: Token | null = null;
     let tries = 0;
 
+    let code: string, interval: number, signal: AbortSignal | undefined;
+
+    if (typeof args[0] === "string") {
+      code = args[0];
+      interval = args[1] ?? 5;
+      signal = args[2];
+    } else {
+      code = args[0].device_code;
+      interval = args[0].interval;
+      signal = args[1];
+    }
+
     while (!res || !res.refresh_token) {
+      if (signal?.aborted) {
+        throw new DOMException("Aborted", "AbortError");
+      }
+
       const response = await this.client.request(
         use_proxy("https://oauth2.googleapis.com/token"),
         {
@@ -157,6 +187,7 @@ export class Authenticator extends EventTarget {
             code: code,
             grant_type: "http://oauth.net/grant_type/device/1.0",
           },
+          signal,
         },
       );
 
@@ -167,7 +198,7 @@ export class Authenticator extends EventTarget {
       tries++;
     }
 
-    this.token = {
+    return this.token = {
       ...res,
       expires_date: new Date(Date.now() + res.expires_in * 1000),
     };
