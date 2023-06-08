@@ -35,6 +35,7 @@ export type RequiresLoginEvent = CustomEvent<
 
 interface AuthenticatorEventMap {
   "requires-login": RequiresLoginEvent;
+  "token-changed": Event;
 }
 
 export interface Authenticator extends EventTarget {
@@ -79,6 +80,7 @@ export class Authenticator extends EventTarget {
     if (token) token.expires_date = new Date(token.expires_date);
     this._token = token;
     this.store?.set("token", token);
+    this.dispatchEvent(new Event("token-changed"));
   }
 
   get token() {
