@@ -341,7 +341,7 @@ export type ChartContents = ReturnType<typeof parse_chart_contents>;
 
 export function parse_content_list<T extends any>(
   results: any,
-  parse_func: (data: any) => T,
+  parse_func: (data: any) => T | null,
   key = MTRIR,
 ) {
   const contents: T[] = [];
@@ -351,7 +351,11 @@ export function parse_content_list<T extends any>(
 
     if (!list) continue;
 
-    contents.push(parse_func(list));
+    const data = parse_func(list);
+
+    if (data) {
+      contents.push(data);
+    }
   }
 
   return contents;

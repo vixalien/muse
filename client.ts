@@ -1,4 +1,6 @@
 import {
+  get_history,
+  get_library_playlists,
   get_library_songs,
   get_option,
   get_queue,
@@ -129,7 +131,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_queue_ids(["Vg18eeEugOQ", "C6x4zNiIG8g", "Xvkfm-AUkso"])
+get_library_playlists()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

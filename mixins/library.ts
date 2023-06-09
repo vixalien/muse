@@ -161,7 +161,11 @@ export function get_library_playlists(
   return fetch_library_contents(
     "FEmusic_liked_playlists",
     options,
-    (playlists) => parse_content_list(playlists, parse_playlist, MTRIR),
+    (playlists) =>
+      parse_content_list(playlists, (content) => {
+        if (!content.subtitle) return null;
+        return parse_playlist(content);
+      }, MTRIR),
     true,
   );
 }
