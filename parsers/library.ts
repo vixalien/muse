@@ -6,11 +6,9 @@ import {
 } from "../mixins/utils.ts";
 import { request_json } from "../mixins/_request.ts";
 import {
-  FEEDBACK_TOKEN,
   find_object_by_key,
   GRID,
   ITEM_SECTION,
-  MENU_SERVICE,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   SECTION_LIST,
@@ -19,11 +17,9 @@ import {
   SINGLE_COLUMN_TAB,
   TAB_1_CONTENT,
   THUMBNAILS,
-  TITLE,
-  TITLE_TEXT,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
-import { parse_playlist_items, PlaylistItem } from "./playlists.ts";
+import { parse_playlist_items } from "./playlists.ts";
 import {
   get_item_text,
   get_menu_playlists,
@@ -153,50 +149,6 @@ export function get_library_contents(response: string, renderer: string) {
   }
 
   return contents;
-}
-
-export interface History {
-  categories: { title: string; items: PlaylistItem[] }[];
-}
-
-export async function get_history() {
-  await check_auth();
-
-  const json = await request_json("browse", {
-    data: {
-      browseId: "FEmusic_history",
-    },
-  });
-
-  const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
-
-  const history: History = {
-    categories: [],
-  };
-
-  for (const content of results) {
-    const data = jo(content, MUSIC_SHELF, "contents");
-
-    if (!data) {
-      // I'm not sure what this means...
-      throw new Error(jo(content, "musicNotifierShelfRenderer", TITLE));
-    }
-
-    const songlist = parse_playlist_items(data, [[
-      "-1:",
-      MENU_SERVICE,
-      FEEDBACK_TOKEN,
-    ]]);
-
-    const category: { title: string; items: PlaylistItem[] } = {
-      title: j(content, MUSIC_SHELF, TITLE_TEXT),
-      items: songlist,
-    };
-
-    history.categories.push(category);
-  }
-
-  return history;
 }
 
 export function parse_toast(json: any): string | null {

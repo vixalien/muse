@@ -5,12 +5,18 @@ import {
   validate_response,
 } from "../continuations.ts";
 import {
+  FEEDBACK_TOKEN,
   GRID,
+  MENU_SERVICE,
   MRLIR,
   MTRIR,
+  MUSIC_SHELF,
   SECTION_LIST,
   SECTION_LIST_CONTINUATION,
   SINGLE_COLUMN,
+  SINGLE_COLUMN_TAB,
+  TITLE,
+  TITLE_TEXT,
 } from "../nav.ts";
 import {
   MixedItem,
@@ -425,4 +431,48 @@ export async function unsubscribe_artists(
   });
 
   return parse_toast(json);
+}
+
+export interface History {
+  categories: { title: string; items: PlaylistItem[] }[];
+}
+
+export async function get_history() {
+  await check_auth();
+
+  const json = await request_json("browse", {
+    data: {
+      browseId: "FEmusic_history",
+    },
+  });
+
+  const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
+
+  const history: History = {
+    categories: [],
+  };
+
+  for (const content of results) {
+    const data = jo(content, MUSIC_SHELF, "contents");
+
+    if (!data) {
+      // I'm not sure what this means...
+      throw new Error(jo(content, "musicNotifierShelfRenderer", TITLE));
+    }
+
+    const songlist = parse_playlist_items(data, [[
+      "-1:",
+      MENU_SERVICE,
+      FEEDBACK_TOKEN,
+    ]]);
+
+    const category: { title: string; items: PlaylistItem[] } = {
+      title: j(content, MUSIC_SHELF, TITLE_TEXT),
+      items: songlist,
+    };
+
+    history.categories.push(category);
+  }
+
+  return history;
 }
