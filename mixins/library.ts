@@ -11,6 +11,8 @@ import {
   MRLIR,
   MTRIR,
   MUSIC_SHELF,
+  NAVIGATION_BROWSE_ID,
+  RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_CONTINUATION,
   SINGLE_COLUMN,
@@ -36,7 +38,7 @@ import {
 import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
 import { LikeStatus } from "../parsers/songs.ts";
 import { j, jo } from "../util.ts";
-import { ParsedAlbum, Song } from "./browsing.ts";
+import { ParsedAlbum, Song, Thumbnail } from "./browsing.ts";
 import { get_playlist, GetPlaylistOptions, Playlist } from "./playlist.ts";
 import {
   AbortOptions,
@@ -479,4 +481,41 @@ export async function get_history() {
   }
 
   return history;
+}
+
+export interface User {
+  name: string;
+  thumbnails: Thumbnail[];
+  handle: string | null;
+  channel_id: string;
+}
+
+export async function get_current_user(
+  options: AbortOptions = {},
+): Promise<User> {
+  await check_auth();
+
+  const json = await request_json("account/account_menu", {
+    signal: options.signal,
+  });
+
+  const renderer = j(
+    json,
+    "actions.0.openPopupAction.popup.multiPageMenuRenderer",
+  );
+
+  const header = renderer.header;
+
+  const account = j(header, "activeAccountHeaderRenderer");
+
+  return {
+    name: j(account, "accountName", RUN_TEXT),
+    thumbnails: j(account, "accountPhoto.thumbnails"),
+    handle: jo(account, "channelHandle", RUN_TEXT),
+    channel_id: j(
+      renderer,
+      "sections.0.multiPageMenuSectionRenderer.items.0.compactLinkRenderer",
+      NAVIGATION_BROWSE_ID,
+    ),
+  };
 }
