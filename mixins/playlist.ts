@@ -52,7 +52,8 @@ export interface Thumbnail {
 
 export interface Playlist {
   id: string;
-  privacy: "PUBLIC" | "PRIVATE";
+  privacy: "PUBLIC" | "PRIVATE" | "UNLISTED";
+  editable: boolean;
   title: string;
   thumbnails: Thumbnail[];
   description: string | null;
@@ -183,6 +184,7 @@ export async function get_playlist(
       ? json.header.musicEditablePlaylistDetailHeaderRenderer.editHeader
         .musicPlaylistEditHeaderRenderer.privacy
       : "PUBLIC",
+    editable: own_playlist,
     title: j(header, TITLE_TEXT),
     thumbnails: j(header, THUMBNAIL_CROPPED),
     description: jo(header, DESCRIPTION),
