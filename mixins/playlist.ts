@@ -14,6 +14,7 @@ import {
   SUBTITLE,
   SUBTITLE3,
   THUMBNAIL_CROPPED,
+  THUMBNAIL_RENDERER,
   TITLE_TEXT,
 } from "../nav.ts";
 import {
@@ -35,6 +36,7 @@ import {
 } from "./utils.ts";
 import { request_json } from "./_request.ts";
 import { ArtistRun, parse_song_artists_runs } from "../parsers/songs.ts";
+import { ERROR_CODE, MuseError } from "../errors.ts";
 
 export type { PlaylistItem };
 
@@ -330,7 +332,7 @@ export interface EditPlaylistOptions extends AbortOptions {
   privacy_status?: PlaylistPrivacyStatus;
   move_items?: { setVideoId: string; positionBefore?: string }[];
   add_videos?: string[];
-  remove_videos?: { videoId: string; setVideoId: string }[];
+  remove_videos?: { videoId: string; setVideoId?: string }[];
   add_source_playlists?: string[];
 }
 
@@ -398,11 +400,19 @@ export async function edit_playlist(
 
   if (remove_videos) {
     remove_videos.forEach((remove_video) => {
-      actions.push({
-        action: "ACTION_REMOVE_VIDEO",
-        removedVideoId: remove_video.videoId,
-        setVideoId: remove_video.setVideoId,
-      });
+      if (remove_video.setVideoId != null) {
+        actions.push({
+          action: "ACTION_REMOVE_VIDEO",
+          removedVideoId: remove_video.videoId,
+          setVideoId: remove_video.setVideoId,
+        });
+      } else {
+        actions.push({
+          action: "ACTION_REMOVE_VIDEO_BY_VIDEO_ID",
+          removedVideoId: remove_video.videoId,
+          setVideoId: remove_video.setVideoId,
+        });
+      }
     });
   }
 
@@ -468,4 +478,97 @@ export function remove_playlist_items(
     remove_videos: video_ids,
     ...options,
   });
+}
+
+export interface AddToPlaylistItem {
+  playlistId: string;
+  title: string;
+  thumbnails: Thumbnail[];
+  songs: string;
+}
+
+export interface AddToPlaylist {
+  recents: AddToPlaylistItem[];
+  playlists: AddToPlaylistItem[];
+}
+
+export async function get_add_to_playlist(
+  videoIds: string[] | null,
+  playlistId: string | null = null,
+  options: AbortOptions = {},
+) {
+  await check_auth();
+
+  const { signal } = options;
+
+  const endpoint = "playlist/get_add_to_playlist";
+  const data: Record<string, any> = {
+    excludeWatchLater: true,
+  };
+
+  if (videoIds != null) {
+    data.videoIds = videoIds;
+  } else if (playlistId != null) {
+    data.playlistId = playlistId;
+  } else {
+    throw new MuseError(
+      ERROR_CODE.INVALID_PARAMETER,
+      "Either videoIds or playlistId must be provided",
+    );
+  }
+
+  const result: AddToPlaylist = {
+    recents: [],
+    playlists: [],
+  };
+
+  const json = await request_json(endpoint, { data, signal });
+
+  const contents = j(json, "contents.0.addToPlaylistRenderer");
+
+  const recents = j(
+    contents,
+    "topShelf.musicCarouselShelfRenderer.contents",
+  );
+
+  for (const recent of recents) {
+    const item = recent.musicTwoRowItemRenderer;
+
+    if (!item) {
+      continue;
+    }
+
+    result.recents.push({
+      thumbnails: j(item, THUMBNAIL_RENDERER),
+      playlistId: j(item, "navigationEndpoint.playlistEditEndpoint.playlistId"),
+      songs: j(item, SUBTITLE),
+      title: j(item, TITLE_TEXT),
+    });
+  }
+
+  const playlists = j(contents, "playlists");
+
+  for (const playlist of playlists) {
+    const item = playlist.playlistAddToOptionRenderer;
+
+    if (!item) {
+      continue;
+    }
+
+    // Liked songs "LM" doesn't have a playlistId
+
+    result.playlists.push({
+      thumbnails: j(item, THUMBNAIL_RENDERER),
+      playlistId: jo(
+        item,
+        "navigationEndpoint.playlistEditEndpoint.playlistId",
+      ) ?? "LM",
+      songs: j(item, "shortBylineText.runs").map((run: any) => run.text).join(
+        "",
+      ),
+      title: j(item, TITLE_TEXT),
+    });
+  }
+
+  return result;
 }

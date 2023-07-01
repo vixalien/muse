@@ -1,16 +1,4 @@
-import {
-  get_history,
-  get_library_playlists,
-  get_library_songs,
-  get_option,
-  get_queue,
-  get_queue_ids,
-  get_search_suggestions,
-  get_song,
-  remove_search_history,
-  search,
-  setup,
-} from "./mod.ts";
+import { get_add_to_playlist, get_option, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -131,7 +119,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_library_playlists()
+get_add_to_playlist(["9HsfhHLD9h0"])
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
