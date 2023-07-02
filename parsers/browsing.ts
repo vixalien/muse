@@ -382,6 +382,7 @@ export interface ParsedAlbum {
   title: string;
   year: string | null;
   browseId: string;
+  audioPlaylistId: string;
   thumbnails: Thumbnail[];
   isExplicit: boolean;
   album_type: AlbumType | null;
@@ -403,11 +404,17 @@ export function parse_album(result: any): ParsedAlbum {
     runs.pop();
   }
 
+  const endpoint = j(
+    result,
+    "thumbnailOverlay.musicItemThumbnailOverlayRenderer.content.musicPlayButtonRenderer.playNavigationEndpoint.watchEndpoint",
+  );
+
   return {
     type: "album",
     title: j(result, TITLE_TEXT),
     year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
+    audioPlaylistId: j(endpoint, "playlistId"),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     album_type: j(result, SUBTITLE),
@@ -430,11 +437,17 @@ export function parse_single(result: any): ParsedAlbum {
     runs.pop();
   }
 
+  const endpoint = j(
+    result,
+    "thumbnailOverlay.musicItemThumbnailOverlayRenderer.content.musicPlayButtonRenderer.playNavigationEndpoint.watchEndpoint",
+  );
+
   return {
     type: "album",
     title: j(result, TITLE_TEXT),
     year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
+    audioPlaylistId: j(endpoint, "playlistId"),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     artists: runs,
