@@ -68,7 +68,7 @@ export interface Playlist {
   duration_seconds: number;
   tracks: PlaylistItem[];
   continuation: string | null;
-  suggestions: any;
+  suggestions: PlaylistItem[];
   suggestions_continuation: string | null;
   related: ParsedPlaylist[];
 }
@@ -81,9 +81,9 @@ export interface PlaylistSuggestions {
 export async function get_playlist_suggestions(
   playlistId: string,
   continuation: string,
-  options: Omit<PaginationOptions, "continuation">,
+  options: Omit<PaginationOptions, "continuation"> = {},
 ): Promise<PlaylistSuggestions> {
-  const { signal, limit = 20 } = options;
+  const { signal, limit = 6 } = options;
 
   const browseId = playlistId.startsWith("VL") ? playlistId : `VL${playlistId}`;
   const data = { browseId };
