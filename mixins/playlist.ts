@@ -346,7 +346,7 @@ export interface EditPlaylistResult {
 export async function edit_playlist(
   playlistId: string,
   options: EditPlaylistOptions,
-): Promise<any> {
+): Promise<EditPlaylistResult> {
   const {
     title,
     description,
