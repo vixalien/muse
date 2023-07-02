@@ -250,12 +250,14 @@ export async function get_playlist(
 
     if (related) {
       const response = await request(params);
-      const continuation = j(response, SECTION_LIST_CONTINUATION);
+      const continuation = jo(response, SECTION_LIST_CONTINUATION);
 
-      playlist.related = get_continuation_contents(
-        j(continuation, CONTENT, CAROUSEL),
-        (results: any) => parse_content_list(results, parse_playlist),
-      );
+      if (continuation) {
+        playlist.related = get_continuation_contents(
+          j(continuation, CONTENT, CAROUSEL),
+          (results: any) => parse_content_list(results, parse_playlist),
+        );
+      }
     }
   }
 
