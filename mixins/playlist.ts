@@ -336,6 +336,13 @@ export interface EditPlaylistOptions extends AbortOptions {
   add_source_playlists?: string[];
 }
 
+export interface EditPlaylistResult {
+  added: {
+    videoId: string;
+    setVideoId: string;
+  }[];
+}
+
 export async function edit_playlist(
   playlistId: string,
   options: EditPlaylistOptions,
@@ -429,7 +436,24 @@ export async function edit_playlist(
 
   const json = await request_json("browse/edit_playlist", { data, signal });
 
-  return "status" in json ? json.status : json;
+  const result: EditPlaylistResult = {
+    added: [],
+  };
+
+  if ("playlistEditResults" in json) {
+    for (const item of json.playlistEditResults) {
+      if ("playlistEditVideoAddedResultData" in item) {
+        const added = item.playlistEditVideoAddedResultData;
+
+        result.added.push({
+          videoId: j(added, "videoId"),
+          setVideoId: j(added, "setVideoId"),
+        });
+      }
+    }
+  }
+
+  return result;
 }
 
 export async function delete_playlist(
