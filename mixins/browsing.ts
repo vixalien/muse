@@ -463,7 +463,7 @@ export async function get_artist_albums(
   return results.map((result: any) => parse_album(result[MTRIR]));
 }
 
-export interface User extends UserContents {
+export interface UserPage extends UserContents {
   name: string;
   songs_on_repeat: {
     results: PlaylistItem[];
@@ -473,7 +473,7 @@ export interface User extends UserContents {
 export async function get_user(
   channelId: string,
   options: AbortOptions = {},
-): Promise<User> {
+): Promise<UserPage> {
   const json = await request_json("browse", {
     data: { browseId: channelId },
     signal: options.signal,
@@ -481,7 +481,7 @@ export async function get_user(
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
-  const user: User = {
+  const user: UserPage = {
     name: j(json, "header.musicVisualHeaderRenderer", TITLE_TEXT),
     ...parse_user_contents(results),
     songs_on_repeat: null,
