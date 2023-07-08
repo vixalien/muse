@@ -15,6 +15,11 @@ export interface AudioFormat extends BaseFormat {
   channels: number;
   sample_rate: number;
   audio_codec: string | null;
+  quality:
+    | "tiny"
+    | "small"
+    | "medium"
+    | "large";
 }
 
 export interface VideoFormat extends BaseFormat {
@@ -49,6 +54,16 @@ export interface VideoFormat extends BaseFormat {
     | "4320p60";
   fps: number;
   video_codec: string | null;
+  video_quality:
+    | "tiny"
+    | "small"
+    | "medium"
+    | "large"
+    | "hd720"
+    | "hd1080"
+    | "hd1440"
+    | "hd2160"
+    | "highres";
 }
 
 export type BaseFormat = {
@@ -65,18 +80,7 @@ export type BaseFormat = {
   itag: number;
   modified: Date;
   mime_type: string;
-  projection_type: "rectangular" | string;
-  quality:
-    | "tiny"
-    | "small"
-    | "medium"
-    | "large"
-    | "hd720"
-    | "hd1080"
-    | "hd1440"
-    | "hd2160"
-    | "highres"
-    | string;
+  projection_type: "rectangular" | "360" | "stereoscopic" | "3d";
   container: "flv" | "3gp" | "mp4" | "webm" | "ts";
 };
 
@@ -264,7 +268,6 @@ export function parse_format(format: any) {
     duration_ms: Number(format.approxDurationMs) ?? null,
     projection_type: format.projectionType.toLowerCase() ?? null,
     mime_type: format.mimeType,
-    quality: format.quality,
     has_audio: false,
     has_video: false,
     container: format.mimeType.split(";")[0].split("/")[1],
@@ -278,6 +281,7 @@ export function parse_format(format: any) {
       fps: format.fps,
       quality_label: format.qualityLabel,
       video_codec: codecs ? codecs.split(", ")[0] : null,
+      video_quality: format.quality,
     } as VideoFormat);
   }
   if (has_audio) {
@@ -285,6 +289,7 @@ export function parse_format(format: any) {
       has_audio: true,
       sample_rate: format.audioSampleRate,
       audio_quality: format.audioQuality?.slice(14).toLowerCase(),
+      quality: format.quality,
       channels: format.audioChannels,
       audio_codec: codecs ? codecs.split(", ").slice(-1)[0] : null,
     } as AudioFormat);
