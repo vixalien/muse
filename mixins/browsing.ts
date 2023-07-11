@@ -7,10 +7,10 @@ import {
   DESCRIPTION,
   DESCRIPTION_SHELF,
   find_object_by_key,
+  GRID,
   GRID_ITEMS,
   MRLIR,
   MRLITFC,
-  MTRIR,
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PLAYLIST_ID,
@@ -440,11 +440,17 @@ export async function get_lyrics(
   return lyrics;
 }
 
+export interface ArtistAlbums {
+  artist: string;
+  title: string;
+  results: ParsedAlbum[];
+}
+
 export async function get_artist_albums(
   channelId: string,
   params: string,
   options: AbortOptions = {},
-): Promise<ParsedAlbum[]> {
+): Promise<ArtistAlbums> {
   const json = await request_json("browse", {
     data: {
       browseId: channelId,
@@ -453,14 +459,13 @@ export async function get_artist_albums(
     signal: options.signal,
   });
 
-  const results = j(
-    json,
-    SINGLE_COLUMN_TAB,
-    SECTION_LIST_ITEM,
-    GRID_ITEMS,
-  ) as any[];
+  const grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST_ITEM, GRID);
 
-  return results.map((result: any) => parse_album(result[MTRIR]));
+  return {
+    artist: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
+    title: j(grid, "header.gridHeaderRenderer", TITLE_TEXT),
+    results: parse_content_list(grid.items, parse_album),
+  };
 }
 
 export interface UserPage extends UserContents {
