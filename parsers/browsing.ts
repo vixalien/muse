@@ -253,13 +253,16 @@ export function parse_categories<
       if ("navigationEndpoint" in j(data[0], CAROUSEL_TITLE)) {
         category_obj.browseId = j(
           data[0],
-          `${CAROUSEL_TITLE}.${NAVIGATION_BROWSE_ID}`,
+          CAROUSEL_TITLE,
+          NAVIGATION_BROWSE_ID,
         );
 
-        if (["albums", "singles", "playlists"].includes(category)) {
-          category_obj.params =
-            j(data[0], CAROUSEL_TITLE).navigationEndpoint.browseEndpoint.params;
-        }
+        category_obj.params = jo(
+          data[0],
+          CAROUSEL_TITLE,
+          NAVIGATION_BROWSE,
+          "params",
+        );
       }
 
       category_obj.results = parse_content_list(
