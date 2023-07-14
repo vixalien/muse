@@ -34,7 +34,7 @@ import {
   parse_mixed_content,
   parse_moods,
   parse_playlist,
-  parse_user_contents,
+  parse_channel_contents,
   ParsedAlbum,
   ParsedPlaylist,
   UserContents,
@@ -488,7 +488,7 @@ export async function get_channel(
 
   const user: UserPage = {
     name: j(json, "header.musicVisualHeaderRenderer", TITLE_TEXT),
-    ...parse_user_contents(results),
+    ...parse_channel_contents(results),
     songs_on_repeat: null,
   };
 
