@@ -289,10 +289,10 @@ export function parse_channel_contents(results: any[]) {
   return parse_categories(results, categories_data);
 }
 
-export type NonNUllableUserContents = ReturnType<typeof parse_channel_contents>;
+export type NonNUllableChannelContents = ReturnType<typeof parse_channel_contents>;
 
-export type UserContents = {
-  [Key in keyof NonNUllableUserContents]: NonNUllableUserContents[Key] | null;
+export type ChannelContents = {
+  [Key in keyof NonNUllableChannelContents]: NonNUllableChannelContents[Key] | null;
 };
 
 export function parse_artist_contents(results: any[]) {

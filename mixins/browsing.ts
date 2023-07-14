@@ -8,7 +8,6 @@ import {
   DESCRIPTION_SHELF,
   find_object_by_key,
   GRID,
-  GRID_ITEMS,
   MRLIR,
   MRLITFC,
   MUSIC_SHELF,
@@ -26,18 +25,18 @@ import {
 import { AlbumHeader, parse_album_header } from "../parsers/albums.ts";
 import {
   ArtistContents,
+  ChannelContents,
   MixedContent,
   Mood,
   parse_album,
   parse_artist_contents,
+  parse_channel_contents,
   parse_content_list,
   parse_mixed_content,
   parse_moods,
   parse_playlist,
-  parse_channel_contents,
   ParsedAlbum,
   ParsedPlaylist,
-  UserContents,
 } from "../parsers/browsing.ts";
 import {
   parse_playlist_items,
@@ -468,7 +467,7 @@ export async function get_artist_albums(
   };
 }
 
-export interface UserPage extends UserContents {
+export interface Channel extends ChannelContents {
   name: string;
   songs_on_repeat: {
     results: PlaylistItem[];
@@ -478,7 +477,7 @@ export interface UserPage extends UserContents {
 export async function get_channel(
   channelId: string,
   options: AbortOptions = {},
-): Promise<UserPage> {
+): Promise<Channel> {
   const json = await request_json("browse", {
     data: { browseId: channelId },
     signal: options.signal,
@@ -486,7 +485,7 @@ export async function get_channel(
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
 
-  const user: UserPage = {
+  const channel: Channel = {
     name: j(json, "header.musicVisualHeaderRenderer", TITLE_TEXT),
     ...parse_channel_contents(results),
     songs_on_repeat: null,
@@ -495,12 +494,12 @@ export async function get_channel(
   if ("musicShelfRenderer" in results[0]) {
     const musicShelf = j(results[0], `${MUSIC_SHELF}`);
 
-    user.songs_on_repeat = {
+    channel.songs_on_repeat = {
       results: parse_playlist_items(musicShelf.contents),
     };
   }
 
-  return user;
+  return channel;
 }
 
 /**
@@ -508,11 +507,17 @@ export async function get_channel(
  */
 export const get_user = get_channel;
 
-export async function get_user_playlists(
+export interface ChannelPlaylists {
+  artist: string;
+  title: string;
+  results: ParsedPlaylist[];
+}
+
+export async function get_channel_playlists(
   channelId: string,
   params: string,
   options: AbortOptions = {},
-): Promise<ParsedPlaylist[]> {
+): Promise<ChannelPlaylists> {
   const json = await request_json("browse", {
     data: {
       browseId: channelId,
@@ -521,12 +526,16 @@ export async function get_user_playlists(
     signal: options.signal,
   });
 
-  const results = j(
-    json,
-    SINGLE_COLUMN_TAB,
-    SECTION_LIST_ITEM,
-    GRID_ITEMS,
-  );
+  const grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST_ITEM, GRID);
 
-  return parse_content_list(results, parse_playlist);
+  return {
+    artist: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
+    title: j(grid, "header.gridHeaderRenderer", TITLE_TEXT),
+    results: parse_content_list(grid.items, parse_playlist),
+  };
 }
+
+/**
+ * @deprecated Use `get_channel_playlists` instead.
+ */
+export const get_user_playlists = get_channel_playlists;
