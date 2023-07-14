@@ -56,7 +56,7 @@ export function parse_album_header(response: any) {
   }
 
   if (header.secondSubtitle.runs.length > 1) {
-    album.trackCount = Number(header.secondSubtitle.runs[0].text.split(" ")[0]);
+    album.trackCount = Number(header.secondSubtitle.runs[0].text);
     album.duration = header.secondSubtitle.runs[2].text;
   } else {
     album.duration = header.secondSubtitle.runs[0].text;

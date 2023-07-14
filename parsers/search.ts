@@ -243,7 +243,7 @@ export function parse_search_artist(result: any): SearchArtist {
   return {
     type: "artist",
     name: j(title, "text"),
-    subscribers: (flex1 && flex1.text.runs[2]?.text.split(" ")[0]) ?? null,
+    subscribers: (flex1 && flex1.text.runs[2]?.text) ?? null,
     browseId: j(result, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAILS),
     ...get_menu_playlists(result),
@@ -267,7 +267,7 @@ export function parse_search_profile(result: any): SearchProfile {
   return {
     type: "profile",
     name: j(title, "text"),
-    username: (flex1 && flex1.text.runs[2]?.text.split(" ")[0]) ?? null,
+    username: (flex1 && flex1.text.runs[2]?.text) ?? null,
     browseId: jo(result, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAILS),
   };
@@ -298,7 +298,7 @@ export function parse_search_playlist(
   return {
     type: "playlist",
     title: j(title, "text"),
-    songs: flex1.text.runs[2]?.text.split(" ")[0] ?? null,
+    songs: flex1.text.runs[2]?.text[0] ?? null,
     authors,
     browseId: j(result, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAILS),
@@ -488,7 +488,7 @@ export interface TopResultArtist extends SearchArtist {
 }
 
 export function parse_top_result_artist(result: any): TopResultArtist {
-  const subscribers = jo(result, SUBTITLE2)?.split(" ")[0];
+  const subscribers = jo(result, SUBTITLE2);
 
   const buttons = j(result, "buttons").map((button: any) =>
     button.buttonRenderer

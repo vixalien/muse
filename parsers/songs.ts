@@ -189,7 +189,7 @@ export function parse_song_runs(runs: any[], slice_start = 0) {
     } else {
       // note: YT uses non-breaking space \xa0 to separate number and magnitude
       if (text.match(/\d([^ ])* [^ ]*$/) && Number(i) > 0) {
-        parsed.views = text.split(" ")[0];
+        parsed.views = text;
       } else if (text.match(/^(\d+:)*\d+:\d+$/)) {
         parsed.duration = text;
         parsed.duration_seconds = parse_duration(text);

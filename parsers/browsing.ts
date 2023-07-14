@@ -519,7 +519,7 @@ export function parse_song_flat(data: any) {
       id: j(columns[2], TEXT_RUN, NAVIGATION_BROWSE_ID),
     };
   } else {
-    song.views = jo(columns[1], `text.runs[-1].text`)?.split(" ")[0];
+    song.views = jo(columns[1], `text.runs[-1].text`);
   }
 
   return song;
@@ -617,7 +617,7 @@ export function parse_top_video(result: any): TopVideo {
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
-    views: runs[runs.length - 1].text.split(" ")[0],
+    views: runs[runs.length - 1],
     rank: Number(j(rank, TEXT_RUN_TEXT)),
     change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
   };
@@ -638,8 +638,7 @@ export function parse_top_artist(result: any): TopArtist {
   return {
     name: j(get_flex_column_item(result, 0), TEXT_RUN_TEXT),
     browseId: j(result, NAVIGATION_BROWSE_ID),
-    subscribers:
-      j(get_flex_column_item(result, 1), TEXT_RUN_TEXT)?.split(" ")[0],
+    subscribers: j(get_flex_column_item(result, 1), TEXT_RUN_TEXT),
     thumbnails: j(result, THUMBNAILS),
     rank: Number(j(rank, TEXT_RUN_TEXT)),
     change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
@@ -665,8 +664,6 @@ export function parse_trending(result: any): TrendingSong {
   const title = get_flex_column_item(result, 0);
   const title_run = j(title, TEXT_RUN);
 
-  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
-
   const last_flex =
     get_flex_column_item(result, result.flexColumns.length - 1) ??
       get_flex_column_item(result, result.flexColumns.length - 2);
@@ -680,9 +677,7 @@ export function parse_trending(result: any): TrendingSong {
     TEXT_RUNS,
   );
 
-  const views = last_runs[last_runs.length - 1];
-
-  const has_views = views?.text.endsWith(_("views")) ?? false;
+  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   const album_flex = get_flex_column_item(
     result,
@@ -692,18 +687,18 @@ export function parse_trending(result: any): TrendingSong {
   return {
     title: j(title_run, "text"),
     videoId: jo(title_run, NAVIGATION_VIDEO_ID),
-    artists: parse_song_artists(result, 1, has_views ? -1 : undefined),
+    artists: parse_song_artists(result, 1, undefined),
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     rank: Number(j(rank, TEXT_RUN_TEXT)),
     change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
-    album: (!has_views && album_flex)
+    album: album_flex
       ? {
         title: j(album_flex, TEXT_RUN_TEXT),
         browseId: j(album_flex, TEXT_RUN, NAVIGATION_BROWSE_ID),
       }
       : null,
-    views: has_views ? views.text.split(" ")[0] : null,
+    views: album_flex ? null : last_runs[last_runs.length - 1]?.text ?? null,
   };
 }
 
@@ -731,7 +726,7 @@ export function parse_playlist(data: any) {
     playlistId: j(data, TITLE, NAVIGATION_BROWSE_ID).slice(2),
     thumbnails: j(data, THUMBNAIL_RENDERER),
     songs: has_data && has_songs
-      ? j(subtitles[subtitles.length - 1], "text")?.split(" ")[0]
+      ? j(subtitles[subtitles.length - 1], "text")
       : null,
     authors: has_data
       ? parse_song_artists_runs(
@@ -752,7 +747,7 @@ export function parse_playlist(data: any) {
       subtitle.runs.length == 3 &&
       j(data, SUBTITLE2).match(/\d+ /)
     ) {
-      playlist.count = j(data, SUBTITLE2).split(" ")[0];
+      playlist.count = j(data, SUBTITLE2);
       // TODO: why are we getting "author" 2 times?
       playlist.author = parse_song_artists_runs(subtitle.runs.slice(0, 1));
     }
@@ -770,7 +765,7 @@ export interface RelatedArtist {
 }
 
 export function parse_related_artist(data: any): RelatedArtist {
-  const subscribers = jo(data, SUBTITLE2)?.split(" ")[0];
+  const subscribers = jo(data, SUBTITLE2);
 
   return {
     type: "artist",

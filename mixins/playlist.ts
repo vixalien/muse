@@ -171,7 +171,7 @@ export async function get_playlist(
 
   const song_count = header.secondSubtitle.runs
     ? Number(
-      header.secondSubtitle.runs[0].text.normalize("NFKD").split(" ")[0],
+      header.secondSubtitle.runs[0].text.normalize("NFKD"),
     )
     : null;
 
