@@ -45,6 +45,7 @@ export const filters = [
   "featured_playlists",
   "songs",
   "videos",
+  "profiles",
 ] as const;
 
 export type Filter = typeof filters[number];
@@ -77,6 +78,8 @@ export function get_search_params(
           case "featured_playlists":
           case "community_playlists":
             return `EgeKAQQoA${_get_param2(filter)}BagwQAxAEEAkQDhAKEAU%3D`;
+          case "profiles":
+            return "EgWKAQJYAWoMEAMQBBAJEAoQBRAV";
         }
       } else {
         switch (filter) {
@@ -89,7 +92,10 @@ export function get_search_params(
           case "playlists":
             return `EgWKAQI${_get_param2(filter)}AWoIEAMQBBAJEAo%3D`;
           case "featured_playlists":
+          case "community_playlists":
             return `EgeKAQQoA${_get_param2(filter)}BaggQAxAEEAkQCg%3D%3D`;
+          case "profiles":
+            return "EgWKAQJYAUICCAFqDBADEAQQCRAKEAUQFQ%3D%3D";
         }
       }
       break;
@@ -245,6 +251,29 @@ export function parse_search_artist(result: any): SearchArtist {
   };
 }
 
+export interface SearchProfile {
+  type: "profile";
+  name: string;
+  username: string | null;
+  browseId: string;
+  thumbnails: Thumbnail[];
+}
+
+export function parse_search_profile(result: any): SearchProfile {
+  const flex = get_flex_column_item(result, 0);
+  const flex1 = get_flex_column_item(result, 1);
+
+  const title = j(flex, TEXT_RUN);
+
+  return {
+    type: "profile",
+    name: j(title, "text"),
+    username: (flex1 && flex1.text.runs[2]?.text.split(" ")[0]) ?? null,
+    browseId: jo(result, NAVIGATION_BROWSE_ID),
+    thumbnails: j(result, THUMBNAILS),
+  };
+}
+
 export interface SearchPlaylist {
   type: "playlist";
   title: string;
@@ -304,7 +333,8 @@ export type SearchContent =
   | SearchVideo
   | SearchArtist
   | SearchPlaylist
-  | SearchRadio;
+  | SearchRadio
+  | SearchProfile;
 
 export function parse_search_content(
   result: any,
@@ -334,6 +364,9 @@ export function parse_search_content(
       break;
     case "video":
       parser = parse_search_video;
+      break;
+    case "profile":
+      parser = parse_search_profile;
       break;
     default:
       parser = (e: any) => {
@@ -379,6 +412,9 @@ export function parse_search_results(
         break;
       case "videos":
         parser = parse_search_video;
+        break;
+      case "profiles":
+        parser = parse_search_profile;
         break;
       case null:
         parser = parse_search_content;
