@@ -546,7 +546,7 @@ export function parse_video(result: any): ParsedVideo {
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
-    views: runs[runs.length - 1].text.split(" ")[0],
+    views: runs[runs.length - 1].text,
   };
 }
 

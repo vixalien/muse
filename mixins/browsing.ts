@@ -475,7 +475,7 @@ export interface UserPage extends UserContents {
   } | null;
 }
 
-export async function get_user(
+export async function get_channel(
   channelId: string,
   options: AbortOptions = {},
 ): Promise<UserPage> {
@@ -502,6 +502,11 @@ export async function get_user(
 
   return user;
 }
+
+/**
+ * @deprecated Use `get_channel` instead.
+ */
+export const get_user = get_channel;
 
 export async function get_user_playlists(
   channelId: string,

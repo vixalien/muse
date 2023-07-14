@@ -28,6 +28,7 @@ export const NAVIGATION_BROWSE_ID = `${NAVIGATION_BROWSE}.browseId`;
 export const NAVIGATION_PARAMS = `${NAVIGATION_BROWSE}.params`;
 export const PAGE_TYPE =
   "browseEndpointContextSupportedConfigs.browseEndpointContextMusicConfig.pageType";
+export const NAVIGATION_PAGE_TYPE = `${NAVIGATION_BROWSE}.${PAGE_TYPE}`;
 export const NAVIGATION_VIDEO_ID = "navigationEndpoint.watchEndpoint.videoId";
 export const NAVIGATION_PLAYLIST_ID =
   "navigationEndpoint.watchEndpoint.playlistId";
