@@ -75,7 +75,7 @@ export async function request(endpoint: string, options: RequestInit) {
         });
       default:
         throw new MuseError(ERROR_CODE.GENERIC, "Can't fetch data", {
-          cause: await response.json(),
+          cause: await response.text(),
         });
     }
   }
