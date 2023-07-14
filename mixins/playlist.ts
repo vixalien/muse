@@ -169,9 +169,13 @@ export async function get_playlist(
 
   const run_count = header.subtitle.runs.length;
 
-  const song_count = header.secondSubtitle.runs
+  const trackCount = header.secondSubtitle.runs
+    ? header.secondSubtitle.runs[0].text
+    : null;
+
+  const song_count = trackCount
     ? Number(
-      header.secondSubtitle.runs[0].text.normalize("NFKD"),
+      trackCount.normalize("NFKD").match(/\d+/)[0],
     )
     : null;
 
@@ -197,10 +201,10 @@ export async function get_playlist(
       )
       : [],
     year: run_count === 5 ? j(header, SUBTITLE3) : null,
-    trackCount: song_count,
+    trackCount: trackCount,
     duration,
     duration_seconds: 0,
-    tracks: (song_count === null || song_count > 0)
+    tracks: (song_count === null || song_count > 0 || isNaN(song_count))
       ? parse_playlist_items(results.contents)
       : [],
     continuation: null,
