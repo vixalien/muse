@@ -3,12 +3,11 @@ import {
   find_object_by_key,
   MENU_ITEMS,
   MRLIR,
-  NAVIGATION_BROWSE,
   NAVIGATION_BROWSE_ID,
+  NAVIGATION_PAGE_TYPE,
   NAVIGATION_PLAYLIST_ID,
   NAVIGATION_VIDEO_ID,
   NAVIGATION_VIDEO_TYPE,
-  PAGE_TYPE,
   PLAY_BUTTON,
   SUBTITLE2,
   SUBTITLE_BADGE_LABEL,
@@ -570,7 +569,7 @@ export type TopResult =
   | TopResultVideo;
 
 export function parse_top_result(result: any) {
-  const page_type = jo(result, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
+  const page_type = jo(result, TITLE, NAVIGATION_PAGE_TYPE);
 
   switch (page_type) {
     case "MUSIC_PAGE_TYPE_ARTIST":

@@ -12,10 +12,10 @@ import {
   MTRIR,
   NAVIGATION_BROWSE,
   NAVIGATION_BROWSE_ID,
+  NAVIGATION_PAGE_TYPE,
   NAVIGATION_PLAYLIST_ID,
   NAVIGATION_VIDEO_ID,
   NAVIGATION_WATCH_PLAYLIST_ID,
-  PAGE_TYPE,
   RUN_TEXT,
   SUBTITLE,
   SUBTITLE2,
@@ -83,7 +83,7 @@ export type MixedItem =
 export function parse_mixed_item(data: any) {
   let item: MixedItem = null;
 
-  const page_type = jo(data, TITLE, NAVIGATION_BROWSE, PAGE_TYPE);
+  const page_type = jo(data, TITLE, NAVIGATION_PAGE_TYPE);
   switch (page_type) {
     case null:
     case undefined:

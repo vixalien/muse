@@ -1,4 +1,9 @@
-import { FEEDBACK_TOKEN, NAVIGATION_BROWSE_ID, TOGGLE_MENU } from "../nav.ts";
+import {
+  FEEDBACK_TOKEN,
+  NAVIGATION_BROWSE_ID,
+  NAVIGATION_PAGE_TYPE,
+  TOGGLE_MENU,
+} from "../nav.ts";
 import { jo } from "../util.ts";
 import { _ } from "./browsing.ts";
 import {
@@ -103,6 +108,7 @@ export function parse_song_artists(
 export interface ArtistRun {
   name: string;
   id: string | null;
+  type: "artist" | "channel";
 }
 
 export function parse_song_artists_runs(runs: any) {
@@ -117,9 +123,12 @@ export function parse_song_artists_runs(runs: any) {
 
     if (run == null) continue;
 
+    const page_type = jo(run, NAVIGATION_PAGE_TYPE);
+
     artists.push({
       name: run.text,
       id: jo(run, NAVIGATION_BROWSE_ID),
+      type: page_type === "MUSIC_PAGE_TYPE_ARTIST" ? "artist" : "channel",
     });
   }
 
@@ -169,7 +178,13 @@ export function parse_song_runs(runs: any[], slice_start = 0) {
         parsed.album = item;
       } else {
         // artist
-        parsed.artists.push(item);
+        parsed.artists.push({
+          ...item,
+          type:
+            jo(run, NAVIGATION_PAGE_TYPE) === "MUSIC_PAGE_TYPE_ARTIST"
+              ? "artist"
+              : "channel",
+        });
       }
     } else {
       // note: YT uses non-breaking space \xa0 to separate number and magnitude
@@ -185,6 +200,7 @@ export function parse_song_runs(runs: any[], slice_start = 0) {
         parsed.artists.push({
           name: text,
           id: null,
+          type: "artist",
         });
       }
     }
