@@ -469,6 +469,7 @@ export async function get_artist_albums(
 
 export interface Channel extends ChannelContents {
   name: string;
+  thumbnails: Thumbnail[];
   songs_on_repeat: {
     results: PlaylistItem[];
   } | null;
@@ -484,9 +485,15 @@ export async function get_channel(
   });
 
   const results = j(json, SINGLE_COLUMN_TAB, SECTION_LIST);
+  const header = j(json, "header.musicVisualHeaderRenderer");
 
   const channel: Channel = {
-    name: j(json, "header.musicVisualHeaderRenderer", TITLE_TEXT),
+    name: j(header, TITLE_TEXT),
+    thumbnails: jo(
+      header,
+      "foregroundThumbnail.musicThumbnailRenderer",
+      THUMBNAIL,
+    ),
     ...parse_channel_contents(results),
     songs_on_repeat: null,
   };
