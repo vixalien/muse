@@ -173,11 +173,13 @@ const base_map = new Map([
   ["artist", "Artist"],
   ["song", "Song"],
   ["video", "Video"],
+  ["profile", "Profile"],
   // search titles
   ["songs", "Songs"],
   ["featured_playlists", "Featured playlists"],
   ["community_playlists", "Community playlists"],
   ["artists", "Artists"],
+  ["profiles", "Profiles"],
   // // user
   ["songs_on_repeat", "Songs on repeat"],
   ["artists_on_repeat", "Artists on repeat"],
@@ -241,41 +243,41 @@ export async function get_base_strings() {
 
 const known_params = new Map([
   ["artist", [
-    "EgWKAQIgAWoMEAMQBBAJEA4QChAF",
-    "EgWKAQIgAWoKEAMQBBAJEAoQBQ%3D%3D",
-    "EgWKAQIgAWoKEAMQCRAEEAoQBQ%3D%3D",
+    "EgWKAQIgAWoMEAMQBBAJEAoQBRAV",
+    "EgWKAQIgAWoOEAMQBBAJEA4QChAFEBU%3D",
   ]],
   ["song", [
-    "EgWKAQIIAWoMEAMQBBAJEA4QChAF",
-    "EgWKAQIIAWoKEAMQBBAJEA4QCg%3D%3D",
-    "EgWKAQIIAWoKEAMQBBAJEAUQCg%3D%3D",
+    "EgWKAQIIAWoMEAMQBBAJEA4QChAV",
+    "EgWKAQIIAWoOEAMQBBAJEA4QChAFEBU%3D",
   ]],
   ["video", [
-    "EgWKAQIQAWoMEAMQBBAJEA4QChAF",
-    "EgWKAQIQAWoKEAMQBBAJEA4QCg%3D%3D",
+    "EgWKAQIQAWoMEAMQBBAJEA4QChAV",
+    "EgWKAQIQAWoOEAMQBBAJEA4QChAFEBU%3D",
   ]],
   ["playlist", [
-    "EgeKAQQoADgBagwQAxAEEAkQDhAKEAU%3D",
-    "EgeKAQQoADgBagoQAxAEEAkQDhAK",
+    "EgeKAQQoADgBagwQAxAEEAkQDhAKEBU%3D",
+    "EgeKAQQoADgBag4QAxAEEAkQDhAKEAUQFQ%3D%3D",
   ]],
-  ["songs", [
-    "titleEgWKAQIIAWoMEAMQBBAJEA4QChAF",
-    "titleEgWKAQIIAWoKEAMQBBAJEA4QCg%3D%3D",
-    "titleEgWKAQIIAWoKEAMQBBAJEAUQCg%3D%3D",
-    "titleEgWKAQIIAWoKEAMQCRAEEAoQBQ%3D%3D",
-  ]],
+  ["songs", []],
   ["featured_playlists", [
-    "titleEgeKAQQoADgBagwQAxAEEAkQDhAKEAU%3D",
-    "titleEgeKAQQoADgBagoQAxAEEAkQDhAK",
+    "titleEgeKAQQoADgBagwQAxAEEAkQDhAKEBU%3D",
+    "titleEgeKAQQoADgBag4QAxAEEAkQDhAKEAUQFQ%3D%3D",
   ]],
   ["community_playlists", [
-    "titleEgeKAQQoAEABagwQAxAEEAkQDhAKEAU%3D",
-    "titleEgeKAQQoAEABagoQAxAEEAkQDhAK",
+    "titleEgeKAQQoAEABagwQAxAEEAkQDhAKEBU%3D",
+    "titleEgeKAQQoAEABag4QAxAEEAkQDhAKEAUQFQ%3D%3D",
   ]],
   ["artists", [
-    "titleEgWKAQIgAWoMEAMQBBAJEA4QChAF",
-    "titleEgWKAQIgAWoKEAMQBBAJEAoQBQ%3D%3D",
-    "titleEgWKAQIgAWoKEAMQCRAEEAoQBQ%3D%3D",
+    "titleEgWKAQIgAWoMEAMQBBAJEAoQBRAV",
+    "titleEgWKAQIgAWoOEAMQBBAJEA4QChAFEBU%3D",
+  ]],
+  ["profile", [
+    "EgWKAQJYAWoMEAMQBBAJEA4QChAV",
+    "EgWKAQJYAWoOEAMQBBAJEA4QChAFEBU%3D",
+  ]],
+  ["profiles", [
+    "titleEgWKAQJYAWoOEAMQBBAJEA4QChAFEBU%3D",
+    "titleEgWKAQJYAWoMEAMQBBAJEA4QChAV",
   ]],
 ]);
 
@@ -328,7 +330,12 @@ export async function get_strings_for_language(
       }
 
       // handle translated thumbnails
-      if (i.id.slice(0, -3) === id.slice(0, -3)) return true;
+      if (
+        typeof i.id === "string" && typeof id === "string" &&
+        i.id.slice(0, -3) === id.slice(0, -3)
+      ) {
+        return true;
+      }
 
       return false;
     });
@@ -357,7 +364,7 @@ export async function get_all_strings() {
   // console.log("base", base_id_map);
 
   const languages = LOCALES.languages.map((l) => l.value);
-  // const languages = ["fr", "es", "ko"];
+  // const languages = ["fr", "es", "ko", "gl"];
 
   const strings: Record<string, any> = {};
 
