@@ -26,7 +26,7 @@ export interface AlbumHeader extends AlbumHeaderExtends {
   thumbnails: Thumbnail[];
   isExplicit: boolean;
   description: string | null;
-  trackCount: number | null;
+  trackCount: string | null;
   duration: string | null;
   audioPlaylistId: string | null;
   likeStatus: LikeStatus | null;
@@ -56,7 +56,7 @@ export function parse_album_header(response: any) {
   }
 
   if (header.secondSubtitle.runs.length > 1) {
-    album.trackCount = Number(header.secondSubtitle.runs[0].text);
+    album.trackCount = header.secondSubtitle.runs[0].text;
     album.duration = header.secondSubtitle.runs[2].text;
   } else {
     album.duration = header.secondSubtitle.runs[0].text;
