@@ -289,10 +289,14 @@ export function parse_channel_contents(results: any[]) {
   return parse_categories(results, categories_data);
 }
 
-export type NonNUllableChannelContents = ReturnType<typeof parse_channel_contents>;
+export type NonNUllableChannelContents = ReturnType<
+  typeof parse_channel_contents
+>;
 
 export type ChannelContents = {
-  [Key in keyof NonNUllableChannelContents]: NonNUllableChannelContents[Key] | null;
+  [Key in keyof NonNUllableChannelContents]:
+    | NonNUllableChannelContents[Key]
+    | null;
 };
 
 export function parse_artist_contents(results: any[]) {
@@ -554,6 +558,7 @@ export function parse_video(result: any): ParsedVideo {
 export type TrendChange = "UP" | "DOWN" /* | "NEW" */ | "NEUTRAL";
 
 export interface TopSong {
+  type: "top-song";
   title: string;
   videoId: string;
   artists: SongArtist[] | null;
@@ -579,6 +584,7 @@ export function parse_top_song(result: any): TopSong {
   );
 
   return {
+    type: "top-song",
     title: j(title_run, "text"),
     videoId: j(title_run, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists(result, 1),
@@ -647,6 +653,7 @@ export function parse_top_artist(result: any): TopArtist {
 }
 
 export interface TrendingSong {
+  type: "trending-song";
   title: string;
   videoId: string | null;
   artists: SongArtist[] | null;
@@ -686,6 +693,7 @@ export function parse_trending(result: any): TrendingSong {
   );
 
   return {
+    type: "trending-song",
     title: j(title_run, "text"),
     videoId: jo(title_run, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists(result, 1, undefined),
