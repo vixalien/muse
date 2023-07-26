@@ -180,10 +180,9 @@ export function parse_song_runs(runs: any[], slice_start = 0) {
         // artist
         parsed.artists.push({
           ...item,
-          type:
-            jo(run, NAVIGATION_PAGE_TYPE) === "MUSIC_PAGE_TYPE_ARTIST"
-              ? "artist"
-              : "channel",
+          type: jo(run, NAVIGATION_PAGE_TYPE) === "MUSIC_PAGE_TYPE_ARTIST"
+            ? "artist"
+            : "channel",
         });
       }
     } else {

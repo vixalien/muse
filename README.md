@@ -257,7 +257,7 @@ I'm currently targetting to match the [ytmusicapi]'s capabilities.
 
 ### watch
 
-- [x] get queue ~get watch playlist~
+- [x] get queue ~~get watch playlist~~
 
 ### library
 

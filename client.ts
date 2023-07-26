@@ -1,4 +1,4 @@
-import { edit_playlist, get_artist, get_option, get_song, setup } from "./mod.ts";
+import { get_option, get_song, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";

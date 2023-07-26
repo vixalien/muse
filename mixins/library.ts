@@ -54,9 +54,7 @@ import {
 } from "./utils.ts";
 import { request, request_json } from "./_request.ts";
 
-export type {
-  ParsedLibraryArtist
-} from "../parsers/library.ts";
+export type { ParsedLibraryArtist } from "../parsers/library.ts";
 
 export interface GetLibraryOptions extends PaginationOptions {
   order?: LibraryOrder;
