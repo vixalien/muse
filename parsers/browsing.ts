@@ -412,17 +412,20 @@ export function parse_album(result: any): ParsedAlbum {
     runs.pop();
   }
 
-  const endpoint = j(
+  const playlistId = jo(
     result,
     "thumbnailOverlay.musicItemThumbnailOverlayRenderer.content.musicPlayButtonRenderer.playNavigationEndpoint.watchEndpoint",
-  );
+  )?.playlistId ?? j(
+    result,
+    "thumbnailOverlay.musicItemThumbnailOverlayRenderer.content.musicPlayButtonRenderer.playNavigationEndpoint.watchPlaylistEndpoint",
+  ).playlistId;
 
   return {
     type: "album",
     title: j(result, TITLE_TEXT),
     year: is_year ? year : null,
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
-    audioPlaylistId: j(endpoint, "playlistId"),
+    audioPlaylistId: playlistId,
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     album_type: j(result, SUBTITLE),
