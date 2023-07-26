@@ -649,7 +649,7 @@ export function parse_trending(
   const data: Omit<Ranked<ParsedSong>, "type" | "album"> = {
     title: j(title_run, "text"),
     videoId: j(title_run, NAVIGATION_VIDEO_ID),
-    artists: parse_song_artists(result, 1, undefined) ?? [],
+    artists: parse_song_artists(result, 1, album_flex ? undefined : -1) ?? [],
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     rank: j(rank, TEXT_RUN_TEXT),
