@@ -798,3 +798,9 @@ export function __(value: string) {
 
   return null;
 }
+
+export function is_ranked<T>(
+  item: T | Ranked<T>,
+): item is Ranked<T> {
+  return typeof (item as any).rank === "string";
+}
