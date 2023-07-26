@@ -49,15 +49,20 @@ import { Thumbnail } from "./playlist.ts";
 import { AbortOptions, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
+export { is_ranked } from "../parsers/browsing.ts";
+
 export type {
   Category,
+  ExploreContents,
   FlatSong,
   MixedContent,
   MixedItem,
   ParsedAlbum,
+  ParsedMoodOrGenre,
   ParsedPlaylist,
   ParsedSong,
   ParsedVideo,
+  Ranked,
   RelatedArtist,
   WatchPlaylist,
 } from "../parsers/browsing.ts";

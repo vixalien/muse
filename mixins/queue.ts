@@ -10,6 +10,8 @@ import { j, jo } from "../util.ts";
 import { AbortOptions, PaginationOptions } from "./utils.ts";
 import { request_json } from "./_request.ts";
 
+export type { QueueTrack } from "../parsers/queue.ts";
+
 export interface QueueOptions extends PaginationOptions {
   radio?: boolean;
   shuffle?: boolean;

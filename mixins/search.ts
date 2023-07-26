@@ -37,6 +37,7 @@ export type {
   SearchArtist,
   SearchContent,
   SearchPlaylist,
+  SearchProfile,
   SearchRadio,
   SearchSong,
   SearchVideo,
@@ -44,6 +45,7 @@ export type {
   TopResultAlbum,
   TopResultArtist,
   TopResultSong,
+  TopResultVideo,
 } from "../parsers/search.ts";
 
 export { filters, scopes } from "../parsers/search.ts";
