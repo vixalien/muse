@@ -8,7 +8,6 @@ import {
   MUSIC_SHELF,
   SECTION_LIST,
   SINGLE_COLUMN_TAB,
-  TITLE,
   TITLE_TEXT,
 } from "../nav.ts";
 import {
@@ -43,9 +42,10 @@ export async function get_explore(
 
 export interface Charts {
   countries: {
-    selected: string;
-    options: string[];
-  };
+    selected: boolean;
+    code: string;
+    title: string;
+  }[];
   results: ChartContents;
 }
 
@@ -73,13 +73,32 @@ export async function get_charts(
     "subheaders.0.musicSideAlignedItemRenderer.startItems.0.musicSortFilterButtonRenderer",
   );
 
+  const menu_options = menu.menu.musicMultiSelectMenuRenderer.options
+    .map((option: any) => {
+      return option.musicMultiSelectMenuItemRenderer;
+    })
+    .filter(Boolean);
+
   const charts: Charts = {
-    countries: {
-      selected: j(menu, TITLE),
-      options: j(json, FRAMEWORK_MUTATIONS)
-        .map((m: any) => jo(m, "payload.musicFormBooleanChoice.opaqueToken"))
-        .filter(Boolean),
-    },
+    countries: j(json, FRAMEWORK_MUTATIONS)
+      .map((m: any) => {
+        const data = jo(m, "payload.musicFormBooleanChoice");
+
+        if (!data) return;
+
+        const menu_option = menu_options.find((o: any) =>
+          o.formItemEntityKey === data.id
+        );
+
+        if (!menu_option) return;
+
+        return {
+          selected: data.selected,
+          code: data.opaqueToken,
+          title: j(menu_option, TITLE_TEXT),
+        };
+      })
+      .filter(Boolean),
     results: parse_chart_contents(results),
   };
 
