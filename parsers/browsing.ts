@@ -466,7 +466,7 @@ export function parse_single(result: any): ParsedAlbum {
 export interface ParsedSong extends SongRuns {
   type: "inline-video" | "song";
   title: string;
-  videoId: string | null;
+  videoId: string;
   playlistId: string | null;
   isExplicit: boolean;
   thumbnails: Thumbnail[];
@@ -557,22 +557,7 @@ export function parse_video(result: any): ParsedVideo {
 
 export type TrendChange = "UP" | "DOWN" /* | "NEW" */ | "NEUTRAL";
 
-export interface TopSong {
-  type: "top-song";
-  title: string;
-  videoId: string;
-  artists: SongArtist[] | null;
-  playlistId: string | null;
-  thumbnails: Thumbnail[];
-  rank: string;
-  change: TrendChange | null;
-  album: {
-    title: string;
-    browseId: string;
-  } | null;
-}
-
-export function parse_top_song(result: any): TopSong {
+export function parse_top_song(result: any): Ranked<ParsedSong> {
   const title = get_flex_column_item(result, 0);
   const title_run = j(title, TEXT_RUN);
 
@@ -584,105 +569,70 @@ export function parse_top_song(result: any): TopSong {
   );
 
   return {
-    type: "top-song",
+    type: "song",
     title: j(title_run, "text"),
     videoId: j(title_run, NAVIGATION_VIDEO_ID),
-    artists: parse_song_artists(result, 1),
+    artists: parse_song_artists(result, 1) ?? [],
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     rank: j(rank, TEXT_RUN_TEXT),
     change: jo(rank, "icon.iconType")?.split("_")[2] || null,
+    isExplicit: jo(result, BADGE_LABEL) != null,
+    views: null,
+    duration: null,
+    duration_seconds: null,
+    year: null,
     album: album_run
       ? {
-        title: j(album_run, "text"),
-        browseId: j(album_run, NAVIGATION_BROWSE_ID),
+        name: j(album_run, "text"),
+        id: j(album_run, NAVIGATION_BROWSE_ID),
       }
       : null,
   };
 }
 
-export interface TopVideo {
-  type: "top-video";
-  title: string;
-  videoId: string;
-  artists: SongArtist[] | null;
-  playlistId: string | null;
-  thumbnails: Thumbnail[];
-  views: string | null;
-  rank: number;
-  change: TrendChange | null;
-}
-
-export function parse_top_video(result: any): TopVideo {
+export function parse_top_video(result: any): Ranked<ParsedVideo> {
   const runs = result.subtitle.runs;
   const artists_len = get_dot_separator_index(runs);
 
   const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   return {
-    type: "top-video",
+    type: "video",
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
-    views: runs[runs.length - 1],
-    rank: Number(j(rank, TEXT_RUN_TEXT)),
-    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
+    views: runs[runs.length - 1].text,
+    rank: j(rank, TEXT_RUN_TEXT),
+    change: jo(rank, "icon.iconType")?.split("_")[2] || null,
   };
 }
 
-export interface TopArtist {
-  type: "top-artist";
-  name: string;
-  browseId: string;
-  subscribers: string;
-  thumbnails: Thumbnail[];
-  rank: number;
-  change: TrendChange | null;
-}
-
-export function parse_top_artist(result: any): TopArtist {
+export function parse_top_artist(result: any): Ranked<RelatedArtist> {
   const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   return {
-    type: "top-artist",
+    type: "artist",
     name: j(get_flex_column_item(result, 0), TEXT_RUN_TEXT),
     browseId: j(result, NAVIGATION_BROWSE_ID),
     subscribers: j(get_flex_column_item(result, 1), TEXT_RUN_TEXT),
     thumbnails: j(result, THUMBNAILS),
-    rank: Number(j(rank, TEXT_RUN_TEXT)),
-    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
+    rank: j(rank, TEXT_RUN_TEXT),
+    change: jo(rank, "icon.iconType")?.split("_")[2] || null,
   };
 }
 
-export interface TrendingSong {
-  type: "trending-song";
-  title: string;
-  videoId: string | null;
-  artists: SongArtist[] | null;
-  playlistId: string | null;
-  thumbnails: Thumbnail[];
-  rank: number;
-  change: TrendChange | null;
-  album: {
-    title: string;
-    browseId: string;
-  } | null;
-  views: string | null;
-}
-
-export function parse_trending(result: any): TrendingSong {
+export function parse_trending(
+  result: any,
+): Ranked<ParsedSong> | Ranked<ParsedVideo> {
   const title = get_flex_column_item(result, 0);
   const title_run = j(title, TEXT_RUN);
 
   const last_flex =
     get_flex_column_item(result, result.flexColumns.length - 1) ??
       get_flex_column_item(result, result.flexColumns.length - 2);
-
-  // if (!("runs" in last_flex.title.text)) {
-  //   last_flex = get_flex_column_item(result, result.flexColumns.length - 2);
-  // }
 
   const last_runs = jo(
     last_flex,
@@ -696,23 +646,39 @@ export function parse_trending(result: any): TrendingSong {
     result.flexColumns.length - 1,
   );
 
-  return {
-    type: "trending-song",
+  const data: Omit<Ranked<ParsedSong>, "type" | "album"> = {
     title: j(title_run, "text"),
-    videoId: jo(title_run, NAVIGATION_VIDEO_ID),
-    artists: parse_song_artists(result, 1, undefined),
+    videoId: j(title_run, NAVIGATION_VIDEO_ID),
+    artists: parse_song_artists(result, 1, undefined) ?? [],
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
-    rank: Number(j(rank, TEXT_RUN_TEXT)),
-    change: jo(rank, "icon.iconType")?.split("_")[2].toLowerCase() || null,
-    album: album_flex
-      ? {
-        title: j(album_flex, TEXT_RUN_TEXT),
-        browseId: j(album_flex, TEXT_RUN, NAVIGATION_BROWSE_ID),
-      }
-      : null,
-    views: album_flex ? null : last_runs[last_runs.length - 1]?.text ?? null,
+    rank: j(rank, TEXT_RUN_TEXT),
+    change: jo(rank, "icon.iconType")?.split("_")[2] || null,
+    year: null,
+    duration: null,
+    duration_seconds: null,
+    isExplicit: jo(result, BADGE_LABEL) != null,
+    views: null,
   };
+
+  if (album_flex) {
+    return {
+      type: "song",
+      ...data,
+      album: album_flex
+        ? {
+          name: j(album_flex, TEXT_RUN_TEXT),
+          id: j(album_flex, TEXT_RUN, NAVIGATION_BROWSE_ID),
+        }
+        : null,
+    };
+  } else {
+    return {
+      type: "video",
+      ...data,
+      views: last_runs[last_runs.length - 1]?.text ?? null,
+    };
+  }
 }
 
 export interface ParsedPlaylist {
@@ -776,6 +742,11 @@ export interface RelatedArtist {
   subscribers: string | null;
   thumbnails: Thumbnail[];
 }
+
+export type Ranked<T> = T & {
+  rank: string;
+  change: TrendChange | null;
+};
 
 export function parse_related_artist(data: any): RelatedArtist {
   const subscribers = jo(data, SUBTITLE2);
