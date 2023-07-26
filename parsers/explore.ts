@@ -9,7 +9,7 @@ import {
   TITLE_TEXT,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
-import { parse_content_list, parse_playlist } from "./browsing.ts";
+import { parse_content_list, parse_mixed_item } from "./browsing.ts";
 
 export function parse_playlists_categories(results: any) {
   const categories = [];
@@ -36,7 +36,7 @@ export function parse_playlists_categories(results: any) {
       categories.push({
         title,
         params,
-        playlists: parse_content_list(results, parse_playlist),
+        playlists: parse_content_list(results, parse_mixed_item),
       });
     }
   }
