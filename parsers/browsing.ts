@@ -602,6 +602,7 @@ export function parse_top_song(result: any): TopSong {
 }
 
 export interface TopVideo {
+  type: "top-video";
   title: string;
   videoId: string;
   artists: SongArtist[] | null;
@@ -619,6 +620,7 @@ export function parse_top_video(result: any): TopVideo {
   const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   return {
+    type: "top-video",
     title: j(result, TITLE_TEXT),
     videoId: j(result, NAVIGATION_VIDEO_ID),
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),
