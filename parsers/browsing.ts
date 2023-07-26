@@ -633,6 +633,7 @@ export function parse_top_video(result: any): TopVideo {
 }
 
 export interface TopArtist {
+  type: "top-artist";
   name: string;
   browseId: string;
   subscribers: string;
@@ -645,6 +646,7 @@ export function parse_top_artist(result: any): TopArtist {
   const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   return {
+    type: "top-artist",
     name: j(get_flex_column_item(result, 0), TEXT_RUN_TEXT),
     browseId: j(result, NAVIGATION_BROWSE_ID),
     subscribers: j(get_flex_column_item(result, 1), TEXT_RUN_TEXT),
