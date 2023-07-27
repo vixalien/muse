@@ -3,8 +3,9 @@ import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 import { get_option, set_option } from "../setup.ts";
 
 import { RequestInit } from "../request.ts";
-import { use_proxy } from "../util.ts";
+import { jo, use_proxy } from "../util.ts";
 import { ERROR_CODE, MuseError } from "../errors.ts";
+import { ITEM_SECTION, SECTION_LIST_ITEM, SINGLE_COLUMN_TAB } from "../nav.ts";
 
 export function get_auth_headers() {
   return get_option("auth").get_headers();
@@ -87,6 +88,22 @@ export async function request_json(endpoint: string, options: RequestInit) {
   const response = await request(endpoint, options);
 
   const json = await response.json();
+
+  // checking if YouTube Music isn't available in the country
+  const icon = jo(
+    json,
+    SINGLE_COLUMN_TAB,
+    SECTION_LIST_ITEM,
+    ITEM_SECTION,
+    "messageRenderer.icon.iconType",
+  );
+
+  if (icon === "MUSIC_UNAVAILABLE") {
+    throw new MuseError(
+      ERROR_CODE.NOT_AVAILABLE,
+      "YouTube Music isn't available in your country",
+    );
+  }
 
   return json;
 }

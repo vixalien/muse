@@ -1,5 +1,6 @@
 export enum ERROR_CODE {
   GENERIC,
+  NOT_AVAILABLE,
 
   /* Params */
   INVALID_PARAMETER,
