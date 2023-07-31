@@ -275,7 +275,7 @@ export async function get_playlist(
         playlistId,
         results,
         {
-          limit: songs_to_get - playlist.tracks.length,
+          limit,
           signal,
         },
       );
