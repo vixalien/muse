@@ -311,6 +311,14 @@ export interface VideoDetails {
   isLiveContent: boolean;
 }
 
+export interface Caption {
+  url: string;
+  name: string;
+  vssId: string;
+  lang: string;
+  translatable: boolean;
+}
+
 export interface Song {
   formats: Format[];
   adaptive_formats: Format[];
@@ -319,6 +327,7 @@ export interface Song {
   playerConfig: any;
   playbackTracking: any;
   videostatsPlaybackUrl: string;
+  captions: Caption[];
 }
 
 export async function get_album_browse_id(
@@ -380,6 +389,15 @@ export async function get_song(
     playbackTracking: response.playbackTracking,
     videostatsPlaybackUrl:
       response.playbackTracking.videostatsPlaybackUrl.baseUrl,
+    captions:
+      jo(response, "captions.playerCaptionsTracklistRenderer.captionTracks")
+        ?.map((caption: any) => ({
+          url: caption.baseUrl,
+          name: j(caption, "name.runs[0].text"),
+          vssId: caption.vssId,
+          lang: caption.languageCode,
+          translable: caption.isTranslatable,
+        })) ?? [],
   };
 
   return song;
