@@ -180,6 +180,8 @@ const base_map = new Map([
   ["community_playlists", "Community playlists"],
   ["artists", "Artists"],
   ["profiles", "Profiles"],
+  ["episodes", "Episodes"],
+  ["podcasts", "Podcasts"],
   // // user
   ["songs_on_repeat", "Songs on repeat"],
   ["artists_on_repeat", "Artists on repeat"],
@@ -278,6 +280,14 @@ const known_params = new Map([
   ["profiles", [
     "titleEgWKAQJYAWoOEAMQBBAJEA4QChAFEBU%3D",
     "titleEgWKAQJYAWoMEAMQBBAJEA4QChAV",
+  ]],
+  ["podcasts", [
+    "titleEgWKAQJQAWoSEAMQBBAJEA4QChAFEBEQEBAV",
+    "titleEgWKAQJQAWoQEAMQBBAJEA4QChAREBAQFQ%3D%3D",
+  ]],
+  ["episodes", [
+    "titleEgWKAQJIAWoSEAMQBBAJEA4QChAFEBEQEBAV",
+    "titleEgWKAQJIAWoQEAMQBBAJEA4QChAREBAQFQ%3D%3D",
   ]],
 ]);
 

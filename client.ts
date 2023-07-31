@@ -1,4 +1,4 @@
-import { get_artist, get_explore, get_option, setup } from "./mod.ts";
+import { get_option, search, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -96,10 +96,7 @@ const auth_flow = async () => {
 
   console.log("Loading token...");
 
-  await auth.load_token_with_code(
-    loginCode.device_code,
-    loginCode.interval,
-  );
+  await auth.load_token_with_code(loginCode);
 
   console.log("Logged in!", auth._token);
 };
@@ -119,7 +116,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_artist("UClYV6hHlupm_S_ObS1W-DYw")
+search("Hello world")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

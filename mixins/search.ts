@@ -342,6 +342,11 @@ export async function search(
         const results = j(res, "musicShelfRenderer.contents");
         const category = jo(res, MUSIC_SHELF, TITLE_TEXT);
 
+        // skip episodes and podcasts
+        if (["episodes", "podcasts"].includes(__(category) ?? "")) {
+          continue;
+        }
+
         const category_search_results = parse_search_results(
           results,
           scope ?? null,
