@@ -312,7 +312,6 @@ export interface VideoDetails {
 }
 
 export interface Song {
-  /** @deprecated */
   formats: Format[];
   adaptive_formats: Format[];
   expires: Date;
@@ -320,9 +319,6 @@ export interface Song {
   playerConfig: any;
   playbackTracking: any;
   videostatsPlaybackUrl: string;
-  hlsManifestUrl: string;
-  aspectRatio: number;
-  serverAbrStreamingUrl: string;
 }
 
 export async function get_album_browse_id(
@@ -358,7 +354,7 @@ export async function get_song(
 ): Promise<Song> {
   const response = await request_json("player", {
     data: {
-      ...CONSTANTS2.IOS.DATA,
+      ...CONSTANTS2.ANDROID.DATA,
       contentCheckOk: true,
       racyCheckOk: true,
       video_id,
@@ -367,7 +363,7 @@ export async function get_song(
   });
 
   const song: Song = {
-    formats: response.streamingData.formats?.map(parse_format) ?? [],
+    formats: response.streamingData.formats.map(parse_format),
     adaptive_formats: response.streamingData.adaptiveFormats.map(
       parse_format,
     ),
@@ -384,9 +380,6 @@ export async function get_song(
     playbackTracking: response.playbackTracking,
     videostatsPlaybackUrl:
       response.playbackTracking.videostatsPlaybackUrl.baseUrl,
-    hlsManifestUrl: response.streamingData.hlsManifestUrl,
-    aspectRatio: response.videoDetails.aspectRatio,
-    serverAbrStreamingUrl: response.streamingData.serverManifestStreamUrl,
   };
 
   return song;
