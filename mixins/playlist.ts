@@ -266,16 +266,12 @@ export async function get_playlist(
   }
 
   if (song_count === null || song_count > 0) {
-    const songs_to_get = song_count
-      ? Math.min(limit ?? song_count, song_count)
-      : limit;
-
     if ("continuations" in results) {
       const continued_data = await get_more_playlist_tracks(
         playlistId,
         results,
         {
-          limit: songs_to_get - playlist.tracks.length,
+          limit: limit - playlist.tracks.length,
           signal,
         },
       );
