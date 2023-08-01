@@ -173,12 +173,6 @@ export async function get_playlist(
     ? header.secondSubtitle.runs[0].text
     : null;
 
-  const song_count = trackCount
-    ? Number(
-      trackCount.normalize("NFKD").match(/\d+/)[0],
-    )
-    : null;
-
   const duration =
     header.secondSubtitle.runs && header.secondSubtitle.runs.length > 2
       ? header.secondSubtitle.runs[2].text
@@ -204,9 +198,7 @@ export async function get_playlist(
     trackCount: trackCount,
     duration,
     duration_seconds: 0,
-    tracks: (song_count === null || song_count > 0 || isNaN(song_count))
-      ? parse_playlist_items(results.contents)
-      : [],
+    tracks: parse_playlist_items(results.contents),
     continuation: null,
     suggestions: [],
     suggestions_continuation: null,
@@ -265,7 +257,6 @@ export async function get_playlist(
     }
   }
 
-  if (song_count === null || song_count > 0) {
     if ("continuations" in results) {
       const continued_data = await get_more_playlist_tracks(
         playlistId,
@@ -279,7 +270,6 @@ export async function get_playlist(
       playlist.tracks.push(...continued_data.tracks);
       playlist.continuation = continued_data.continuation;
     }
-  }
 
   playlist.duration_seconds = sum_total_duration(playlist);
 
