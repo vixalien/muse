@@ -320,6 +320,7 @@ export interface Caption {
 }
 
 export interface Song {
+  /** @deprecated */
   formats: Format[];
   adaptive_formats: Format[];
   expires: Date;
@@ -328,6 +329,9 @@ export interface Song {
   playbackTracking: any;
   videostatsPlaybackUrl: string;
   captions: Caption[];
+  hlsManifestUrl: string;
+  aspectRatio: number;
+  serverAbrStreamingUrl: string;
 }
 
 export async function get_album_browse_id(
@@ -363,7 +367,7 @@ export async function get_song(
 ): Promise<Song> {
   const response = await request_json("player", {
     data: {
-      ...CONSTANTS2.ANDROID.DATA,
+      ...CONSTANTS2.IOS.DATA,
       contentCheckOk: true,
       racyCheckOk: true,
       video_id,
@@ -372,7 +376,7 @@ export async function get_song(
   });
 
   const song: Song = {
-    formats: response.streamingData.formats.map(parse_format),
+    formats: response.streamingData.formats?.map(parse_format) ?? [],
     adaptive_formats: response.streamingData.adaptiveFormats.map(
       parse_format,
     ),
@@ -398,6 +402,9 @@ export async function get_song(
           lang: caption.languageCode,
           translable: caption.isTranslatable,
         })) ?? [],
+    hlsManifestUrl: response.streamingData.hlsManifestUrl,
+    aspectRatio: response.videoDetails.aspectRatio,
+    serverAbrStreamingUrl: response.streamingData.serverManifestStreamUrl,
   };
 
   return song;

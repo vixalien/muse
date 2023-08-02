@@ -93,5 +93,39 @@
         }
       }
     }
+  },
+  "IOS": {
+    "DATA": {
+      "context": {
+        "client": {
+          "screenWidthPoints": 689,
+          "screenHeightPoints": 963,
+          "screenPixelDensity": 1,
+          "utcOffsetMinutes": 120,
+          "hl": "en",
+          "gl": "GB",
+          "remoteHost": "1.1.1.1",
+          "deviceMake": "",
+          "deviceModel": "",
+          "userAgent": "com.google.ios.apps.youtube.music/5.46.52 (Linux; U; Android 13; GB) gzip",
+          "clientName": "IOS_MUSIC",
+          "clientVersion": "5.46.52",
+          "osName": "iOS",
+          "osVersion": "16",
+          "originalUrl": "https://www.youtube.com/tv?is_account_switch=1&hrld=1&fltor=1",
+          "theme": "CLASSIC",
+          "platform": "MOBILE",
+          "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+          "webpSupport": false,
+          "timeZone": "Europe/Amsterdam",
+          "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+        },
+        "user": { "enableSafetyMode": false },
+        "request": {
+          "internalExperimentFlags": [],
+          "consistencyTokenJars": []
+        }
+      }
+    }
   }
 }
