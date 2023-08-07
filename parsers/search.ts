@@ -9,6 +9,7 @@ import {
   NAVIGATION_VIDEO_ID,
   NAVIGATION_VIDEO_TYPE,
   PLAY_BUTTON,
+  SUBTITLE,
   SUBTITLE2,
   SUBTITLE_BADGE_LABEL,
   TEXT_RUN,
@@ -562,11 +563,30 @@ export function parse_top_result_album(result: any): TopResultAlbum {
   };
 }
 
+export interface TopResultPlaylist extends SearchPlaylist {
+  description: string | null;
+  more: SearchContent[];
+}
+
+export function parse_top_result_playlist(result: any): TopResultPlaylist {
+  return {
+    type: "playlist",
+    title: j(result, TITLE_TEXT),
+    browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
+    thumbnails: j(result, THUMBNAILS),
+    authors: parse_song_artists_runs(result.subtitle.runs.slice(2)),
+    songs: null,
+    description: jo(result, SUBTITLE),
+    more: parse_top_result_more(result),
+  };
+}
+
 export type TopResult =
   | TopResultSong
   | TopResultAlbum
   | TopResultArtist
-  | TopResultVideo;
+  | TopResultVideo
+  | TopResultPlaylist;
 
 export function parse_top_result(result: any) {
   const page_type = jo(result, TITLE, NAVIGATION_PAGE_TYPE);
@@ -576,6 +596,8 @@ export function parse_top_result(result: any) {
       return parse_top_result_artist(result);
     case "MUSIC_PAGE_TYPE_ALBUM":
       return parse_top_result_album(result);
+    case "MUSIC_PAGE_TYPE_PLAYLIST":
+      return parse_top_result_playlist(result);
     default:
       if (
         jo(result, TITLE, "navigationEndpoint", NAVIGATION_VIDEO_TYPE) != null
