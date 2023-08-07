@@ -565,14 +565,24 @@ export function parse_top_result_album(result: any): TopResultAlbum {
 
 export interface TopResultPlaylist extends SearchPlaylist {
   description: string | null;
+  shuffleId: string | null;
   more: SearchContent[];
 }
 
 export function parse_top_result_playlist(result: any): TopResultPlaylist {
+  const buttons = j(result, "buttons").map((button: any) =>
+    button.buttonRenderer
+  );
+
+  const shuffleButton = buttons.find((button: any) =>
+    button.icon.iconType === "MUSIC_SHUFFLE"
+  );
+
   return {
     type: "playlist",
     title: j(result, TITLE_TEXT),
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
+    shuffleId: j(shuffleButton, "command.watchPlaylistEndpoint.playlistId"),
     thumbnails: j(result, THUMBNAILS),
     authors: parse_song_artists_runs(result.subtitle.runs.slice(2)),
     songs: null,
