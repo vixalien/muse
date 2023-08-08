@@ -329,7 +329,7 @@ export interface Song {
   playbackTracking: any;
   videostatsPlaybackUrl: string;
   captions: Caption[];
-  hlsManifestUrl: string;
+  hlsManifestUrl: string | null;
   aspectRatio: number;
   serverAbrStreamingUrl: string;
 }
@@ -367,7 +367,7 @@ export async function get_song(
 ): Promise<Song> {
   const response = await request_json("player", {
     data: {
-      ...CONSTANTS2.IOS.DATA,
+      ...CONSTANTS2.ANDROID.DATA,
       contentCheckOk: true,
       racyCheckOk: true,
       video_id,
