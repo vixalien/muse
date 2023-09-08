@@ -248,6 +248,7 @@ export async function get_artist(
 }
 
 export interface AlbumResult extends AlbumHeader {
+  id: string;
   tracks: PlaylistItem[];
   other_versions: ParsedAlbum[] | null;
 }
@@ -281,6 +282,7 @@ export async function get_album(
   const header = parse_album_header(response);
 
   const album: AlbumResult = {
+    id: find_context_param(response, "browse_id"),
     ...header,
     tracks: parse_playlist_items(results.contents),
     other_versions: null,
