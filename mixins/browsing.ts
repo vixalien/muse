@@ -26,6 +26,7 @@ import { AlbumHeader, parse_album_header } from "../parsers/albums.ts";
 import {
   ArtistContents,
   ChannelContents,
+  find_context_param,
   MixedContent,
   Mood,
   parse_album,
@@ -556,6 +557,7 @@ export async function get_artist_albums(
 
 export interface Channel extends ChannelContents {
   name: string;
+  channelId: string;
   thumbnails: Thumbnail[];
   songs_on_repeat: {
     results: PlaylistItem[];
@@ -576,6 +578,7 @@ export async function get_channel(
 
   const channel: Channel = {
     name: j(header, TITLE_TEXT),
+    channelId: find_context_param(json, "browse_id"),
     thumbnails: jo(
       header,
       "foregroundThumbnail.musicThumbnailRenderer",

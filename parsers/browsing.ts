@@ -810,3 +810,9 @@ export function is_ranked<T>(
 ): item is Ranked<T> {
   return typeof (item as any).rank === "string";
 }
+
+export function find_context_param(json: any, key: string) {
+  return j(json, "responseContext.serviceTrackingParams[0].params").find((
+    param: any,
+  ) => param.key === key).value;
+}
