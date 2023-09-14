@@ -399,6 +399,7 @@ export interface ParsedAlbum {
   isExplicit: boolean;
   album_type: AlbumType | null;
   artists: ArtistRun[];
+  libraryLikeStatus: LikeStatus | null;
 }
 
 export function parse_album(result: any): ParsedAlbum {
@@ -434,6 +435,7 @@ export function parse_album(result: any): ParsedAlbum {
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     album_type: j(result, SUBTITLE),
     artists: runs,
+    libraryLikeStatus: get_library_like_status(result),
   };
 }
 
@@ -470,6 +472,7 @@ export function parse_single(result: any): ParsedAlbum {
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     artists: runs,
     album_type: null,
+    libraryLikeStatus: get_library_like_status(result),
   };
 }
 
