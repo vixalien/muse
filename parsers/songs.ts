@@ -226,6 +226,7 @@ export function parse_song_album(data: any, index: number): Album | null {
 export interface MenuTokens {
   add: string | null;
   remove: string | null;
+  saved: boolean;
 }
 
 export function parse_song_menu_tokens(item: any): MenuTokens {
@@ -241,7 +242,7 @@ export function parse_song_menu_tokens(item: any): MenuTokens {
     );
 
   // swap if already in library
-  if (service_type == "LIBRARY_REMOVE") {
+  if (service_type == "LIBRARY_SAVED") {
     [library_add_token, library_remove_token] = [
       library_remove_token,
       library_add_token,
@@ -251,6 +252,7 @@ export function parse_song_menu_tokens(item: any): MenuTokens {
   return {
     add: library_add_token,
     remove: library_remove_token,
+    saved: service_type == "LIBRARY_SAVED",
   };
 }
 
