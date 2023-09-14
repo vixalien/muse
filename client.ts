@@ -1,4 +1,4 @@
-import { get_option, search, setup } from "./mod.ts";
+import { get_artist, get_artist_albums, get_home, get_option, get_playlist, search, setup } from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -116,7 +116,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-search("Hello world")
+get_home()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });

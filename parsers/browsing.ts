@@ -1,4 +1,5 @@
 import STRINGS from "../locales/strings.json" assert { type: "json" };
+import { LikeStatus } from "../mod.ts";
 
 import {
   BADGE_LABEL,
@@ -32,6 +33,7 @@ import { get_option } from "../setup.ts";
 import { j, jo } from "../util.ts";
 import {
   ArtistRun,
+  get_library_like_status,
   parse_song_artists,
   parse_song_artists_runs,
   parse_song_runs,
@@ -697,6 +699,7 @@ export interface ParsedPlaylist {
   description: string | null;
   count: string | null;
   author: ArtistRun[] | null;
+  libraryLikeStatus: LikeStatus | null;
 }
 
 export function parse_playlist(data: any) {
@@ -721,6 +724,7 @@ export function parse_playlist(data: any) {
     description: null,
     count: null,
     author: null,
+    libraryLikeStatus: get_library_like_status(data),
   };
 
   const subtitle = data.subtitle;

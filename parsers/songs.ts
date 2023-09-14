@@ -1,10 +1,12 @@
 import {
   FEEDBACK_TOKEN,
+  find_object_by_key,
+  MENU_ITEMS,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PAGE_TYPE,
   TOGGLE_MENU,
 } from "../nav.ts";
-import { jo } from "../util.ts";
+import { j, jo } from "../util.ts";
 import { _ } from "./browsing.ts";
 import {
   get_browse_id,
@@ -254,6 +256,24 @@ export function parse_song_menu_tokens(item: any): MenuTokens {
     remove: library_remove_token,
     saved: service_type == "LIBRARY_SAVED",
   };
+}
+
+export function parse_menu_library_like_status(item: any): LikeStatus | null {
+  const toggle_menu = item[TOGGLE_MENU],
+    service_type = toggle_menu.defaultIcon.iconType;
+
+  if (typeof service_type !== "string") return null;
+
+  return service_type == "LIBRARY_SAVED" ? "LIKE" : "INDIFFERENT";
+}
+
+export function get_library_like_status(item: any) {
+  const toggle_menu = find_object_by_key(
+    j(item, MENU_ITEMS),
+    TOGGLE_MENU,
+  );
+
+  return toggle_menu ? parse_menu_library_like_status(toggle_menu) : null;
 }
 
 export function parse_format(format: any) {
