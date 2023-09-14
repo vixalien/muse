@@ -1,7 +1,5 @@
 import {
   BADGE_LABEL,
-  find_object_by_key,
-  MENU_ITEMS,
   MRLIR,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PAGE_TYPE,
@@ -18,15 +16,14 @@ import {
   THUMBNAILS,
   TITLE,
   TITLE_TEXT,
-  TOGGLE_MENU,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
 import { _, __, AlbumType } from "./browsing.ts";
 import {
   ArtistRun,
+  get_menu_tokens,
   MenuTokens,
   parse_song_artists_runs,
-  parse_song_menu_tokens,
   parse_song_runs,
   SongRuns,
 } from "./songs.ts";
@@ -190,11 +187,6 @@ export function parse_search_song(result: any, has_label = false): SearchSong {
 
   const title = j(flex, TEXT_RUN);
 
-  const toggle_menu = find_object_by_key(
-    j(result, MENU_ITEMS),
-    TOGGLE_MENU,
-  );
-
   return {
     type: "song",
     title: j(title, "text"),
@@ -202,7 +194,7 @@ export function parse_search_song(result: any, has_label = false): SearchSong {
     playlistId: jo(title, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     isExplicit: jo(result, BADGE_LABEL) != null,
-    feedbackTokens: toggle_menu ? parse_song_menu_tokens(toggle_menu) : null,
+    feedbackTokens: get_menu_tokens(result),
     videoType: j(
       result,
       PLAY_BUTTON,
@@ -525,11 +517,6 @@ export interface TopResultVideo extends SearchVideo {
 export function parse_top_result_song(
   result: any,
 ): TopResultSong | TopResultVideo {
-  const toggle_menu = find_object_by_key(
-    j(result, MENU_ITEMS),
-    TOGGLE_MENU,
-  );
-
   return {
     type: __(result.subtitle.runs[0].text) as "song" | "video" ?? "song",
     title: j(result, TITLE_TEXT),
@@ -537,7 +524,7 @@ export function parse_top_result_song(
     playlistId: jo(result, TITLE, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
-    feedbackTokens: toggle_menu ? parse_song_menu_tokens(toggle_menu) : null,
+    feedbackTokens: get_menu_tokens(result),
     videoType: j(result, TITLE, "navigationEndpoint", NAVIGATION_VIDEO_TYPE),
     ...parse_song_runs(result.subtitle.runs, 2),
     more: parse_top_result_more(result),

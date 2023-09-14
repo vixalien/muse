@@ -34,6 +34,8 @@ import { j, jo } from "../util.ts";
 import {
   ArtistRun,
   get_library_like_status,
+  get_menu_tokens,
+  MenuTokens,
   parse_song_artists,
   parse_song_artists_runs,
   parse_song_runs,
@@ -478,6 +480,7 @@ export interface ParsedSong extends SongRuns {
   playlistId: string | null;
   isExplicit: boolean;
   thumbnails: Thumbnail[];
+  feedbackTokens: MenuTokens | null;
 }
 
 export function parse_song(result: any): ParsedSong {
@@ -488,6 +491,7 @@ export function parse_song(result: any): ParsedSong {
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
+    feedbackTokens: get_menu_tokens(result),
     ...parse_song_runs(result.subtitle.runs),
   };
 }
@@ -596,6 +600,7 @@ export function parse_top_song(result: any): Ranked<ParsedSong> {
         id: j(album_run, NAVIGATION_BROWSE_ID),
       }
       : null,
+    feedbackTokens: get_menu_tokens(result),
   };
 }
 
@@ -667,6 +672,7 @@ export function parse_trending(
     duration_seconds: null,
     isExplicit: jo(result, BADGE_LABEL) != null,
     views: null,
+    feedbackTokens: get_menu_tokens(result),
   };
 
   if (album_flex) {
