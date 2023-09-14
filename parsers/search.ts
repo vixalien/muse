@@ -21,10 +21,15 @@ import { j, jo } from "../util.ts";
 import { _, __, AlbumType } from "./browsing.ts";
 import {
   ArtistRun,
+  get_library_like_status,
+  get_menu_like_status,
   get_menu_tokens,
+  get_shuffle_and_radio_ids,
+  LikeStatus,
   MenuTokens,
   parse_song_artists_runs,
   parse_song_runs,
+  ShuffleAndRadioIds,
   SongRuns,
 } from "./songs.ts";
 import {
@@ -135,7 +140,7 @@ export function _get_param2(filter: Filter) {
   }
 }
 
-export interface SearchAlbum {
+export interface SearchAlbum extends ShuffleAndRadioIds {
   type: "album";
   title: string;
   browseId: string;
@@ -163,6 +168,7 @@ export function parse_search_album(result: any): SearchAlbum {
     album_type: runs[0].text,
     year: runs[runs.length - 1].text,
     artists: parse_song_artists_runs(runs.slice(2, -1)),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -175,6 +181,7 @@ export interface SearchSongOrVideo extends SongRuns {
   isExplicit: boolean;
   feedbackTokens: MenuTokens | null;
   videoType: string;
+  likeStatus: LikeStatus | null;
 }
 
 export interface SearchSong extends SearchSongOrVideo {
@@ -201,6 +208,7 @@ export function parse_search_song(result: any, has_label = false): SearchSong {
       "playNavigationEndpoint",
       NAVIGATION_VIDEO_TYPE,
     ),
+    likeStatus: get_menu_like_status(result),
     ...parse_song_runs(flex1.text.runs, has_label ? 2 : 0),
   };
 }
@@ -219,13 +227,13 @@ export function parse_search_video(
   };
 }
 
-export interface SearchArtist extends MenuPlaylists {
+export type SearchArtist = MenuPlaylists & ShuffleAndRadioIds & {
   type: "artist";
   name: string;
   subscribers: string | null;
   browseId: string;
   thumbnails: Thumbnail[];
-}
+};
 
 export function parse_search_artist(result: any): SearchArtist {
   const flex = get_flex_column_item(result, 0);
@@ -240,6 +248,7 @@ export function parse_search_artist(result: any): SearchArtist {
     browseId: j(result, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAILS),
     ...get_menu_playlists(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -266,13 +275,14 @@ export function parse_search_profile(result: any): SearchProfile {
   };
 }
 
-export interface SearchPlaylist {
+export interface SearchPlaylist extends ShuffleAndRadioIds {
   type: "playlist";
   title: string;
   songs: string | null;
   authors: ArtistRun[];
   browseId: string;
   thumbnails: Thumbnail[];
+  libraryLikeStatus: LikeStatus | null;
 }
 
 export function parse_search_playlist(
@@ -295,6 +305,8 @@ export function parse_search_playlist(
     authors,
     browseId: j(result, NAVIGATION_BROWSE_ID),
     thumbnails: j(result, THUMBNAILS),
+    libraryLikeStatus: get_library_like_status(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -483,26 +495,14 @@ export interface TopResultArtist extends SearchArtist {
 export function parse_top_result_artist(result: any): TopResultArtist {
   const subscribers = jo(result, SUBTITLE2);
 
-  const buttons = j(result, "buttons").map((button: any) =>
-    button.buttonRenderer
-  );
-
-  const shuffleButton = buttons.find((button: any) =>
-    button.icon.iconType === "MUSIC_SHUFFLE"
-  );
-  const radioButton = buttons.find((button: any) =>
-    button.icon.iconType === "MIX"
-  );
-
   return {
     type: "artist",
     name: j(result, TITLE_TEXT),
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
     subscribers,
     thumbnails: j(result, THUMBNAILS),
-    shuffleId: j(shuffleButton, "command.watchPlaylistEndpoint.playlistId"),
-    radioId: j(radioButton, "command.watchPlaylistEndpoint.playlistId"),
     more: parse_top_result_more(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -526,6 +526,7 @@ export function parse_top_result_song(
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     feedbackTokens: get_menu_tokens(result),
     videoType: j(result, TITLE, "navigationEndpoint", NAVIGATION_VIDEO_TYPE),
+    likeStatus: get_menu_like_status(result),
     ...parse_song_runs(result.subtitle.runs, 2),
     more: parse_top_result_more(result),
   };
@@ -547,6 +548,7 @@ export function parse_top_result_album(result: any): TopResultAlbum {
     year: null,
     artists: parse_song_artists_runs(result.subtitle.runs.slice(2)),
     more: parse_top_result_more(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -557,24 +559,17 @@ export interface TopResultPlaylist extends SearchPlaylist {
 }
 
 export function parse_top_result_playlist(result: any): TopResultPlaylist {
-  const buttons = j(result, "buttons").map((button: any) =>
-    button.buttonRenderer
-  );
-
-  const shuffleButton = buttons.find((button: any) =>
-    button.icon.iconType === "MUSIC_SHUFFLE"
-  );
-
   return {
     type: "playlist",
     title: j(result, TITLE_TEXT),
     browseId: j(result, TITLE, NAVIGATION_BROWSE_ID),
-    shuffleId: j(shuffleButton, "command.watchPlaylistEndpoint.playlistId"),
     thumbnails: j(result, THUMBNAILS),
     authors: parse_song_artists_runs(result.subtitle.runs.slice(2)),
     songs: null,
     description: jo(result, SUBTITLE),
     more: parse_top_result_more(result),
+    libraryLikeStatus: get_library_like_status(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
