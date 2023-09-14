@@ -271,6 +271,31 @@ export function get_menu_tokens(item: any) {
 
   return toggle_menu ? parse_song_menu_tokens(toggle_menu) : null;
 }
+
+export function get_menu_like_status(item: any): LikeStatus | null {
+  if (
+    find_object_by_icon_name(
+      j(item, MENU_ITEMS),
+      TOGGLE_MENU,
+      "FAVORITE",
+    )
+  ) {
+    return "INDIFFERENT";
+  }
+
+  if (
+    find_object_by_icon_name(
+      j(item, MENU_ITEMS),
+      TOGGLE_MENU,
+      "UNFAVORITE",
+    )
+  ) {
+    return "LIKE";
+  }
+
+  return null;
+}
+
 export interface ShuffleAndRadioIds {
   shuffleId: string | null;
   radioId: string | null;

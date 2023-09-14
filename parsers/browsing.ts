@@ -34,6 +34,7 @@ import { j, jo } from "../util.ts";
 import {
   ArtistRun,
   get_library_like_status,
+  get_menu_like_status,
   get_menu_tokens,
   get_shuffle_and_radio_ids,
   MenuTokens,
@@ -487,6 +488,7 @@ export interface ParsedSong extends SongRuns {
   playlistId: string | null;
   isExplicit: boolean;
   thumbnails: Thumbnail[];
+  likeStatus: LikeStatus | null;
   feedbackTokens: MenuTokens | null;
 }
 
@@ -499,6 +501,7 @@ export function parse_song(result: any): ParsedSong {
     thumbnails: j(result, THUMBNAIL_RENDERER),
     isExplicit: jo(result, SUBTITLE_BADGE_LABEL) != null,
     feedbackTokens: get_menu_tokens(result),
+    likeStatus: get_menu_like_status(result),
     ...parse_song_runs(result.subtitle.runs),
   };
 }
@@ -557,6 +560,7 @@ export interface ParsedVideo {
   playlistId: string | null;
   thumbnails: Thumbnail[];
   views: string | null;
+  likeStatus: LikeStatus | null;
 }
 
 export function parse_video(result: any): ParsedVideo {
@@ -571,6 +575,7 @@ export function parse_video(result: any): ParsedVideo {
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     views: runs[runs.length - 1].text,
+    likeStatus: get_menu_like_status(result),
   };
 }
 
@@ -608,6 +613,7 @@ export function parse_top_song(result: any): Ranked<ParsedSong> {
       }
       : null,
     feedbackTokens: get_menu_tokens(result),
+    likeStatus: get_menu_like_status(result),
   };
 }
 
@@ -627,6 +633,7 @@ export function parse_top_video(result: any): Ranked<ParsedVideo> {
     views: runs[runs.length - 1].text,
     rank: j(rank, TEXT_RUN_TEXT),
     change: jo(rank, "icon.iconType")?.split("_")[2] || null,
+    likeStatus: get_menu_like_status(result),
   };
 }
 
@@ -681,6 +688,7 @@ export function parse_trending(
     isExplicit: jo(result, BADGE_LABEL) != null,
     views: null,
     feedbackTokens: get_menu_tokens(result),
+    likeStatus: get_menu_like_status(result),
   };
 
   if (album_flex) {
