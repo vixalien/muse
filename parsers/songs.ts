@@ -4,6 +4,7 @@ import {
   MENU_ITEMS,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PAGE_TYPE,
+  NAVIGATION_WATCH_PLAYLIST_ID,
   TOGGLE_MENU,
 } from "../nav.ts";
 import { j, jo } from "../util.ts";
@@ -269,6 +270,33 @@ export function get_menu_tokens(item: any) {
   );
 
   return toggle_menu ? parse_song_menu_tokens(toggle_menu) : null;
+}
+export interface ShuffleAndRadioIds {
+  shuffleId: string | null;
+  radioId: string | null;
+}
+
+export function get_shuffle_and_radio_ids(item: any): ShuffleAndRadioIds {
+  const shuffle = find_object_by_icon_name(
+    j(item, MENU_ITEMS),
+    "menuNavigationItemRenderer",
+    "MUSIC_SHUFFLE",
+  );
+
+  const radio = find_object_by_icon_name(
+    j(item, MENU_ITEMS),
+    "menuNavigationItemRenderer",
+    "MIX",
+  );
+
+  return {
+    shuffleId: shuffle
+      ? jo(shuffle, "menuNavigationItemRenderer", NAVIGATION_WATCH_PLAYLIST_ID)
+      : null,
+    radioId: radio
+      ? jo(radio, "menuNavigationItemRenderer", NAVIGATION_WATCH_PLAYLIST_ID)
+      : null,
+  };
 }
 
 export function parse_menu_library_like_status(item: any): LikeStatus | null {

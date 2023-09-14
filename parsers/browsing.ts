@@ -35,10 +35,12 @@ import {
   ArtistRun,
   get_library_like_status,
   get_menu_tokens,
+  get_shuffle_and_radio_ids,
   MenuTokens,
   parse_song_artists,
   parse_song_artists_runs,
   parse_song_runs,
+  ShuffleAndRadioIds,
   SongArtist,
   SongRuns,
 } from "./songs.ts";
@@ -389,7 +391,7 @@ export function parse_mood_or_genre(result: any[]): ParsedMoodOrGenre {
 
 export type AlbumType = "album" | "single" | "ep";
 
-export interface ParsedAlbum {
+export interface ParsedAlbum extends ShuffleAndRadioIds {
   type: "album";
   title: string;
   year: string | null;
@@ -436,6 +438,7 @@ export function parse_album(result: any): ParsedAlbum {
     album_type: j(result, SUBTITLE),
     artists: runs,
     libraryLikeStatus: get_library_like_status(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -473,6 +476,7 @@ export function parse_single(result: any): ParsedAlbum {
     artists: runs,
     album_type: null,
     libraryLikeStatus: get_library_like_status(result),
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -637,6 +641,7 @@ export function parse_top_artist(result: any): Ranked<RelatedArtist> {
     thumbnails: j(result, THUMBNAILS),
     rank: j(rank, TEXT_RUN_TEXT),
     change: jo(rank, "icon.iconType")?.split("_")[2] || null,
+    ...get_shuffle_and_radio_ids(result),
   };
 }
 
@@ -698,7 +703,7 @@ export function parse_trending(
   }
 }
 
-export interface ParsedPlaylist {
+export interface ParsedPlaylist extends ShuffleAndRadioIds {
   type: "playlist";
   title: string;
   playlistId: string;
@@ -734,6 +739,7 @@ export function parse_playlist(data: any) {
     count: null,
     author: null,
     libraryLikeStatus: get_library_like_status(data),
+    ...get_shuffle_and_radio_ids(data),
   };
 
   const subtitle = data.subtitle;
@@ -754,7 +760,7 @@ export function parse_playlist(data: any) {
   return playlist;
 }
 
-export interface RelatedArtist {
+export interface RelatedArtist extends ShuffleAndRadioIds {
   type: "artist" | "channel";
   name: string;
   browseId: string;
@@ -776,10 +782,11 @@ export function parse_related_artist(data: any): RelatedArtist {
     browseId: j(data, TITLE, NAVIGATION_BROWSE_ID),
     subscribers,
     thumbnails: j(data, THUMBNAIL_RENDERER),
+    ...get_shuffle_and_radio_ids(data),
   };
 }
 
-export interface WatchPlaylist {
+export interface WatchPlaylist extends ShuffleAndRadioIds {
   type: "watch-playlist";
   title: string;
   playlistId: string;
@@ -792,6 +799,7 @@ export function parse_watch_playlist(data: any): WatchPlaylist {
     title: j(data, TITLE_TEXT),
     playlistId: j(data, NAVIGATION_WATCH_PLAYLIST_ID),
     thumbnails: j(data, THUMBNAIL_RENDERER),
+    ...get_shuffle_and_radio_ids(data),
   };
 }
 

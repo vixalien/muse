@@ -1,6 +1,6 @@
 // commonly used navigation paths
 
-import { j } from "./util.ts";
+import { jo } from "./util.ts";
 
 export const THUMBNAIL = "thumbnail.thumbnails";
 export const THUMBNAILS = `thumbnail.musicThumbnailRenderer.${THUMBNAIL}`;
@@ -130,8 +130,13 @@ export function find_object_by_icon_name(
   return objectList && objectList.length > 0
     ? objectList.find((item) => {
       if (!Object.hasOwn(item, key)) return false;
+
       const menu = item[key];
-      const icon = j(menu, "defaultIcon.iconType");
+      const icon = jo(menu, "defaultIcon.iconType") ??
+        jo(menu, "icon.iconType");
+
+      if (!icon) return false;
+
       return [icons].flat().includes(icon);
     })
     : null;
