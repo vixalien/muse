@@ -1,6 +1,5 @@
 import {
   FEEDBACK_TOKEN,
-  find_object_by_key,
   MENU_ITEMS,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PAGE_TYPE,
@@ -268,10 +267,16 @@ export function parse_menu_library_like_status(item: any): LikeStatus | null {
 }
 
 export function get_library_like_status(item: any) {
-  const toggle_menu = find_object_by_key(
-    j(item, MENU_ITEMS),
-    TOGGLE_MENU,
-  );
+  const items = j(item, MENU_ITEMS) as any[];
+
+  const toggle_menu = items && items.length > 0
+    ? items.find((item) => {
+      if (!Object.hasOwn(item, TOGGLE_MENU)) return false;
+      const toggle = item[TOGGLE_MENU];
+      const icon = j(toggle, "defaultIcon.iconType");
+      return icon === "LIBRARY_ADD" || "LIBRARY_SAVED";
+    })
+    : null;
 
   return toggle_menu ? parse_menu_library_like_status(toggle_menu) : null;
 }
