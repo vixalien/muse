@@ -257,19 +257,19 @@ export async function get_playlist(
     }
   }
 
-    if ("continuations" in results) {
-      const continued_data = await get_more_playlist_tracks(
-        playlistId,
-        results,
-        {
-          limit: limit - playlist.tracks.length,
-          signal,
-        },
-      );
+  if ("continuations" in results) {
+    const continued_data = await get_more_playlist_tracks(
+      playlistId,
+      results,
+      {
+        limit: limit - playlist.tracks.length,
+        signal,
+      },
+    );
 
-      playlist.tracks.push(...continued_data.tracks);
-      playlist.continuation = continued_data.continuation;
-    }
+    playlist.tracks.push(...continued_data.tracks);
+    playlist.continuation = continued_data.continuation;
+  }
 
   playlist.duration_seconds = sum_total_duration(playlist);
 
@@ -326,9 +326,13 @@ export interface EditPlaylistOptions extends AbortOptions {
   add_videos?: string[];
   remove_videos?: { videoId: string; setVideoId?: string }[];
   add_source_playlists?: string[];
+  dedupe_check?: boolean;
 }
 
+export type EditPlaylistStatus = "STATUS_SUCCEEDED" | "STATUS_FAILED";
+
 export interface EditPlaylistResult {
+  status: EditPlaylistStatus;
   added: {
     videoId: string;
     setVideoId: string;
@@ -347,6 +351,7 @@ export async function edit_playlist(
     add_videos,
     remove_videos,
     add_source_playlists,
+    dedupe_check,
     signal,
   } = options;
   await check_auth();
@@ -393,6 +398,7 @@ export async function edit_playlist(
       actions.push({
         action: "ACTION_ADD_VIDEO",
         addedVideoId: video_id,
+        dedupeOption: dedupe_check ? "DEDUPE_OPTION_CHECK" : null,
       });
     });
   }
@@ -430,6 +436,7 @@ export async function edit_playlist(
 
   const result: EditPlaylistResult = {
     added: [],
+    status: json.status,
   };
 
   if ("playlistEditResults" in json) {
@@ -451,7 +458,7 @@ export async function edit_playlist(
 export async function delete_playlist(
   playlistId: string,
   options: AbortOptions = {},
-): Promise<any> {
+): Promise<EditPlaylistStatus> {
   await check_auth();
 
   const data = {
@@ -463,14 +470,18 @@ export async function delete_playlist(
     signal: options.signal,
   });
 
-  return "status" in json ? json.status : json;
+  return json.status;
+}
+
+export interface AddPlaylistOptions extends AbortOptions {
+  dedupe_check?: EditPlaylistOptions["dedupe_check"];
 }
 
 export function add_playlist_sources(
   playlistId: string,
   source_playlists: string[],
-  options: AbortOptions = {},
-): Promise<any> {
+  options: AddPlaylistOptions = {},
+): Promise<EditPlaylistResult> {
   return edit_playlist(playlistId, {
     add_source_playlists: source_playlists,
     ...options,
@@ -480,8 +491,8 @@ export function add_playlist_sources(
 export function add_playlist_items(
   playlistId: string,
   video_ids: string[],
-  options: AbortOptions = {},
-): Promise<any> {
+  options: AddPlaylistOptions = {},
+): Promise<EditPlaylistResult> {
   return edit_playlist(playlistId, { add_videos: video_ids, ...options });
 }
 
@@ -489,7 +500,7 @@ export function remove_playlist_items(
   playlistId: string,
   video_ids: { videoId: string; setVideoId: string }[],
   options: AbortOptions = {},
-): Promise<any> {
+): Promise<EditPlaylistResult> {
   return edit_playlist(playlistId, {
     remove_videos: video_ids,
     ...options,
