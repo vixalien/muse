@@ -326,7 +326,7 @@ export interface EditPlaylistOptions extends AbortOptions {
   add_videos?: string[];
   remove_videos?: { videoId: string; setVideoId?: string }[];
   add_source_playlists?: string[];
-  dedupe?: "check" | "drop_duplicate";
+  dedupe?: "check" | "drop_duplicate" | "skip";
 }
 
 export type EditPlaylistStatus = "STATUS_SUCCEEDED" | "STATUS_FAILED";
@@ -402,6 +402,8 @@ export async function edit_playlist(
           ? "DEDUPE_OPTION_CHECK"
           : dedupe === "drop_duplicate"
           ? "DEDUPE_OPTION_DROP_DUPLICATE"
+          : dedupe === "skip"
+          ? "DEDUPE_OPTION_SKIP"
           : null,
       });
     });
