@@ -441,8 +441,6 @@ export async function edit_playlist(
 
   data.actions = actions;
 
-  console.log("data", data);
-
   const json = await request_json("browse/edit_playlist", { data, signal });
 
   const result: EditPlaylistResult = {
