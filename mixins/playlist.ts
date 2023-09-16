@@ -198,7 +198,7 @@ export async function get_playlist(
     trackCount: trackCount,
     duration,
     duration_seconds: 0,
-    tracks: parse_playlist_items(results.contents),
+    tracks: parse_playlist_items(results.contents ?? []),
     continuation: null,
     suggestions: [],
     suggestions_continuation: null,
@@ -214,7 +214,9 @@ export async function get_playlist(
   if ("continuations" in section_list) {
     let params = get_continuation_params(section_list);
 
-    if (own_playlist && (suggestions_limit > 0 || related)) {
+    if (
+      params.continuation && own_playlist && (suggestions_limit > 0 || related)
+    ) {
       const suggested = await request(params);
       const continuation = j(suggested, SECTION_LIST_CONTINUATION);
 
@@ -244,7 +246,7 @@ export async function get_playlist(
       playlist.suggestions_continuation = continued_suggestions.continuation;
     }
 
-    if (related) {
+    if (params.continuation && related) {
       const response = await request(params);
       const continuation = jo(response, SECTION_LIST_CONTINUATION);
 
