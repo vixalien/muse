@@ -362,6 +362,14 @@ export async function edit_playlist(
 
   const actions: ({ action: string } & Record<string, any>)[] = [];
 
+  const dedupeOption = dedupe === "check"
+    ? "DEDUPE_OPTION_CHECK"
+    : dedupe === "drop_duplicate"
+    ? "DEDUPE_OPTION_DROP_DUPLICATE"
+    : dedupe === "skip"
+    ? "DEDUPE_OPTION_SKIP"
+    : null;
+
   if (title) {
     actions.push({
       action: "ACTION_SET_PLAYLIST_NAME",
@@ -398,13 +406,7 @@ export async function edit_playlist(
       actions.push({
         action: "ACTION_ADD_VIDEO",
         addedVideoId: video_id,
-        dedupeOption: dedupe === "check"
-          ? "DEDUPE_OPTION_CHECK"
-          : dedupe === "drop_duplicate"
-          ? "DEDUPE_OPTION_DROP_DUPLICATE"
-          : dedupe === "skip"
-          ? "DEDUPE_OPTION_SKIP"
-          : null,
+        dedupeOption,
       });
     });
   }
@@ -432,11 +434,14 @@ export async function edit_playlist(
       actions.push({
         action: "ACTION_ADD_PLAYLIST",
         addedFullListId: playlist_id,
+        dedupeOption,
       });
     });
   }
 
   data.actions = actions;
+
+  console.log("data", data);
 
   const json = await request_json("browse/edit_playlist", { data, signal });
 
