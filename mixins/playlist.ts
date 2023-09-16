@@ -326,7 +326,7 @@ export interface EditPlaylistOptions extends AbortOptions {
   add_videos?: string[];
   remove_videos?: { videoId: string; setVideoId?: string }[];
   add_source_playlists?: string[];
-  dedupe_check?: boolean;
+  dedupe?: "check" | "drop_duplicate";
 }
 
 export type EditPlaylistStatus = "STATUS_SUCCEEDED" | "STATUS_FAILED";
@@ -351,7 +351,7 @@ export async function edit_playlist(
     add_videos,
     remove_videos,
     add_source_playlists,
-    dedupe_check,
+    dedupe,
     signal,
   } = options;
   await check_auth();
@@ -398,7 +398,11 @@ export async function edit_playlist(
       actions.push({
         action: "ACTION_ADD_VIDEO",
         addedVideoId: video_id,
-        dedupeOption: dedupe_check ? "DEDUPE_OPTION_CHECK" : null,
+        dedupeOption: dedupe === "check"
+          ? "DEDUPE_OPTION_CHECK"
+          : dedupe === "drop_duplicate"
+          ? "DEDUPE_OPTION_DROP_DUPLICATE"
+          : null,
       });
     });
   }
@@ -474,7 +478,7 @@ export async function delete_playlist(
 }
 
 export interface AddPlaylistOptions extends AbortOptions {
-  dedupe_check?: EditPlaylistOptions["dedupe_check"];
+  dedupe?: EditPlaylistOptions["dedupe"];
 }
 
 export function add_playlist_sources(
