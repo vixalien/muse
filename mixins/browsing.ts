@@ -17,6 +17,7 @@ import {
   SECTION_LIST,
   SECTION_LIST_ITEM,
   SINGLE_COLUMN_TAB,
+  TEXT_RUN_TEXT,
   THUMBNAIL,
   THUMBNAILS,
   TITLE,
@@ -548,11 +549,22 @@ export async function get_artist_albums(
     signal: options.signal,
   });
 
-  const grid = j(json, SINGLE_COLUMN_TAB, SECTION_LIST_ITEM, GRID);
+  const columnTab = j(json, SINGLE_COLUMN_TAB);
+
+  const grid = j(columnTab, SECTION_LIST_ITEM, GRID);
+
+  const chips = j(
+    columnTab,
+    "sectionListRenderer.header.musicSideAlignedItemRenderer.startItems.0.chipCloudRenderer.chips",
+  );
+
+  const selected_chip = chips
+    .filter((chip: any) => chip.chipCloudChipRenderer.isSelected == true)
+    .map((chip: any) => j(chip.chipCloudChipRenderer, TEXT_RUN_TEXT))[0];
 
   return {
     artist: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
-    title: j(grid, "header.gridHeaderRenderer", TITLE_TEXT),
+    title: selected_chip,
     results: parse_content_list(grid.items, parse_album),
   };
 }

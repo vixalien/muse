@@ -1,4 +1,14 @@
-import { get_artist, get_home, get_option, search, setup } from "./mod.ts";
+import {
+  add_playlist_items,
+  delete_playlist,
+  edit_playlist,
+  get_artist,
+  get_artist_albums,
+  get_home,
+  get_option,
+  search,
+  setup,
+} from "./mod.ts";
 import { FetchClient, RequestInit } from "./request.ts";
 import { DenoFileStore } from "./store.ts";
 import { debug } from "./util.ts";
@@ -116,7 +126,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-search("global radio")
+get_artist_albums("MPADUClYV6hHlupm_S_ObS1W-DYw", "ggMIegYIARoCAQI%3D")
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
