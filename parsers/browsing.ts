@@ -595,7 +595,8 @@ export function parse_top_song(result: any): Ranked<ParsedSong> {
   return {
     type: "song",
     title: j(title_run, "text"),
-    videoId: j(title_run, NAVIGATION_VIDEO_ID),
+    videoId: jo(title_run, NAVIGATION_VIDEO_ID) ??
+      j(title_run, NAVIGATION_BROWSE_ID),
     artists: parse_song_artists(result, 1) ?? [],
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
@@ -606,10 +607,13 @@ export function parse_top_song(result: any): Ranked<ParsedSong> {
     duration: null,
     duration_seconds: null,
     year: null,
-    album: album_run
+    album: album_run &&
+        album_run.displayPriority ==
+          "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
       ? {
         name: j(album_run, "text"),
-        id: j(album_run, NAVIGATION_BROWSE_ID),
+        id: jo(album_run, NAVIGATION_VIDEO_ID) ??
+          j(album_run, NAVIGATION_BROWSE_ID),
       }
       : null,
     feedbackTokens: get_menu_tokens(result),
@@ -626,7 +630,8 @@ export function parse_top_video(result: any): Ranked<ParsedVideo> {
   return {
     type: "video",
     title: j(result, TITLE_TEXT),
-    videoId: j(result, NAVIGATION_VIDEO_ID),
+    videoId: jo(result, NAVIGATION_VIDEO_ID) ??
+      j(result, NAVIGATION_BROWSE_ID),
     artists: parse_song_artists_runs(runs.slice(0, artists_len)),
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
@@ -669,15 +674,16 @@ export function parse_trending(
 
   const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
-  const album_flex = get_flex_column_item(
-    result,
-    result.flexColumns.length - 1,
+  const album_run = jo(
+    get_flex_column_item(result, result.flexColumns.length - 1) ?? {},
+    TEXT_RUN,
   );
 
   const data: Omit<Ranked<ParsedSong>, "type" | "album"> = {
     title: j(title_run, "text"),
-    videoId: j(title_run, NAVIGATION_VIDEO_ID),
-    artists: parse_song_artists(result, 1, album_flex ? undefined : -1) ?? [],
+    videoId: jo(title_run, NAVIGATION_VIDEO_ID) ??
+      j(title_run, NAVIGATION_BROWSE_ID),
+    artists: parse_song_artists(result, 1, album_run ? undefined : -1) ?? [],
     playlistId: jo(title_run, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAILS),
     rank: j(rank, TEXT_RUN_TEXT),
@@ -691,14 +697,17 @@ export function parse_trending(
     likeStatus: get_menu_like_status(result),
   };
 
-  if (album_flex) {
+  if (album_run) {
     return {
       type: "song",
       ...data,
-      album: album_flex
+      album: album_run &&
+          album_run.displayPriority ==
+            "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
         ? {
-          name: j(album_flex, TEXT_RUN_TEXT),
-          id: j(album_flex, TEXT_RUN, NAVIGATION_BROWSE_ID),
+          name: j(album_run, "text"),
+          id: jo(album_run, NAVIGATION_VIDEO_ID) ??
+            j(album_run, NAVIGATION_BROWSE_ID),
         }
         : null,
     };
