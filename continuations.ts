@@ -5,7 +5,7 @@ export async function get_continuations(
   continuation_type: string,
   limit: number | null,
   request: (additional_params: Record<string, string>) => Promise<any>,
-  parse: (data: any) => any[],
+  parse: (data: any, continuation?: any) => any[],
   _ctoken_path = "",
   reloadable = false,
 ) {
@@ -40,6 +40,28 @@ export async function get_continuations(
   }
 
   return { items, continuation };
+}
+
+export async function get_sort_continuations<Return extends any>(
+  results: any,
+  continuation_type: string,
+  request: (additional_params: Record<string, string>) => Promise<any>,
+  parse: (data: any, continuation?: any) => Return,
+) {
+  const get_params = () => get_reloadable_continuation_params(results);
+
+  let params = get_params();
+
+  const response = await request(params);
+
+  if ("continuationContents" in response) {
+    results = response.continuationContents[continuation_type];
+    params = get_params();
+  } else {
+    return null;
+  }
+
+  return get_continuation_contents(results, parse);
 }
 
 export async function get_validated_continuations(
@@ -119,15 +141,15 @@ function get_continuation_object(ctoken: string) {
 
 export function get_continuation_contents<T extends any = any>(
   continuation: any,
-  parse: (data: any) => T[],
+  parse: (data: any, continuation?: any) => T,
 ) {
   for (const term of ["contents", "items"]) {
     if (term in continuation) {
-      return parse(continuation[term]);
+      return parse(continuation[term], continuation);
     }
   }
 
-  return [] as T[];
+  return [] as T;
 }
 
 export async function resend_request_until_valid(

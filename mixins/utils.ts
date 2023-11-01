@@ -1,6 +1,8 @@
 import { ERROR_CODE, MuseError } from "../errors.ts";
+import { TITLE_TEXT } from "../nav.ts";
 import { LikeStatus } from "../parsers/songs.ts";
 import { get_option } from "../setup.ts";
+import { j } from "../util.ts";
 export { get_option };
 
 export function prepare_like_endpoint(status: LikeStatus) {
@@ -127,4 +129,42 @@ export interface PaginationOptions extends AbortOptions {
 
 export interface PaginationAndOrderOptions extends PaginationOptions {
   order?: Order;
+}
+
+export interface SortOptions {
+  selected: string;
+  options: { title: string; continuation: string }[];
+}
+
+export function get_sort_options(chips: any): SortOptions {
+  const sort = j(
+    chips.find((chip: any) => "musicSortFilterButtonRenderer" in chip),
+    "musicSortFilterButtonRenderer",
+  );
+
+  const selected = j(sort, TITLE_TEXT);
+  const options = j(sort, "menu.musicMultiSelectMenuRenderer.options")
+    .map((option: any) => {
+      const renderer = j(option, "musicMultiSelectMenuItemRenderer");
+
+      return {
+        title: j(renderer, TITLE_TEXT),
+        continuation: j(
+          renderer,
+          "selectedCommand.commandExecutorCommand.commands",
+        )
+          .filter((option: any) =>
+            option.browseSectionListReloadEndpoint != null
+          )
+          .map((option: any) =>
+            option.browseSectionListReloadEndpoint.continuation
+              .reloadContinuationData.continuation
+          )[0],
+      };
+    });
+
+  return {
+    selected,
+    options,
+  };
 }

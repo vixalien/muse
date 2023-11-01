@@ -1,6 +1,6 @@
 import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 
-import { get_continuations } from "../continuations.ts";
+import { get_continuations, get_sort_continuations } from "../continuations.ts";
 import {
   CAROUSEL,
   CONTENT,
@@ -8,6 +8,7 @@ import {
   DESCRIPTION_SHELF,
   find_object_by_key,
   GRID,
+  GRID_ITEMS,
   MRLIR,
   MRLITFC,
   MUSIC_SHELF,
@@ -48,7 +49,12 @@ import {
 import { ArtistRun, Format, parse_format } from "../parsers/songs.ts";
 import { j, jo, sum_total_duration } from "../util.ts";
 import { Thumbnail } from "./playlist.ts";
-import { AbortOptions, PaginationOptions } from "./utils.ts";
+import {
+  AbortOptions,
+  get_sort_options,
+  PaginationOptions,
+  SortOptions,
+} from "./utils.ts";
 import { request_json } from "./_request.ts";
 
 export { is_ranked } from "../parsers/browsing.ts";
@@ -531,21 +537,69 @@ export async function get_lyrics(
 }
 
 export interface ArtistAlbums {
-  artist: string;
+  artist: string | null;
   title: string;
   results: ParsedAlbum[];
+  sort: SortOptions;
 }
 
 export async function get_artist_albums(
   channelId: string,
   params: string,
-  options: AbortOptions = {},
+  options: Omit<PaginationOptions, "limit"> = {},
 ): Promise<ArtistAlbums> {
+  const data = {
+    browseId: channelId,
+    params,
+  };
+
+  function get_chips(renderer: any) {
+    const header = j(renderer, "header.musicSideAlignedItemRenderer");
+
+    const chips = j(header, "startItems.0.chipCloudRenderer.chips");
+
+    const selected_chip = j(
+      chips
+        .find((chip: any) => chip.chipCloudChipRenderer.isSelected == true),
+      "chipCloudChipRenderer",
+      TEXT_RUN_TEXT,
+    );
+
+    return {
+      selected_chip: selected_chip as string,
+      sort_options: get_sort_options(header.endItems),
+    };
+  }
+
+  if (options.continuation) {
+    return get_sort_continuations(
+      options.continuation,
+      "sectionListContinuation",
+      (params) => {
+        return request_json("browse", {
+          data,
+          params,
+          signal: options.signal,
+        });
+      },
+      (contents, continuation) => {
+        const chips = get_chips(continuation);
+
+        return {
+          artist: null,
+          title: chips.selected_chip,
+          results: parse_content_list(
+            j(contents[0], GRID_ITEMS),
+            parse_album,
+          ),
+          sort: chips.sort_options,
+        };
+      },
+    )! as Promise<ArtistAlbums>;
+  }
+
   const json = await request_json("browse", {
-    data: {
-      browseId: channelId,
-      params,
-    },
+    data,
     signal: options.signal,
   });
 
@@ -553,19 +607,13 @@ export async function get_artist_albums(
 
   const grid = j(columnTab, SECTION_LIST_ITEM, GRID);
 
-  const chips = j(
-    columnTab,
-    "sectionListRenderer.header.musicSideAlignedItemRenderer.startItems.0.chipCloudRenderer.chips",
-  );
-
-  const selected_chip = chips
-    .filter((chip: any) => chip.chipCloudChipRenderer.isSelected == true)
-    .map((chip: any) => j(chip.chipCloudChipRenderer, TEXT_RUN_TEXT))[0];
+  const chips = get_chips(j(columnTab, "sectionListRenderer"));
 
   return {
     artist: j(json, "header.musicHeaderRenderer", TITLE_TEXT),
-    title: selected_chip,
+    title: chips.selected_chip,
     results: parse_content_list(grid.items, parse_album),
+    sort: chips.sort_options,
   };
 }
 
