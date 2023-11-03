@@ -344,14 +344,14 @@ export function parse_search_content(
   result: any,
   upload = false,
   passed_entity?: string,
-): SearchContent {
+): SearchContent | null {
   const flex1 = get_flex_column_item(result, 1);
 
   // uploads artist won't have the second flex column
   const entity = passed_entity ||
     (flex1 ? __(j(flex1, TEXT_RUN_TEXT)) : "artist");
 
-  let parser: (e: any, has_label?: boolean) => SearchContent;
+  let parser: (e: any, has_label?: boolean) => SearchContent | null;
 
   switch (entity) {
     case "station":
@@ -381,7 +381,11 @@ export function parse_search_content(
         try {
           return parse_search_album(e);
         } catch {
-          return parse_search_song(e);
+          try {
+            return parse_search_song(e);
+          } catch {
+            return null;
+          }
         }
       };
   }
@@ -396,7 +400,7 @@ export function parse_search_results(
 ) {
   const search_results: SearchContent[] = [];
 
-  let parser: (e: any) => SearchContent;
+  let parser: (e: any) => SearchContent | null;
 
   if (scope == null || scope == "library") {
     switch (filter) {
@@ -430,10 +434,10 @@ export function parse_search_results(
   for (const result of results) {
     const data = result[MRLIR];
 
-    search_results.push(parser(data));
+    search_results.push(parser(data)!);
   }
 
-  return search_results;
+  return search_results.filter((e) => !!e);
 }
 
 export function parse_top_result_more(result: any) {
@@ -455,25 +459,25 @@ export function parse_top_result_more(result: any) {
       const entity = flex1 ? __(jo(flex1, TEXT_RUN_TEXT)) as string : null;
 
       if (entity) {
-        more.push(parse_search_content(content, false));
+        more.push(parse_search_content(content, false)!);
 
         last_entity = entity;
       } else {
         try {
           more.push(
-            parse_search_content(content, false, last_entity ?? undefined),
+            parse_search_content(content, false, last_entity ?? undefined)!,
           );
         } catch {
           // try as album
           try {
             more.push(
-              parse_search_content(content, false, "album"),
+              parse_search_content(content, false, "album")!,
             );
           } catch {
             // try as song
             try {
               more.push(
-                parse_search_content(content, false, "song"),
+                parse_search_content(content, false, "song")!,
               );
             } catch {
               // ignore
@@ -485,7 +489,7 @@ export function parse_top_result_more(result: any) {
     }
   }
 
-  return more;
+  return more.filter((e) => !!e);
 }
 
 export interface TopResultArtist extends SearchArtist {
