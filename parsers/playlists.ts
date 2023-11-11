@@ -31,7 +31,8 @@ import {
 export type VideoType =
   | "MUSIC_VIDEO_TYPE_OMV" /** Official Music Videos */
   | "MUSIC_VIDEO_TYPE_UGC" /** User Generated Content */
-  | "MUSIC_VIDEO_TYPE_ATV" /** Artist Videos */;
+  | "MUSIC_VIDEO_TYPE_ATV" /** Artist Videos */
+  | "MUSIC_VIDEO_TYPE_PRIVATELY_OWNED_TRACK" /** Song uploaded by user */;
 
 export interface PlaylistItem {
   videoId: string;
