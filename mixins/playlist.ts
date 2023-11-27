@@ -225,7 +225,7 @@ export async function get_playlist(
 
       playlist.suggestions = get_continuation_contents(
         suggestions_shelf,
-        parse_playlist_items,
+        (results: any) => parse_playlist_items(results),
       );
 
       playlist.suggestions_continuation = j(
