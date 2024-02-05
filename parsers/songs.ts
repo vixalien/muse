@@ -303,13 +303,13 @@ export interface ShuffleAndRadioIds {
 
 export function get_shuffle_and_radio_ids(item: any): ShuffleAndRadioIds {
   const shuffle = find_object_by_icon_name(
-    j(item, MENU_ITEMS),
+    jo(item, MENU_ITEMS),
     "menuNavigationItemRenderer",
     "MUSIC_SHUFFLE",
   );
 
   const radio = find_object_by_icon_name(
-    j(item, MENU_ITEMS),
+    jo(item, MENU_ITEMS),
     "menuNavigationItemRenderer",
     "MIX",
   );
@@ -335,7 +335,7 @@ export function parse_menu_library_like_status(item: any): LikeStatus | null {
 
 export function get_library_like_status(item: any) {
   const toggle_menu = find_object_by_icon_name(
-    j(item, MENU_ITEMS),
+    jo(item, MENU_ITEMS),
     TOGGLE_MENU,
     [
       "LIBRARY_ADD",
