@@ -54,6 +54,7 @@ import {
 
 export interface Mood {
   name: string;
+  selected: boolean;
   params: string;
 }
 
@@ -70,6 +71,7 @@ export function parse_moods(results: any[]) {
 
     moods.push({
       name: j(renderer, TEXT_RUN_TEXT),
+      selected: j(renderer, "isSelected"),
       params: j(renderer, "navigationEndpoint.browseEndpoint.params"),
     });
   });

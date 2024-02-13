@@ -26,7 +26,7 @@ export const jo = (
 export const j = (json: unknown, path: string, ...others: string[]) => {
   const result = jo(json, path, ...others);
 
-  if (!result) {
+  if (result == null) {
     throw new MuseError(
       ERROR_CODE.PARSING_INVALID_JSON,
       `JSONPath expression "${[path, ...others]}" returned nothing`,
