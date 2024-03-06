@@ -94,7 +94,7 @@ export async function get_playlist_suggestions(
     "musicShelfContinuation",
     limit,
     (params: any) => request_json(endpoint, { data, params, signal }),
-    parse_playlist_items,
+    data => parse_playlist_items(data),
     undefined,
     true,
   );
