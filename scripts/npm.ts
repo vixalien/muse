@@ -23,7 +23,16 @@ async function get_latest_version() {
 }
 
 await build({
-  entryPoints: ["./mod.ts", "./auth.ts", "./request.ts", "./store.ts"],
+  entryPoints: [
+    "./mod.ts",
+    "./auth.ts",
+    "./request.ts",
+    "./store.ts",
+    {
+      name: "./locales/locales",
+      path: "./locales/locales.json",
+    },
+  ],
   outDir: "./npm",
   shims: {
     // see JS docs for overview and more options
