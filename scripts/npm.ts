@@ -4,16 +4,18 @@ import { build, emptyDir } from "https://deno.land/x/dnt@0.33.1/mod.ts";
 await emptyDir("./npm");
 
 async function get_latest_version() {
-  const p = Deno.run({
-    cmd: ["git", "describe", "--tags", "--abbrev=0"],
-    stdout: "piped",
+  const p = new Deno.Command("git", {
+    args: ["describe", "--tags", "--abbrev=0"],
   });
 
   const decoder = new TextDecoder("utf-8");
 
   const latest = await p
     .output()
-    .then((result) => decoder.decode(result))
+    .then((result) => {
+      if (result.code !== 0) throw new Error("Couldn't get latest tag");
+      return decoder.decode(result.stdout);
+    })
     // remove \n from end of string
     .then((result) => result.slice(0, -1));
 
