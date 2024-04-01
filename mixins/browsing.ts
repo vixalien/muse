@@ -65,6 +65,7 @@ export type {
   FlatSong,
   MixedContent,
   MixedItem,
+  Mood,
   ParsedAlbum,
   ParsedMoodOrGenre,
   ParsedPlaylist,
