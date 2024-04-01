@@ -830,7 +830,7 @@ type Translatable = keyof typeof STRINGS[keyof typeof STRINGS];
 export function _(id: Translatable) {
   const result = STRINGS[get_option("language") as keyof typeof STRINGS];
 
-  return result[id] ?? id;
+  return result?.[id] ?? id;
 }
 
 export function __(value: string) {
@@ -839,9 +839,11 @@ export function __(value: string) {
 
   const result = STRINGS[get_option("language") as keyof typeof STRINGS];
 
-  for (const key in result) {
-    if (result[key as Translatable] === value) {
-      return key as Translatable;
+  if (result) {
+    for (const key in result) {
+      if (result[key as Translatable] === value) {
+        return key as Translatable;
+      }
     }
   }
 
