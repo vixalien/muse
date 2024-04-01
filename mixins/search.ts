@@ -46,6 +46,7 @@ export type {
   TopResultArtist,
   TopResultSong,
   TopResultVideo,
+  TopResultPlaylist,
 } from "../parsers/search.ts";
 
 export { filters, scopes } from "../parsers/search.ts";
