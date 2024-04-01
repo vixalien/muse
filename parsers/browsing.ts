@@ -31,6 +31,7 @@ import {
 } from "../nav.ts";
 import { get_option } from "../setup.ts";
 import { j, jo } from "../util.ts";
+import { get_buttons_like_status } from "./songs.ts";
 import {
   ArtistRun,
   get_library_like_status,
@@ -520,6 +521,7 @@ export interface FlatSong {
     id: string;
   } | null;
   views: string | null;
+  likeStatus: LikeStatus | null;
 }
 
 export function parse_song_flat(data: any) {
@@ -537,6 +539,7 @@ export function parse_song_flat(data: any) {
     isExplicit: jo(data, BADGE_LABEL) != null,
     album: null,
     views: null,
+    likeStatus: get_buttons_like_status(data),
   };
 
   if (

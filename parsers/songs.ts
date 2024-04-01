@@ -7,6 +7,7 @@ import {
   NAVIGATION_WATCH_PLAYLIST_ID,
   TOGGLE_MENU,
 } from "../nav.ts";
+import { MENU_LIKE_STATUS } from "../nav.ts";
 import { j, jo } from "../util.ts";
 import { _ } from "./browsing.ts";
 import {
@@ -294,6 +295,10 @@ export function get_menu_like_status(item: any): LikeStatus | null {
   }
 
   return null;
+}
+
+export function get_buttons_like_status(item: any): LikeStatus | null {
+  return jo(item, MENU_LIKE_STATUS);
 }
 
 export interface ShuffleAndRadioIds {
