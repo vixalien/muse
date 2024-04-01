@@ -2,8 +2,8 @@ export * from "./store.ts";
 export * from "./setup.ts";
 export * from "./errors.ts";
 
-export type * from "./request.ts";
-export type * from "./auth.ts";
+export * from "./request.ts";
+export * from "./auth.ts";
 
 export * from "./mixins/browsing.ts";
 export * from "./mixins/explore.ts";
