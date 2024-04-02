@@ -335,6 +335,7 @@ export function parse_explore_contents(results: any[]) {
       "musicNavigationButtonRenderer",
     ],
     trending: [_("trending"), parse_trending, MRLIR],
+    videos: [_("new videos"), parse_top_video],
   } satisfies CategoryMap;
 
   return parse_categories(results, categories_data);
@@ -630,7 +631,7 @@ export function parse_top_video(result: any): Ranked<ParsedVideo> {
   const runs = result.subtitle.runs;
   const artists_len = get_dot_separator_index(runs);
 
-  const rank = j(result, "customIndexColumn.musicCustomIndexColumnRenderer");
+  const rank = jo(result, "customIndexColumn.musicCustomIndexColumnRenderer");
 
   return {
     type: "video",
@@ -641,8 +642,8 @@ export function parse_top_video(result: any): Ranked<ParsedVideo> {
     playlistId: jo(result, NAVIGATION_PLAYLIST_ID),
     thumbnails: j(result, THUMBNAIL_RENDERER),
     views: runs[runs.length - 1].text,
-    rank: j(rank, TEXT_RUN_TEXT),
-    change: jo(rank, "icon.iconType")?.split("_")[2] || null,
+    rank: rank ? jo(rank, TEXT_RUN_TEXT) : null,
+    change: (rank && jo(rank, "icon.iconType")?.split("_")[2]) ?? null,
     likeStatus: get_menu_like_status(result),
   };
 }
