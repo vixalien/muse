@@ -1,152 +1,22 @@
-import LOCALES from "./locales.json" assert { type: "json" };
+// This module gets all translated strings for all languages
+import LOCALES from "./locales.json" with { type: "json" };
 
 import { request_json } from "../mixins/_request.ts";
-import { set_option, setup } from "../mod.ts";
-import {
-  CAROUSEL,
-  CAROUSEL_CONTENTS,
-  CAROUSEL_TITLE,
-  MRLIR,
-  MTRIR,
-  MUSIC_SHELF,
-  SECTION_LIST,
-  SINGLE_COLUMN_TAB,
-  TAB_CONTENT,
-  TEXT_RUN_TEXT,
-  THUMBNAIL_RENDERER,
-  THUMBNAILS,
-  TITLE_TEXT,
-} from "../nav.ts";
-import { j, jo } from "../util.ts";
+import { set_option } from "../mod.ts";
+import { setup } from "../setup.ts";
 import { DenoFileStore } from "../store.ts";
+import { j, jo, jom } from "../util.ts";
+import { CacheFetch } from "../util/cache-fetch.ts";
 
 setup({
+  // peoplle in the US get to see more stuff like Top Artists in Charts
   location: "US",
   // you must be logged in
   store: new DenoFileStore("store/muse-store.json"),
+  client: new CacheFetch(),
 });
 
-function get_thumbnail_url(thumbnails: any[]) {
-  return thumbnails.sort((a, b) => a.width - b.width)[0].url;
-}
-
-const filter_fn = (item: any, index: number, array: any[]) => {
-  // some languages have same plural as singular
-  // (e.g korean, so "artist" and "artists" may look the same)
-  return index === array.findIndex((i) =>
-    i.title === item.title &&
-    item.id.startsWith("title") + i.id.startsWith("title") !== 1
-  );
-};
-
-export async function get_search_strings(data: Record<string, any> = {}) {
-  const response = await request_json("search", {
-    // this is so that the first result is always a radio
-    data: { query: "1980s radio", params: "QgIIAQ%3D%3D", ...data },
-  });
-
-  return j(
-    response,
-    "contents.tabbedSearchResultsRenderer",
-    TAB_CONTENT,
-    SECTION_LIST,
-  ).map((item: any) => {
-    const shelf = jo(item, "musicShelfRenderer") ||
-      jo(item, "musicCardShelfRenderer");
-
-    if (!shelf) return;
-
-    const first_content = jo(shelf, "contents", "[0]");
-
-    // may happen in case of "top result"
-    if (!first_content) return;
-
-    const first_data = jo(first_content, MRLIR) ?? jo(first_content, MTRIR) ??
-      jo(first_content, "musicNavigationButtonRenderer");
-
-    if (!first_data) {
-      return null;
-    }
-
-    return [{
-      title: jo(
-        first_data,
-        "flexColumns.1.musicResponsiveListItemFlexColumnRenderer",
-        TEXT_RUN_TEXT,
-      ),
-      id: jo(shelf, "bottomEndpoint.searchEndpoint.params"),
-    }, {
-      title: jo(item, "musicShelfRenderer", TITLE_TEXT) ||
-        jo(item, "musicCardShelfRenderer", TITLE_TEXT),
-      id: "title" + jo(shelf, "bottomEndpoint.searchEndpoint.params"),
-    }];
-  })
-    .flat()
-    .filter(Boolean)
-    .filter((a: any) => {
-      return a.title && a.id;
-    })
-    .sort((a: any, b: any) => a.id.localeCompare(b.id))
-    .filter((item: any, index: number, array: any[]) => {
-      // some languages have same plural as singular
-      // (e.g korean, so "artist" and "artists" may look the same)
-      const found_index = array.findIndex((i) =>
-        i.title === item.title &&
-        item.id.startsWith("title") + i.id.startsWith("title") !== 1
-      );
-      return found_index === index;
-    })
-    .filter(filter_fn);
-}
-
-export async function get_content_strings(
-  browseId: string,
-  data: Record<string, any> = {},
-) {
-  const response = await request_json("browse", {
-    data: { browseId, ...data },
-  });
-
-  const extractor = (data: any) => {
-    const title = jo(data, CAROUSEL, CAROUSEL_TITLE, "text") ??
-      jo(data, MUSIC_SHELF, TITLE_TEXT);
-
-    if (!title) return null;
-
-    const first_content = jo(data, CAROUSEL_CONTENTS, "[0]") ??
-      jo(data, MUSIC_SHELF, "contents.0");
-    const first_data = jo(first_content, MRLIR) ?? jo(first_content, MTRIR) ??
-      jo(first_content, "musicNavigationButtonRenderer");
-
-    if (!first_data) {
-      console.log("got data without first data", jo(data, CAROUSEL_CONTENTS));
-      return;
-    }
-
-    let id;
-
-    const first_thumbnails = jo(first_data, THUMBNAIL_RENDERER) ??
-      jo(first_data, THUMBNAILS);
-
-    const color = jo(first_data, "solid.leftStripeColor");
-
-    if (first_thumbnails) {
-      id = get_thumbnail_url(first_thumbnails);
-    } else if (color) {
-      id = color;
-    } else {
-      return;
-    }
-
-    return { title, id };
-  };
-
-  const items = j(response, SINGLE_COLUMN_TAB, SECTION_LIST);
-
-  return items.map(extractor).filter(Boolean);
-}
-
-const base_map = new Map([
+const english_strings = new Map([
   // artist
   ["albums", "Albums"],
   ["singles", "Singles"],
@@ -160,18 +30,19 @@ const base_map = new Map([
   ["top songs", "Top songs"],
   ["moods", "Moods & genres"],
   ["trending", "Trending"],
+  ["new videos", "New music videos"],
   // charts
   ["top songs", "Top songs"],
   ["top videos", "Top music videos"],
   ["top artists", "Top artists"],
-  // TODO: YTM is misbehaving at the moment
   ["genres", "Genres"],
   /// trending is duplicated
   // search
   ["station", "Station"],
   ["playlist", "Playlist"],
   ["artist", "Artist"],
-  ["song", "Song"],
+  // This is not that common anymore
+  // ["song", "Song"],
   ["video", "Video"],
   ["profile", "Profile"],
   // search titles
@@ -188,261 +59,263 @@ const base_map = new Map([
   ["playlists_on_repeat", "Playlists on repeat"],
 ]);
 
-export async function get_base_strings() {
-  set_option("language", "en");
+// Because we already have strings we want to look for
+// We need to find all those strings in the UI
+// After they are found, we will find something that identifies them, so that
+// we know where they were found.
+// After that, we can use the path to know where exactly those strings were
+// found
 
-  const [explore, charts, artist, search_radio, search_hello, channel] =
-    await Promise
-      .all([
-        get_content_strings("FEmusic_explore"),
-        get_content_strings("FEmusic_charts", {
-          formData: {
-            // to get genres
-            selectedValues: ["US"],
-          },
-        }),
-        // BTS (because they have playlists on their channel)
-        // also don't forget to add atleast one song to your library
-        // and make sure the item you add is NOT the first item in any category
-        get_content_strings("UC9vrvNSL3xcWGSkV86REBSg"),
-        get_search_strings(),
-        // to make sure we also get stuff like artists (because there is no artist
-        // named "global radio" yet..)
-        get_search_strings({ query: "hello" }),
-        // use your channel id
-        get_content_strings("UCSdIilrkpBqG01hzOU6pOTg"),
-      ]);
+/**
+ * {
+ *   "songs_on_repeat": ["channel:CHANNEL_ID", "root.array[0].etc.lol.here"]
+ * }
+ *
+ * // This means that the "songs_on_repeat" string was found in the channel page
+ * // and that the path to get it is that, as givem
+ */
 
-  const search = [...search_radio, ...search_hello]
-    .filter(filter_fn);
-
-  const id_map: Record<string, any> = {};
-
-  const ids = [...explore, ...charts, ...artist, ...search, ...channel];
-
-  let logged = false;
-
-  base_map.forEach((value, key) => {
-    const item = ids.find((i) => i.title === value);
-
-    if (!item) {
-      if (!logged) {
-        console.log(
-          "base id map",
-          Object.fromEntries(ids.map((id) => [id.title, id.id])),
-        );
-        logged = true;
-      }
-      console.error("missing", key, value);
-      return;
-    }
-
-    id_map[key] = item.id;
-  });
-
-  return id_map;
+export interface URIResponse {
+  json: any;
+  paths?: string[];
 }
 
-const known_params = new Map([
-  ["artist", [
-    "EgWKAQIgAWoMEAMQBBAJEAoQBRAV",
-    "EgWKAQIgAWoOEAMQBBAJEA4QChAFEBU%3D",
-  ]],
-  ["song", [
-    "EgWKAQIIAWoMEAMQBBAJEA4QChAV",
-    "EgWKAQIIAWoOEAMQBBAJEA4QChAFEBU%3D",
-  ]],
-  ["video", [
-    "EgWKAQIQAWoMEAMQBBAJEA4QChAV",
-    "EgWKAQIQAWoOEAMQBBAJEA4QChAFEBU%3D",
-  ]],
-  ["playlist", [
-    "EgeKAQQoADgBagwQAxAEEAkQDhAKEBU%3D",
-    "EgeKAQQoADgBag4QAxAEEAkQDhAKEAUQFQ%3D%3D",
-  ]],
-  ["songs", []],
-  ["featured_playlists", [
-    "titleEgeKAQQoADgBagwQAxAEEAkQDhAKEBU%3D",
-    "titleEgeKAQQoADgBag4QAxAEEAkQDhAKEAUQFQ%3D%3D",
-  ]],
-  ["community_playlists", [
-    "titleEgeKAQQoAEABagwQAxAEEAkQDhAKEBU%3D",
-    "titleEgeKAQQoAEABag4QAxAEEAkQDhAKEAUQFQ%3D%3D",
-  ]],
-  ["artists", [
-    "titleEgWKAQIgAWoMEAMQBBAJEAoQBRAV",
-    "titleEgWKAQIgAWoOEAMQBBAJEA4QChAFEBU%3D",
-  ]],
-  ["profile", [
-    "EgWKAQJYAWoMEAMQBBAJEA4QChAV",
-    "EgWKAQJYAWoOEAMQBBAJEA4QChAFEBU%3D",
-  ]],
-  ["profiles", [
-    "titleEgWKAQJYAWoOEAMQBBAJEA4QChAFEBU%3D",
-    "titleEgWKAQJYAWoMEAMQBBAJEA4QChAV",
-  ]],
-  ["podcasts", [
-    "titleEgWKAQJQAWoSEAMQBBAJEA4QChAFEBEQEBAV",
-    "titleEgWKAQJQAWoQEAMQBBAJEA4QChAREBAQFQ%3D%3D",
-  ]],
-  ["episodes", [
-    "titleEgWKAQJIAWoSEAMQBBAJEA4QChAFEBEQEBAV",
-    "titleEgWKAQJIAWoQEAMQBBAJEA4QChAREBAQFQ%3D%3D",
-  ]],
-]);
+function parseSearchParams(params: URLSearchParams) {
+  const parsedParams = {};
 
-export async function get_strings_for_language(
-  base_id_map: Record<string, string>,
-  language: string,
-) {
-  set_option("language", language);
+  for (const [key, value] of params.entries()) {
+    const nestedKeys = key.split(".");
+    let currentObj: Record<string, unknown> = parsedParams;
 
-  const [explore, charts, artist, search_radio, search_hello, channel] =
-    await Promise
-      .all([
-        get_content_strings("FEmusic_explore", { lang: language }),
-        get_content_strings("FEmusic_charts", {
-          lang: language,
-          formData: {
-            selectedValues: ["US"],
-          },
-        }),
-        get_content_strings("UC9vrvNSL3xcWGSkV86REBSg", {
-          lang: language,
-        }),
-        get_search_strings({ lang: language }),
-        get_search_strings({ query: "hello" }),
-        get_content_strings("REPLACE_WITH_YOUR_CHANNEL_ID"),
-      ]);
-
-  const id_map: Record<string, any> = {};
-
-  const search = [...search_radio, ...search_hello]
-    .filter(filter_fn);
-
-  const ids = [...explore, ...charts, ...artist, ...search, ...channel];
-
-  let logged = false;
-
-  for (const key in base_id_map) {
-    const id = base_id_map[key];
-
-    const item = ids.find((i) => {
-      if (i.id === id) return true;
-
-      // handling search edge cases
-      if (typeof id === "string") {
-        for (const [_type, ids] of known_params) {
-          if (ids.includes(id)) {
-            return ids.includes(i.id);
-          }
-        }
+    for (let i = 0; i < nestedKeys.length - 1; i++) {
+      const nestedKey = nestedKeys[i];
+      if (!currentObj[nestedKey]) {
+        currentObj[nestedKey] = {};
       }
-
-      // handle translated thumbnails
-      if (
-        typeof i.id === "string" && typeof id === "string" &&
-        i.id.slice(0, -3) === id.slice(0, -3)
-      ) {
-        return true;
-      }
-
-      return false;
-    });
-
-    if (!item) {
-      if (!logged) {
-        console.log(language, "id map");
-        ids.forEach((id) => {
-          console.log("title", id.title, id.id);
-        });
-        logged = true;
-      }
-      console.error("missing", key, id);
-      continue;
+      currentObj = currentObj[nestedKey] as typeof currentObj;
     }
 
-    id_map[key] = item.title;
+    let parsedArray;
+
+    if (value.startsWith("[") && value.endsWith("]")) {
+      parsedArray = value.slice(1, -1).split(",");
+    } else {
+      parsedArray = value;
+    }
+
+    currentObj[nestedKeys[nestedKeys.length - 1]] = parsedArray;
   }
 
-  return id_map;
+  return parsedParams;
 }
 
-export async function get_all_strings() {
-  const base_id_map = await get_base_strings();
+/**
+ * This functions calls the relevant function from the URI.
+ *
+ * For example `get_function_uri("channel:CHANNEL_ID")` will call `get_channel`
+ */
+async function get_uri_response(
+  uri: string,
+  lang?: string,
+): Promise<URIResponse | null> {
+  const segments = uri.split(":");
+  const url = new URL("muse:" + uri);
+  const params = parseSearchParams(url.searchParams);
 
-  // console.log("base", base_id_map);
+  const headers = lang
+    ? {
+      "Accept-Language": `${lang};en;q=0.5`,
+    }
+    : undefined;
 
+  switch (segments[0]) {
+    case "browse": {
+      const json = await request_json("browse", {
+        data: { browseId: segments[1].split("?")[0], ...params, lang },
+        headers,
+      });
+
+      return { json };
+    }
+    case "search": {
+      const json = await request_json("search", {
+        data: {
+          query: decodeURIComponent(segments[1]),
+          params: "QgIIAQ%3D%3D",
+          ...params,
+        },
+        headers,
+      });
+
+      return { json };
+    }
+  }
+
+  return null;
+}
+
+export interface PathDeclaration {
+  path: string;
+  value: string;
+  parent: any;
+  parentProperty: string;
+  hasArrExpr: boolean;
+  pointer: string;
+}
+
+export interface FetchMapItem {
+  uri: string;
+  paths: string[];
+}
+
+export const fetch_map: FetchMapItem[] = [
+  {
+    uri: "browse:FEmusic_explore",
+    paths: [
+      "json.contents.singleColumnBrowseResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents[1:].musicCarouselShelfRenderer.header.musicCarouselShelfBasicHeaderRenderer.title.runs[0].text",
+    ],
+  },
+  {
+    // We select the US because they are the ones who can see Genres
+    uri: "browse:FEmusic_charts?formData.selectedValues=[US]",
+    paths: [
+      "json.contents.singleColumnBrowseResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.*.musicCarouselShelfRenderer.header.musicCarouselShelfBasicHeaderRenderer.title.runs[0].text",
+    ],
+  },
+  {
+    // BTS (because they have playlists on their channel)
+    // also don't forget to add atleast one song of to your library
+    // and make sure the item you add is NOT the first item in any category
+    uri: "browse:UC9vrvNSL3xcWGSkV86REBSg",
+    paths: [
+      "json.contents.singleColumnBrowseResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.*.musicShelfRenderer.title.runs[0].text",
+      "json.contents.singleColumnBrowseResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.*.musicCarouselShelfRenderer.header.musicCarouselShelfBasicHeaderRenderer.title.runs[0].text",
+    ],
+  },
+  {
+    // Replace with your channel
+    uri: "browse:UCSdIilrkpBqG01hzOU6pOTg",
+    paths: [
+      "json.contents.singleColumnBrowseResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.*.musicShelfRenderer.title.runs.0.text",
+      "json.contents.singleColumnBrowseResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.*.musicCarouselShelfRenderer.header.musicCarouselShelfBasicHeaderRenderer.title.runs.0.text",
+    ],
+  },
+  {
+    uri: "search:get+lucky",
+    paths: [
+      "json.contents.tabbedSearchResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.header.chipCloudRenderer.chips.*.chipCloudChipRenderer.text.runs.0.text",
+      "json.contents.tabbedSearchResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.*.musicShelfRenderer.contents.0.musicResponsiveListItemRenderer.flexColumns.1.musicResponsiveListItemFlexColumnRenderer.text.runs[0].text",
+      "json.contents.tabbedSearchResultsRenderer.tabs.0.tabRenderer.content.sectionListRenderer.contents.0.musicCardShelfRenderer.subtitle.runs.0.text",
+    ],
+  },
+];
+
+let base_strings = new Map();
+
+async function get_language_map() {
+  const map = new Map<string, [uri: string, path: string]>();
+
+  for (const item of fetch_map) {
+    const data = await get_uri_response(item.uri);
+
+    for (const path of item.paths) {
+      const items = jom(data, path, "all") as PathDeclaration[] ??
+        [];
+
+      english_strings.forEach((string, key) => {
+        const match = items.find((item) => item.value === string);
+
+        if (!match) return;
+
+        map.set(key, [item.uri, match.path]);
+        base_strings.set(key, match.value);
+      });
+    }
+  }
+
+  return map;
+}
+
+const base_map = await get_language_map();
+
+async function _test_fetch_map_item(item: FetchMapItem) {
+  const data = await get_uri_response(item.uri);
+
+  const items =
+    item.paths.map((path) => jom(data, path)).flat() as PathDeclaration[] ??
+      [];
+
+  console.log("items", items);
+}
+
+// console.log("base map", base_strings);
+
+async function get_strings_for_lang(lang: string) {
+  const map = new Map<string, string>();
+  set_option("language", lang);
+
+  await Promise.all(fetch_map.map(async (item) => {
+    const data = await get_uri_response(item.uri, lang);
+
+    for (const [key, [uri, path]] of base_map.entries()) {
+      if (uri !== item.uri) continue;
+      const translation = jo(data, path);
+
+      if (translation) map.set(key, translation);
+    }
+  }));
+
+  if (map.size != base_map.size) {
+    console.error(`Some strings were not found for ${lang}:`);
+    console.log(Array.from(base_map.keys()).filter((key) => !map.has(key)));
+    throw map;
+  }
+
+  return map;
+}
+
+async function get_all_languages() {
   const languages = LOCALES.languages.map((l) => l.value);
   // const languages = ["fr", "es", "ko", "gl"];
 
-  const strings: Record<string, any> = {};
+  const strings: Map<string, Map<string, string>> = new Map();
 
-  strings.en = Object.fromEntries(base_map);
-
-  // paralellism won't work: too many requests
-  // await Promise.all(
-  //   languages.map(async (language) => {
-  //     if (language === "en-GB") return;
-
-  //     strings[language] = await get_strings_for_language(base_id_map, language);
-  //     console.log("got", language);
-  //   }),
-  // );
-
-  // serial
   for (const language of languages) {
-    if (language === "en-GB") continue;
-
     try {
-      strings[language] = await get_strings_for_language(base_id_map, language);
+      strings.set(language, await get_strings_for_lang(language));
 
       console.log(
-        Object.keys(strings).length - 1,
+        "   ",
+        strings.size,
+        "\t",
         "/",
         languages.length,
         ":",
         language,
       );
-    } catch {
-      console.log("couldn't get strings for", language);
+    } catch (error) {
+      console.log("couldn't get strings for", language, error);
     }
   }
-
-  // a version that allows a max of 5 requests at a time
-  // for (let i = 0; i < languages.length; i += 8) {
-  //   const slice = languages.slice(i, i + 8);
-
-  //   await Promise.all(
-  //     slice.map(async (language) => {
-  //       if (language === "en") return;
-
-  //       strings[language] = await get_strings_for_language(
-  //         base_id_map,
-  //         language,
-  //       );
-
-  //       // also print progress
-  //       console.log(
-  //         Object.keys(strings).length,
-  //         "/",
-  //         languages.length,
-  //         ":",
-  //         language,
-  //       );
-  //     }),
-  //   );
-  // }
 
   return strings;
 }
 
-await get_all_strings()
-  .then((data) => {
-    Deno.writeTextFile("locales/strings.json", JSON.stringify(data));
-  });
+async function get_all_languages_json() {
+  const data = await get_all_languages();
 
-// await get_search_strings()
-//   .then((data) => {
-//     Deno.writeTextFile("locales/strings.json", JSON.stringify(data, null, 2));
-//   });
+  return Object.fromEntries(
+    Array.from(data.entries()).map(([key, map]) => {
+      return [key, Object.fromEntries(map)];
+    }),
+  );
+}
+
+function write_translations(data: Record<string, unknown>) {
+  return Deno.writeTextFile("locales/strings.json", JSON.stringify(data));
+}
+
+const json = await get_all_languages_json();
+await write_translations(json);
+
+console.log("Wrote translations!");

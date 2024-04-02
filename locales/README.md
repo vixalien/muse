@@ -3,6 +3,10 @@ localised.
 
 ## get.ts
 
+```sh
+deno run -A locales/get.ts
+```
+
 this file gets all languages & locations available from Youtube Music and writes
 them to the file called `locales.json`.
 
@@ -15,6 +19,8 @@ result in an error.
 This file is used to generate the `strings.json` file. This file contains the
 required localised strings for the library to work. These strings are used when
 parsing responses, to get for example "new albums", "new songs" etc.
+
+1. Replace all instances of `REPLACE_WITH_YOUR_CHANNEL_ID` with your channel ID.
 
 It's important that all the file does not log any missing strings, as this will
 cause users of that language to miss some data.

@@ -1,4 +1,4 @@
-import { JSONPath } from "./deps.ts";
+import { JSONPath, JSONPathOptions } from "./deps.ts";
 import { ERROR_CODE, MuseError } from "./errors.ts";
 import { get_option } from "./setup.ts";
 
@@ -15,6 +15,14 @@ export const debug = (...args: unknown[]) => {
   if (get_option("debug")) console.debug(...args);
 };
 
+export const jom = (
+  json: unknown,
+  path: string,
+  resultType?: JSONPathOptions["resultType"],
+): any => {
+  const result = JSONPath({ path, json, resultType });
+  return result.length ? result : null;
+};
 export const jo = (
   json: unknown,
   path: string,

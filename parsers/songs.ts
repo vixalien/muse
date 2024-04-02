@@ -198,7 +198,7 @@ export function parse_song_runs(runs: any[], slice_start = 0) {
         parsed.duration_seconds = parse_duration(text);
       } else if (text.match(/^\d{4}$/)) {
         parsed.year = text;
-      } else if (text != _("song") && text != _("video")) {
+      } else if (text != _("video")) {
         // artist without id
         parsed.artists.push({
           name: text,
