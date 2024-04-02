@@ -1,83 +1,11 @@
-import {
-  add_playlist_items,
-  delete_playlist,
-  edit_playlist,
-  get_artist,
-  get_artist_albums,
-  get_home,
-  get_option,
-  search,
-  setup,
-} from "./mod.ts";
-import { FetchClient, RequestInit } from "./request.ts";
+import { get_explore, get_home, setup } from "./mod.ts";
+import { get_option, set_option } from "./setup.ts";
 import { DenoFileStore } from "./store.ts";
-import { debug } from "./util.ts";
-
-const encoder = new TextEncoder();
-
-const CACHE = true;
-
-async function hash(string: string) {
-  // use the subtle crypto API to generate a 512 bit hash
-  // return the hash as a hex string
-  const data = encoder.encode(string);
-  const hash = await crypto.subtle
-    .digest("SHA-256", data);
-
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-class CustomFetch extends FetchClient {
-  constructor() {
-    super();
-  }
-
-  async request(path: string, options: RequestInit) {
-    // caching
-    const cache_path = `store/cache/${await hash(
-      JSON.stringify({ ...options.data, ...options.params, path } || {}),
-    )}.json`;
-
-    const cache = CACHE && !path.startsWith("like/");
-
-    const cached = await Deno.readTextFile(cache_path)
-      .then(JSON.parse).catch(() => null);
-
-    if (cache && cached) {
-      debug("CACHED", options.method, path);
-      return new Response(JSON.stringify(cached));
-    }
-    // end caching
-
-    const response = await super.request(path, options);
-
-    // store into cache
-    if (cache) {
-      try {
-        await Deno.mkdir("store/cache", { recursive: true });
-        await Deno.writeTextFile(
-          cache_path,
-          JSON.stringify(await response.clone().json(), null, 2),
-        );
-      } catch {
-        // not json probably: ignore
-      }
-    }
-
-    // if (!response.ok) {
-    //   const text = await response.text();
-    //   throw new Error(text);
-    // }
-
-    return response;
-  }
-}
+import { CacheFetch } from "./util/cache-fetch.ts";
 
 setup({
   store: new DenoFileStore("store/muse-store.json"),
-  client: new CustomFetch(),
+  client: new CacheFetch(true),
   debug: true,
 });
 
@@ -126,7 +54,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_artist_albums("MPADUClYV6hHlupm_S_ObS1W-DYw", "ggMIegYIARoCAQI%3D")
+get_explore()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
