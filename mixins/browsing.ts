@@ -440,17 +440,18 @@ export async function get_song_related(
 }
 
 export interface BaseTimedLyrics {
-  lyrics: string;
   source: string;
   timed: boolean;
 }
 
 export interface UnTimedLyrics extends BaseTimedLyrics {
   timed: false;
+  lyrics: string | null;
 }
 
 export interface TimedLyrics extends BaseTimedLyrics {
   timed: true;
+  lyrics: string;
   timed_lyrics: {
     line: string;
     start: number;
