@@ -260,6 +260,8 @@ export async function get_queue_ids(
   videoIds: string[],
   options: AbortOptions = {},
 ) {
+  if (videoIds.length === 0) return [];
+
   const response = await request_json("music/get_queue", {
     data: {
       videoIds,
