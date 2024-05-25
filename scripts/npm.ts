@@ -1,5 +1,4 @@
-// ex. scripts/build_npm.ts
-import { build, emptyDir } from "https://deno.land/x/dnt@0.33.1/mod.ts";
+import { build, emptyDir } from "@deno/dnt";
 
 await emptyDir("./npm");
 
@@ -27,9 +26,6 @@ async function get_latest_version() {
 await build({
   entryPoints: [
     "./mod.ts",
-    "./auth.ts",
-    "./request.ts",
-    "./store.ts",
     {
       name: "./locales/locales",
       path: "./locales/locales.json",
@@ -44,7 +40,7 @@ await build({
   test: false,
   typeCheck: false,
   compilerOptions: {
-    lib: ["es2022", "dom"],
+    lib: ["ES2022", "DOM"],
   },
   package: {
     // package.json properties
@@ -69,13 +65,6 @@ await build({
     bugs: {
       url: "https://github.com/vixalien/muse/issues",
     },
-    files: [
-      "/esm",
-      "/script",
-      "/types",
-      "LICENSE",
-      "README.md",
-    ],
   },
 });
 

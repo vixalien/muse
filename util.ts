@@ -1,4 +1,4 @@
-import { JSONPath, JSONPathOptions } from "./deps.ts";
+import { JSONPath, JSONPathOptions } from "jsonpath-plus";
 import { ERROR_CODE, MuseError } from "./errors.ts";
 import { get_option } from "./setup.ts";
 
@@ -20,7 +20,7 @@ export const jom = (
   path: string,
   resultType?: JSONPathOptions["resultType"],
 ): any => {
-  const result = JSONPath({ path, json, resultType });
+  const result = JSONPath({ path, json: json as null, resultType });
   return result.length ? result : null;
 };
 export const jo = (
@@ -28,7 +28,10 @@ export const jo = (
   path: string,
   ...others: string[]
 ): any => {
-  const result = JSONPath({ path: [path, ...others].join("."), json });
+  const result = JSONPath({
+    path: [path, ...others].join("."),
+    json: json as null,
+  });
   return result.length ? result[0] : null;
 };
 export const j = (json: unknown, path: string, ...others: string[]) => {

@@ -1,6 +1,6 @@
 import { FetchClient, RequestInit } from "../request.ts";
 import { debug } from "../util.ts";
-import { omit } from "../deps.ts";
+import { omit } from "lodash-es";
 
 const encoder = new TextEncoder();
 

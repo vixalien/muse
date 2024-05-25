@@ -1,5 +1,5 @@
 import { get_continuations } from "../continuations.ts";
-import { basename, extname } from "../deps.ts";
+import { basename, extname } from "@std/path";
 import { ERROR_CODE, MuseError } from "../errors.ts";
 import {
   MTRIR,

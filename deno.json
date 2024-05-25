@@ -1,4 +1,10 @@
 {
+  "name": "@vixalien/muse",
+  "version": "0.0.98",
+  "exports": {
+    ".": "./mod.ts",
+    "locales/locales": "./locales/locales.json"
+  },
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-write --allow-env=DEBUG ./client.ts",
     "test": "deno test --allow-net --allow-read --allow-write --allow-env=DEBUG --fail-fast ./tests/",
@@ -8,5 +14,11 @@
     "rules": {
       "exclude": ["no-explicit-any"]
     }
+  },
+  "imports": {
+    "@deno/dnt": "jsr:@deno/dnt@^0.41.1",
+    "@std/path": "jsr:@std/path@^0.225.1",
+    "jsonpath-plus": "npm:jsonpath-plus@^9.0.0",
+    "lodash-es": "npm:lodash-es@^4.17.21"
   }
 }
