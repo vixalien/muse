@@ -256,7 +256,13 @@ export async function get_queue(
   return queue;
 }
 
-export async function get_queue_ids(
+/**
+ * Gets the QueueTrack metadata for the specified `videoId`s
+ * @param videoIds track IDs to look queues for
+ * @param options
+ * @returns a list of QueueTracks for each videoId
+ */
+export async function get_queue_tracks(
   videoIds: string[],
   options: AbortOptions = {},
 ) {
@@ -273,3 +279,8 @@ export async function get_queue_ids(
     response.queueDatas.map((data: any) => data.content),
   );
 }
+
+/**
+ * @deprecated use `get_queue_tracks`
+ */
+export const get_queue_ids = get_queue_tracks
