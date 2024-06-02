@@ -1,4 +1,4 @@
-import CONSTANTS from "../constants-ng.json" with { type: "json" };
+import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 
 import { get_option, set_option } from "../setup.ts";
 
@@ -14,11 +14,11 @@ export function get_auth_headers() {
 async function load_visitor_id(signal?: AbortSignal) {
   if (!get_option("auth").has_token() && !get_option("visitor_id")) {
     const visitor_id = await get_option("client").request(
-      `${CONSTANTS.API_URL}/browse`,
+      `${CONSTANTS2.API_URL}/browse`,
       {
         method: "post",
         data: {
-          ...CONSTANTS.DATA,
+          ...CONSTANTS2.DATA,
         },
         signal,
       },
@@ -37,18 +37,18 @@ export async function request(endpoint: string, options: RequestInit) {
 
   const url = endpoint.startsWith("http")
     ? endpoint
-    : `${CONSTANTS.API_URL}/${endpoint}`;
+    : `${CONSTANTS2.API_URL}/${endpoint}`;
 
   const response = await get_option("client").request(
     use_proxy(url),
     {
       method: options.method || "post",
       data: options.method === "get" ? undefined : {
-        ...CONSTANTS.DATA,
+        ...CONSTANTS2.DATA,
         ...options.data,
       },
       headers: {
-        ...CONSTANTS.HEADERS,
+        ...CONSTANTS2.HEADERS,
         ...auth_headers,
         "Content-Type": "application/json",
         "X-Goog-Request-Time": (new Date()).getTime().toString(),

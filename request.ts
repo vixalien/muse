@@ -1,5 +1,5 @@
 import { ERROR_CODE, MuseError } from "./errors.ts";
-import LOCALES from "./locales/locales.json" with { type: "json" };
+import LOCALES from "./locales/locales.json" assert { type: "json" };
 import { get_option } from "./setup.ts";
 
 import { debug } from "./util.ts";

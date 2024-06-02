@@ -1,4 +1,4 @@
-import STRINGS from "../locales/strings.json" with { type: "json" };
+import STRINGS from "../locales/strings.json" assert { type: "json" };
 import { LikeStatus } from "../mod.ts";
 
 import {

@@ -1,4 +1,4 @@
-import CONSTANTS from "../constants-ng.json" with { type: "json" };
+import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 
 import { get_continuations, get_sort_continuations } from "../continuations.ts";
 import {
@@ -378,7 +378,7 @@ export async function get_song(
 ): Promise<Song> {
   const response = await request_json("player", {
     data: {
-      ...CONSTANTS.ANDROID.DATA,
+      ...CONSTANTS2.ANDROID.DATA,
       contentCheckOk: true,
       racyCheckOk: true,
       video_id,
@@ -473,7 +473,7 @@ export async function get_lyrics(
   }
 
   const json = await request_json("browse", {
-    data: { browseId, ...CONSTANTS.ANDROID.DATA },
+    data: { browseId, ...CONSTANTS2.ANDROID.DATA },
     signal: options.signal,
   });
 
