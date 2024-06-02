@@ -35,7 +35,7 @@ import {
   parse_toast,
   ParsedLibraryArtist,
 } from "../parsers/library.ts";
-import { parse_playlist_items, PlaylistItem } from "../parsers/playlists.ts";
+import { parse_playlist_items, PlaylistItem, validate_playlist_id } from "../parsers/playlists.ts";
 import { LikeStatus } from "../parsers/songs.ts";
 import { j, jo } from "../util.ts";
 import { ParsedAlbum, Song, Thumbnail } from "./browsing.ts";
@@ -400,7 +400,7 @@ export async function rate_playlist(
   const json = await request_json(prepare_like_endpoint(status), {
     data: {
       target: {
-        playlistId,
+        playlistId: validate_playlist_id(playlistId),
       },
     },
     signal: options.signal,
