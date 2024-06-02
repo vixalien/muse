@@ -1,5 +1,5 @@
-import { get_home, setup } from "./mod.ts";
-import { get_option } from "./setup.ts";
+import { get_explore, get_home, setup } from "./mod.ts";
+import { get_option, set_option } from "./setup.ts";
 import { DenoFileStore } from "./store.ts";
 import { CacheFetch } from "./util/cache-fetch.ts";
 
@@ -54,7 +54,7 @@ auth.addEventListener("requires-login", (event) => {
 //     console.log(await data.text());
 //   });
 
-get_home()
+get_explore()
   // get_playlist("PLCwfwQhurMOukOqbFmYRidZ81ng_2iSUE")
   // .then((data) => {
   //   return get_queue(null, data.playlistId, { autoplay: true });
