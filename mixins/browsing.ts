@@ -14,6 +14,7 @@ import {
   MUSIC_SHELF,
   NAVIGATION_BROWSE_ID,
   NAVIGATION_PLAYLIST_ID,
+  RESPONSIVE_HEADER,
   RUN_TEXT,
   SECTION_LIST,
   SECTION_LIST_ITEM,
@@ -38,6 +39,7 @@ import {
   parse_mixed_content,
   parse_moods,
   parse_playlist,
+  parse_two_columns,
   ParsedAlbum,
   ParsedPlaylist,
 } from "../parsers/browsing.ts";
@@ -259,41 +261,35 @@ export interface AlbumResult extends AlbumHeader {
   id: string;
   tracks: PlaylistItem[];
   other_versions: ParsedAlbum[] | null;
+  duration_seconds: number;
 }
 
 export async function get_album(
   browseId: string,
   options: AbortOptions = {},
 ): Promise<AlbumResult> {
-  const response = await request_json("browse", {
+  const json = await request_json("browse", {
     data: {
       browseId,
     },
     signal: options.signal,
   });
 
-  const results = j(
-    response,
-    SINGLE_COLUMN_TAB,
-    SECTION_LIST_ITEM,
-    MUSIC_SHELF,
+  const { tab, secondary } = parse_two_columns(json);
+
+  const header = parse_album_header(
+    j(tab, SECTION_LIST_ITEM, RESPONSIVE_HEADER),
   );
 
-  const carousel = jo(
-    response,
-    SINGLE_COLUMN_TAB,
-    SECTION_LIST,
-    "1",
-    CAROUSEL,
-  );
-
-  const header = parse_album_header(response);
+  const results = j(secondary, SECTION_LIST_ITEM, MUSIC_SHELF);
+  const carousel = jo(secondary, SECTION_LIST, "1", CAROUSEL);
 
   const album: AlbumResult = {
-    id: find_context_param(response, "browse_id"),
+    id: find_context_param(json, "browse_id"),
     ...header,
     tracks: parse_playlist_items(results.contents),
     other_versions: null,
+    duration_seconds: 0,
   };
 
   if (carousel != null) {

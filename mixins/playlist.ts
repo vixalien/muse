@@ -7,14 +7,13 @@ import {
   CAROUSEL,
   CONTENT,
   DESCRIPTION,
+  DESCRIPTION_SHELF,
   MUSIC_SHELF,
   SECTION_LIST_CONTINUATION,
   SECTION_LIST_ITEM,
-  SINGLE_COLUMN_TAB,
   SUBTITLE,
-  SUBTITLE3,
-  THUMBNAIL_CROPPED,
   THUMBNAIL_RENDERER,
+  THUMBNAILS,
   TITLE_TEXT,
 } from "../nav.ts";
 import {
@@ -37,6 +36,7 @@ import {
 import { request_json } from "./_request.ts";
 import { ArtistRun, parse_song_artists_runs } from "../parsers/songs.ts";
 import { ERROR_CODE, MuseError } from "../errors.ts";
+import { parse_two_columns } from "../parsers/browsing.ts";
 
 export type { PlaylistItem };
 
@@ -94,7 +94,7 @@ export async function get_playlist_suggestions(
     "musicShelfContinuation",
     limit,
     (params: any) => request_json(endpoint, { data, params, signal }),
-    data => parse_playlist_items(data),
+    (data) => parse_playlist_items(data),
     undefined,
     true,
   );
@@ -152,51 +152,37 @@ export async function get_playlist(
 
   const json = await request_json(endpoint, { data, signal });
 
-  const results = j(
-    json,
-    SINGLE_COLUMN_TAB,
-    SECTION_LIST_ITEM,
-    "musicPlaylistShelfRenderer",
+  const { tab, secondary } = parse_two_columns(json);
+
+  const results = j(secondary, SECTION_LIST_ITEM, "musicPlaylistShelfRenderer");
+
+  const json_header = j(tab, SECTION_LIST_ITEM);
+  const header = jo(
+    json_header,
+    "musicEditablePlaylistDetailHeaderRenderer.header.musicResponsiveHeaderRenderer",
+  ) ?? j(json_header, "musicResponsiveHeaderRenderer");
+  const editHeader = jo(
+    json_header,
+    "musicEditablePlaylistDetailHeaderRenderer.editHeader.musicPlaylistEditHeaderRenderer",
   );
-
-  const own_playlist = "musicEditablePlaylistDetailHeaderRenderer" in
-    json.header;
-
-  const header = own_playlist
-    ? json.header.musicEditablePlaylistDetailHeaderRenderer.header
-      .musicDetailHeaderRenderer
-    : json.header.musicDetailHeaderRenderer;
+  const own_playlist = !!editHeader;
 
   const run_count = header.subtitle.runs.length;
 
-  const trackCount = header.secondSubtitle.runs
-    ? header.secondSubtitle.runs[0].text
-    : null;
-
-  const duration =
-    header.secondSubtitle.runs && header.secondSubtitle.runs.length > 2
-      ? header.secondSubtitle.runs[2].text
-      : null;
+  const secondRuns = header.secondSubtitle.runs;
 
   const playlist: Playlist = {
     id: results.playlistId,
-    privacy: own_playlist
-      ? json.header.musicEditablePlaylistDetailHeaderRenderer.editHeader
-        .musicPlaylistEditHeaderRenderer.privacy
-      : "PUBLIC",
+    privacy: own_playlist ? editHeader.privacy : "PUBLIC",
     editable: own_playlist,
     title: j(header, TITLE_TEXT),
-    thumbnails: j(header, THUMBNAIL_CROPPED),
-    description: jo(header, DESCRIPTION),
+    thumbnails: j(header, THUMBNAILS),
+    description: jo(header, "description", DESCRIPTION_SHELF, DESCRIPTION),
     type: run_count > 0 ? j(header, SUBTITLE) : null,
-    authors: run_count > 1
-      ? parse_song_artists_runs(
-        header.subtitle.runs.slice(2, run_count >= 5 ? -2 : undefined),
-      )
-      : [],
-    year: run_count === 5 ? j(header, SUBTITLE3) : null,
-    trackCount: trackCount,
-    duration,
+    authors: parse_song_artists_runs(header.straplineTextOne.runs),
+    year: j(header, "subtitle.runs", (run_count - 1).toString(), "text"),
+    trackCount: secondRuns ? secondRuns[0].text : null,
+    duration: secondRuns && secondRuns.length > 2 ? secondRuns[2].text : null,
     duration_seconds: 0,
     tracks: parse_playlist_items(results.contents ?? []),
     continuation: null,
@@ -209,7 +195,7 @@ export async function get_playlist(
     request_json(endpoint, { data, params, signal });
 
   // suggestions and related are missing e.g. on liked songs
-  const section_list = j(json, SINGLE_COLUMN_TAB, "sectionListRenderer");
+  const section_list = j(secondary, "sectionListRenderer");
 
   if ("continuations" in section_list) {
     let params = get_continuation_params(section_list);

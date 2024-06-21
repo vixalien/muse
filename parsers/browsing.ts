@@ -1,5 +1,6 @@
 import STRINGS from "../locales/strings.json" assert { type: "json" };
 import { LikeStatus } from "../mod.ts";
+import { TAB_CONTENT } from "../nav.ts";
 
 import {
   BADGE_LABEL,
@@ -28,6 +29,7 @@ import {
   THUMBNAILS,
   TITLE,
   TITLE_TEXT,
+  TWO_COLUMN_RESULTS,
 } from "../nav.ts";
 import { get_option } from "../setup.ts";
 import { j, jo } from "../util.ts";
@@ -861,4 +863,13 @@ export function find_context_param(json: any, key: string) {
   return j(json, "responseContext.serviceTrackingParams[0].params").find((
     param: any,
   ) => param.key === key).value;
+}
+
+export function parse_two_columns(json: any) {
+  const renderer = j(json, "contents", TWO_COLUMN_RESULTS);
+
+  return {
+    secondary: renderer.secondaryContents,
+    tab: j(renderer, TAB_CONTENT),
+  };
 }

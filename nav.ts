@@ -38,6 +38,9 @@ export const NAVIGATION_WATCH_PLAYLIST_ID =
   "navigationEndpoint.watchPlaylistEndpoint.playlistId";
 export const NAVIGATION_VIDEO_TYPE =
   "watchEndpoint.watchEndpointMusicSupportedConfigs.watchEndpointMusicConfig.musicVideoType";
+export const PLAY_WATCH = "playNavigationEndpoint.watchEndpoint";
+export const PLAY_VIDEO_ID = `${PLAY_WATCH}.videoId`;
+export const PLAY_PLAYLIST_ID = `${PLAY_WATCH}.playlistId`;
 export const HEADER_DETAIL = "header.musicDetailHeaderRenderer";
 export const DESCRIPTION_SHELF = "musicDescriptionShelfRenderer";
 export const DESCRIPTION = `description.${RUN_TEXT}`;
@@ -64,10 +67,12 @@ export const THUMBNAIL_RENDERER =
 export const THUMBNAIL_CROPPED =
   `thumbnail.croppedSquareThumbnailRenderer.${THUMBNAIL}`;
 export const FEEDBACK_TOKEN = "feedbackEndpoint.feedbackToken";
-export const BADGE_PATH =
-  "0.musicInlineBadgeRenderer.accessibilityData.accessibilityData.label";
+export const SINGLE_BADGE_PATH =
+  "musicInlineBadgeRenderer.accessibilityData.accessibilityData.label";
+export const BADGE_PATH = `0.${SINGLE_BADGE_PATH}`;
 export const BADGE_LABEL = `badges.${BADGE_PATH}`;
 export const SUBTITLE_BADGE_LABEL = `subtitleBadges.${BADGE_PATH}`;
+export const SINGLE_BADGE_LABEL = `subtitleBadge.0.${SINGLE_BADGE_PATH}`;
 export const CATEGORY_TITLE = "musicNavigationButtonRenderer.buttonText.runs";
 export const CATEGORY_PARAMS =
   "musicNavigationButtonRenderer.clickCommand.browseEndpoint.params";
@@ -83,6 +88,8 @@ export const SECTION_LIST_CONTINUATION =
 export const MENU_PLAYLIST_ID =
   `${MENU_ITEMS}.0.menuNavigationItemRenderer.${NAVIGATION_WATCH_PLAYLIST_ID}`;
 export const MRLITFC = "musicResponsiveListItemFlexColumnRenderer.text";
+export const TWO_COLUMN_RESULTS = "twoColumnBrowseResultsRenderer";
+export const RESPONSIVE_HEADER = "musicResponsiveHeaderRenderer";
 
 interface ObjectWithNested {
   [key: string]: any;
