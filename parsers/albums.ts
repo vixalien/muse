@@ -1,11 +1,10 @@
 import { ArtistRun } from "../mod.ts";
 import { DESCRIPTION_SHELF, SINGLE_BADGE_LABEL } from "../nav.ts";
-import { DESCRIPTION } from "../nav.ts";
 import { THUMBNAILS } from "../nav.ts";
 import { find_object_by_key } from "../nav.ts";
 import { PLAY_PLAYLIST_ID, SUBTITLE, TITLE_TEXT } from "../nav.ts";
 import { j, jo } from "../util.ts";
-import { AlbumType } from "./browsing.ts";
+import { AlbumType, parse_description_runs } from "./browsing.ts";
 import { get_library_like_status, parse_song_artists_runs } from "./songs.ts";
 import { LikeStatus } from "./songs.ts";
 import { get_menu_playlists, MenuPlaylists, Thumbnail } from "./util.ts";
@@ -29,6 +28,13 @@ export function parse_album_header(header: any) {
     find_object_by_key(header.buttons, "musicPlayButtonRenderer")!
       .musicPlayButtonRenderer;
 
+  const description_runs = j(
+    header,
+    "description",
+    DESCRIPTION_SHELF,
+    "description.runs",
+  );
+
   const album: AlbumHeader = {
     // the last header button
     ...get_menu_playlists({ menu: header.buttons.slice(-1)[0] }),
@@ -39,7 +45,9 @@ export function parse_album_header(header: any) {
     trackCount: null,
     duration: null,
     audioPlaylistId: jo(playButton, PLAY_PLAYLIST_ID),
-    description: j(header, "description", DESCRIPTION_SHELF, DESCRIPTION),
+    description: description_runs
+      ? parse_description_runs(description_runs)
+      : null,
     likeStatus: get_library_like_status({
       menu: find_object_by_key(header.buttons, "menuRenderer"),
     }),

@@ -873,3 +873,9 @@ export function parse_two_columns(json: any) {
     tab: j(renderer, TAB_CONTENT),
   };
 }
+
+export function parse_description_runs(runs: any) {
+  return runs.map((run: any) => {
+    return jo(run, "navigationEndpoint.urlEndpoint.url") ?? run.text;
+  }).join("");
+}
