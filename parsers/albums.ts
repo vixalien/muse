@@ -28,7 +28,7 @@ export function parse_album_header(header: any) {
     find_object_by_key(header.buttons, "musicPlayButtonRenderer")!
       .musicPlayButtonRenderer;
 
-  const description_runs = j(
+  const description_runs = jo(
     header,
     "description",
     DESCRIPTION_SHELF,
