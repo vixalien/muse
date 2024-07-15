@@ -1,5 +1,5 @@
 import { get_option, setup } from "../mod.ts";
-import { DenoFileStore } from "../store.ts";
+import { DenoFileStore } from "../src/store.ts";
 
 export * from "./asserts.ts";
 export * from "./deps.ts";

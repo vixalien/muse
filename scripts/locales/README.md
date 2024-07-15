@@ -4,7 +4,7 @@ localised.
 ## get.ts
 
 ```sh
-deno run -A locales/get.ts
+deno run -A scripts/locales/get.ts
 ```
 
 this file gets all languages & locations available from Youtube Music and writes

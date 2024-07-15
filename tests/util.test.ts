@@ -1,6 +1,6 @@
 import { assertEquals, it } from "./util.ts";
 
-import * as util from "../util.ts";
+import * as util from "../src/util.ts";
 
 it("sum_total_duration", () => {
   const item = {

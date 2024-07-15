@@ -1,4 +1,4 @@
-import { request_json } from "../mixins/_request.ts";
+import { request_json } from "../../src/mixins/_request.ts";
 
 export async function get_locales() {
   const response = await request_json("account/get_setting", {});

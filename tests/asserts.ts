@@ -1,4 +1,4 @@
-import { assert, assertArrayIncludes, assertEquals } from "./util.ts";
+import { assert, assertArrayIncludes, assertEquals } from "./deps.ts";
 
 export function assertThumbnails(thumbnails: any, top_id?: string) {
   assert(thumbnails.length > 0);

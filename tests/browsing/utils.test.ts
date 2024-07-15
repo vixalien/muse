@@ -7,7 +7,7 @@ import {
   it,
 } from "../util.ts";
 
-import * as util from "../../mixins/utils.ts";
+import * as muse from "../../src/mod.ts"
 
 it("get_timestamp", () => {
   const one_day = 24 * 60 * 60 * 1000;
@@ -15,27 +15,27 @@ it("get_timestamp", () => {
     (new Date().getTime() - new Date(0).getTime()) /
       one_day,
   ) - 7;
-  assertEquals(util.get_timestamp(), timestamp);
+  assertEquals(muse.get_timestamp(), timestamp);
 });
 
 describe("check_auth", () => {
   let stored_token: any;
 
   beforeAll(async () => {
-    stored_token = util.auth.has_token() ? await util.auth.get_token() : null;
+    stored_token = muse.get_option("auth").has_token() ? await muse.get_option("auth").get_token() : null;
   });
 
   afterAll(() => {
-    util.auth.token = stored_token;
+    muse.get_option("auth").token = stored_token;
   });
 
   it("should throw error if not logged in", () => {
-    util.auth.token = null;
-    assertRejects(() => util.check_auth());
+    muse.get_option("auth").token = null;
+    assertRejects(() => muse.check_auth());
   });
 
   it("should not throw error if logged in", () => {
-    util.auth.token = { dummy: "token" } as any;
-    util.check_auth();
+    muse.get_option("auth").token = { dummy: "token" } as any;
+    muse.check_auth();
   });
 });

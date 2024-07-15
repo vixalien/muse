@@ -1,6 +1,6 @@
 import { assertEquals, it } from "../util.ts";
 
-import * as util from "../../parsers/util.ts";
+import * as util from "../../src/parsers/util.ts";
 
 it("parse_duration", () => {
   assertEquals(util.parse_duration("1:23"), 83);

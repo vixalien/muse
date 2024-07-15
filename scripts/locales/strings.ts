@@ -1,12 +1,12 @@
 // This module gets all translated strings for all languages
-import LOCALES from "./locales.json" with { type: "json" };
+import LOCALES from "../../locales/locales.json" with { type: "json" };
 
-import { request_json } from "../mixins/_request.ts";
-import { set_option } from "../mod.ts";
-import { setup } from "../setup.ts";
-import { DenoFileStore } from "../store.ts";
-import { j, jo, jom } from "../util.ts";
-import { cache_fetch } from "../util/cache-fetch.ts";
+import { request_json } from "../../src/mixins/_request.ts";
+import { set_option } from "../../src/mod.ts";
+import { setup } from "../../src/setup.ts";
+import { DenoFileStore } from "../../src/store.ts";
+import { j, jo, jom } from "../../src/util.ts";
+import { cache_fetch } from "../../src/util/cache-fetch.ts";
 
 setup({
   // peoplle in the US get to see more stuff like Top Artists in Charts

@@ -1,5 +1,5 @@
 import * as muse from "../mod.ts";
-import { cache_fetch } from "../util/cache-fetch.ts";
+import { cache_fetch } from "../src/util/cache-fetch.ts";
 
 muse.setup({
   store: new muse.DenoFileStore("store/muse-store.json"),
