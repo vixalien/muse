@@ -114,7 +114,7 @@ const auth_flow = async () => {
   );
 
   // not necessary, but saves some requests
-  confirm("Press enter when you have logged in");
+  alert("Press enter when you have logged in");
 
   console.log("Loading token...");
 

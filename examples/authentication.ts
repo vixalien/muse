@@ -28,7 +28,7 @@ const auth_flow = async () => {
     css.bold,
   );
 
-  confirm("Press enter when you have logged in");
+  alert("Press enter when you have logged in");
 
   console.log("Loading token...");
 
