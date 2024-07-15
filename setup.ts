@@ -1,4 +1,5 @@
 import { Authenticator, PureAuthenticatorOptions } from "./auth.ts";
+import { RequestFunction } from "./request.ts";
 import { FetchClient, RequestClient } from "./request.ts";
 import { MemoryStore, Store } from "./store.ts";
 
@@ -9,12 +10,13 @@ export interface Options {
   language: string;
   location: string;
   debug: boolean;
-  proxy: string | null;
   visitor_id: string | null;
+  fetch: RequestFunction;
 }
 
 const default_store = new MemoryStore();
 const default_client = new FetchClient();
+const default_fetch_fn: RequestFunction = globalThis.fetch;
 
 const options: Options = {
   store: default_store,
@@ -26,8 +28,8 @@ const options: Options = {
   language: "en",
   location: "US",
   debug: false,
-  proxy: null,
   visitor_id: null,
+  fetch: default_fetch_fn,
 };
 
 export function get_options() {

@@ -1,6 +1,6 @@
 import CONSTANTS from "./constants-ng.json" assert { type: "json" };
 import { RequestClient } from "./request.ts";
-import { use_proxy, wait } from "./util.ts";
+import { wait } from "./util.ts";
 import { Store } from "./store.ts";
 import { ERROR_CODE, MuseError } from "./errors.ts";
 
@@ -115,7 +115,7 @@ export class Authenticator extends EventTarget {
    */
   async get_login_code() {
     const response = await this.client.request(
-      use_proxy("https://www.youtube.com/o/oauth2/device/code"),
+      "https://www.youtube.com/o/oauth2/device/code",
       {
         method: "post",
         data: {
@@ -180,7 +180,7 @@ export class Authenticator extends EventTarget {
       }
 
       const response = await this.client.request(
-        use_proxy("https://oauth2.googleapis.com/token"),
+        "https://oauth2.googleapis.com/token",
         {
           method: "post",
           data: {
@@ -222,7 +222,7 @@ export class Authenticator extends EventTarget {
 
     if (token.expires_date < new Date()) {
       const res = await this.client.request(
-        use_proxy("https://oauth2.googleapis.com/token"),
+        "https://oauth2.googleapis.com/token",
         {
           method: "post",
           data: {

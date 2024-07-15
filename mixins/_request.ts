@@ -2,8 +2,8 @@ import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
 
 import { get_option, set_option } from "../setup.ts";
 
-import { RequestInit } from "../request.ts";
-import { jo, use_proxy } from "../util.ts";
+import { FetchData } from "../request.ts";
+import { jo } from "../util.ts";
 import { ERROR_CODE, MuseError } from "../errors.ts";
 import { ITEM_SECTION, SECTION_LIST_ITEM, SINGLE_COLUMN_TAB } from "../nav.ts";
 
@@ -30,7 +30,7 @@ async function load_visitor_id(signal?: AbortSignal) {
   }
 }
 
-export async function request(endpoint: string, options: RequestInit) {
+export async function request(endpoint: string, options: FetchData) {
   const auth_headers = await get_auth_headers();
 
   await load_visitor_id(options.signal);
@@ -40,7 +40,7 @@ export async function request(endpoint: string, options: RequestInit) {
     : `${CONSTANTS2.API_URL}/${endpoint}`;
 
   const response = await get_option("client").request(
-    use_proxy(url),
+    url,
     {
       method: options.method || "post",
       data: options.method === "get" ? undefined : {
@@ -84,7 +84,7 @@ export async function request(endpoint: string, options: RequestInit) {
   return response;
 }
 
-export async function request_json(endpoint: string, options: RequestInit) {
+export async function request_json(endpoint: string, options: FetchData) {
   const response = await request(endpoint, options);
 
   const json = await response.json();

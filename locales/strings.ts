@@ -6,14 +6,14 @@ import { set_option } from "../mod.ts";
 import { setup } from "../setup.ts";
 import { DenoFileStore } from "../store.ts";
 import { j, jo, jom } from "../util.ts";
-import { CacheFetch } from "../util/cache-fetch.ts";
+import { cache_fetch } from "../util/cache-fetch.ts";
 
 setup({
   // peoplle in the US get to see more stuff like Top Artists in Charts
   location: "US",
   // you must be logged in
   store: new DenoFileStore("store/muse-store.json"),
-  client: new CacheFetch(),
+  fetch: cache_fetch,
 });
 
 const english_strings = new Map([

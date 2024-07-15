@@ -1,11 +1,11 @@
-import { get_explore, get_home, setup } from "./mod.ts";
-import { get_option, set_option } from "./setup.ts";
+import { get_explore, setup } from "./mod.ts";
+import { get_option } from "./setup.ts";
 import { DenoFileStore } from "./store.ts";
-import { CacheFetch } from "./util/cache-fetch.ts";
+import { cache_fetch } from "./util/cache-fetch.ts";
 
 setup({
   store: new DenoFileStore("store/muse-store.json"),
-  client: new CacheFetch(true),
+  fetch: cache_fetch,
   debug: true,
 });
 

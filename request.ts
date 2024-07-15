@@ -9,7 +9,7 @@ type OrLowercase<T extends string> = T | Lowercase<T>;
 /**
  * Request options
  */
-export interface RequestInit {
+export interface FetchData {
   method?: OrLowercase<
     "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS" | "TRACE"
   >;
@@ -26,21 +26,14 @@ export type RequestFunction = (
 ) => Promise<Response>;
 
 export abstract class RequestClient {
-  abstract request(url: string, options: RequestInit): Promise<Response>;
+  abstract request(url: string, options: FetchData): Promise<Response>;
   auth_header: string | null = null;
   // request but return json
-  async request_json<T>(url: string, options: RequestInit) {
+  async request_json<T>(url: string, options: FetchData) {
     const response = await this.request(url, options);
     const json = await response.json();
     return json as T;
   }
-}
-
-export interface FetchInit {
-  method: string | undefined;
-  headers: Headers;
-  data: string | Uint8Array | undefined;
-  signal: AbortSignal | undefined;
 }
 
 export class FetchClient extends RequestClient {
@@ -48,16 +41,16 @@ export class FetchClient extends RequestClient {
     super();
   }
 
-  do_request(url: string, options: FetchInit) {
-    return fetch(url, {
+  private do_fetch(url: string, options: RequestInit) {
+    return get_option("fetch")(url, {
       method: options.method,
       headers: options.headers,
-      body: options.data,
+      body: options.body,
       signal: options.signal,
     });
   }
 
-  async request(path: string, options: RequestInit) {
+  async request(path: string, options: FetchData) {
     debug(options.method, path);
 
     const url = new URL(path);
@@ -130,10 +123,10 @@ export class FetchClient extends RequestClient {
 
     // debug(`Requesting ${options.method} with ${JSON.stringify(options)}`);
 
-    const response = await this.do_request(url.toString(), {
+    const response = await this.do_fetch(url.toString(), {
       method: options.method,
       headers,
-      data: hasData
+      body: hasData
         ? (options.raw_data || options.data instanceof Uint8Array)
           ? options.data as Uint8Array
           : JSON.stringify(options.data)

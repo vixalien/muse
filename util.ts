@@ -54,13 +54,3 @@ export function sum_total_duration(item: any) {
     );
   }
 }
-
-export function use_proxy(url: string) {
-  const proxy = get_option("proxy");
-
-  if (proxy) {
-    return proxy + "/" + new URL(url).href;
-  } else {
-    return url;
-  }
-}

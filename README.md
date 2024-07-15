@@ -44,6 +44,8 @@ You'll need to use a CDN that supports ES modules, such as
 [esm.sh](https://esm.sh/), [jspm.io](https://jspm.io/) or
 [skypack.dev](https://skypack.dev/).
 
+#### Proxy
+
 You'll also need to use a proxy server to get around CORS errors. It's a good
 idea to self host the proxy server
 ([cors-anywhere](https://github.com/Rob--W/cors-anywhere) and
@@ -56,7 +58,9 @@ import { search, set_option } from "https://esm.sh/libmuse@VERSION";
 // import { search, set_option } from "https://jspm.dev/npm:libmuse@VERSION";
 // import { search, set_option } from "https://cdn.skypack.dev/libmuse@VERSION";
 
-set_option("proxy", "https://proxy.example.com/");
+set_option("fetch", (url, options) => {
+  return fetch(`https://proxy.example.com/${url}`, options);
+});
 
 search("top radio")
   .then((data) => {
