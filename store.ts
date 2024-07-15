@@ -122,7 +122,7 @@ export class LocalStorageStore extends Store {
   }
 }
 
-export const get_default_store = (): Store => {
+export const get_best_store = (): Store => {
   // dnt-shim-ignore
   if ("Deno" in globalThis) {
     return new DenoFileStore("muse-store.json");
@@ -133,3 +133,6 @@ export const get_default_store = (): Store => {
     return new MemoryStore();
   }
 };
+
+/** @deprecated use `get_best_store` */
+export const get_default_store = get_best_store;

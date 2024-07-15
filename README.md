@@ -19,23 +19,16 @@ Don't forget to replace `VERSION` with the
 ### Deno
 
 ```ts
-import { get_song, search } from "https://deno.land/x/muse@VERSION/mod.ts";
+import * as muse from "https://deno.land/x/muse@VERSION/mod.ts";
 
 // you can also use the latest version (not recommended) with
-// import { get_song, search } from "https://deno.land/x/muse/mod.ts";
+// import * as muse from "https://deno.land/x/muse/mod.ts";
 
 // you can also import directly from github
-// import { get_song, search } from "https://raw.githubusercontent.com/vixalien/muse/VERSION/mod.ts";
+// import * as muse from "https://raw.githubusercontent.com/vixalien/muse/VERSION/mod.ts";
 
-search("drake")
-  .then((data) => {
-    console.log("search results", data);
-  });
-
-get_song("dQw4w9WgXcQ")
-  .then((data) => {
-    console.log("song", data);
-  });
+const search_results = await muse.search("drake");
+const rickroll = await muse.get_song("dQw4w9WgXcQ");
 ```
 
 ### Browser
@@ -53,19 +46,17 @@ idea to self host the proxy server
 are good options).
 
 ```js
-import { search, set_option } from "https://esm.sh/libmuse@VERSION";
+import * as muse from "https://esm.sh/libmuse@VERSION";
 
-// import { search, set_option } from "https://jspm.dev/npm:libmuse@VERSION";
-// import { search, set_option } from "https://cdn.skypack.dev/libmuse@VERSION";
+// import * as muse from "https://jspm.dev/npm:libmuse@VERSION";
+// import * as muse from "https://cdn.skypack.dev/libmuse@VERSION";
 
-set_option("fetch", (url, options) => {
+// setting up our proxy
+muse.set_option("fetch", (url, options) => {
   return fetch(`https://proxy.example.com/${url}`, options);
 });
 
-search("top radio")
-  .then((data) => {
-    console.log("search results", data);
-  });
+const search_results = await muse.search("top radio");
 ```
 
 ### Node
@@ -80,13 +71,10 @@ Then use it in by importing `libmuse`. The Node version has the exact same
 features as the Deno version.
 
 ```js
-import { get_song, search } from "libmuse";
-// commonjs: const { get_artist } = require("libmuse");
+import * as muse from "libmuse";
+// commonjs: const muse = require("libmuse");
 
-get_artist("UCvyjk7zKlaFyNIPZ-Pyvkng")
-  .then((data) => {
-    console.log("artist", data);
-  });
+const artist = await muse.get_artist("UCvyjk7zKlaFyNIPZ-Pyvkng");
 ```
 
 For the complete list of operations, see
@@ -104,21 +92,11 @@ Here's the flow:
 3. Get the OAuth token & refresh tokens
 
 ```ts
-import { get_option, setup } from "https://deno.land/x/muse@VERSION/mod.ts";
+import * as muse from "https://deno.land/x/muse@VERSION/mod.ts";
 
-/*
-node imports:
+const auth = muse.get_option("auth");
 
-import { get_option, setup } from "libmuse";
-
-commonjs imports:
-
-const { get_option, setup } = require("libmuse");
-*/
-
-const auth = get_option("auth");
-
-setup({
+muse.setup({
   // make sure to persist the token
   store: new DenoFileStore("store/muse-store.json"),
   debug: true,
@@ -165,66 +143,38 @@ Youtube TV login codes.
 You can pass in a storage object to the client to persist the auth token.
 
 ```ts
-import { setup } from "https://deno.land/x/muse@VERSION/mod.ts";
-import {
-  DenoFileStore,
-  get_default_store,
-  LocalStorageStore,
-  MemoryStore,
-  Store,
-} from "https://deno.land/x/muse@VERSION/store.ts";
+import * as muse from "https://deno.land/x/muse@VERSION/mod.ts";
 
-/*
-npm imports:
-
-import { setup } from "libmuse";
-import {
-  DenoFileStore,
-  get_default_store,
-  LocalStorageStore,
-  MemoryStore,
-  Store,
-} from "libmuse/store.js";
-
-commonjs imports:
-
-const { setup } = require("libmuse");
-const {
-  DenoFileStore,
-  get_default_store,
-  LocalStorageStore,
-  MemoryStore,
-  Store,
-} = require("libmuse/store.js");
-*/
-
-// you can use the default store, which is DenoFileStore if available, then LocalStorageStore, then MemoryStore
-const client = setup({ store: get_default_store() });
+// you can use the "best" store, which is DenoFileStore if available, then LocalStorageStore, then MemoryStore
+const client = muse.setup({ store: muse.get_best_store() });
 
 // or you can use any of the built-in stores
-const client = setup({ store: new DenoFileStore("/path/to/file.json") });
-const client = setup({ store: new LocalStorageStore() });
-const client = setup({ store: new MemoryStore() });
+const client = muse.setup({ store: new muse.DenoFileStore("/path/to/file.json") });
+const client = muse.setup({ store: new muse.LocalStorageStore() });
+const client = muse.setup({ store: new muse.MemoryStore() });
 
 // or you can implement your own store
 // by extending the Store abstract class
-class MyStore extends Store {
+class MyStore extends muse.Store {
   get<T>(key: string): T | null;
   set(key: string, value: unknown): void;
   delete(key: string): void;
 }
 
 // then use it accordingly
-const client = setup({ store: new MyStore() });
+const client = muse.setup({ store: new MyStore() });
 
 // Do note that setup() can be called multiple times, but it's not recommended. 
 // this is because setup overrides the global store, so if you call setup()
 // multiple times, other options set before will be ignored. example:
 
-setup({ auth: { /* custom auth options */ } });
-setup({ store: /* custom store */ });
+muse.setup({ auth: { /* custom auth options */ } });
+muse.setup({ store: /* custom store */ });
 
 // the above will only use the custom store, and ignore the custom auth options
+
+// if you need to configure options many times use `muse.set_option`
+muse.set_option("store", /* custom store */)
 ```
 
 ## Operations
