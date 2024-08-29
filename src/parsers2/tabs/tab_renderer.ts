@@ -2,7 +2,7 @@ import { assert, assertEquals } from "jsr:@std/assert";
 
 import { RawJSON } from "../types.d.ts";
 
-import { parseEndpoint } from "../endpoint/mod.ts";
+import { parse_endpoint } from "../endpoint/mod.ts";
 
 export interface ParseTabRendererResult {
   browseId: string;
@@ -12,7 +12,7 @@ export interface ParseTabRendererResult {
 
 export function parse_tab_renderer(content: RawJSON): ParseTabRendererResult {
   const tab = content.tabRenderer;
-  const browseEndpoint = parseEndpoint(tab.endpoint).endpoints.browse;
+  const browseEndpoint = parse_endpoint(tab.endpoint).endpoints.browse;
 
   assert(
     browseEndpoint,

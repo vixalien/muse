@@ -1,11 +1,11 @@
 import { RawJSON } from "../types.d.ts";
 import { BaseEndpointMap, KnownEndpointName } from "./types.d.ts";
 
-import { parseBrowseEndpoint } from "./endpoints/browse.ts";
+import { parse_browse_endpoint } from "./endpoints/browse.ts";
 import { KnownEndpoint } from "./types.d.ts";
 
 export const _endpointMap = {
-  "browse": parseBrowseEndpoint,
+  "browse": parse_browse_endpoint,
 } satisfies BaseEndpointMap;
 
 export enum EndpointType {
@@ -24,7 +24,7 @@ export interface ParseEndpointResult {
   endpoints: Partial<ParsedEndpoints>;
 }
 
-export function parseEndpoint(content: RawJSON): ParseEndpointResult {
+export function parse_endpoint(content: RawJSON): ParseEndpointResult {
   const endpointEntries = Object.entries(_endpointMap)
     .map(([name, parser]) => {
       const endpoint = content[name + "Endpoint"];

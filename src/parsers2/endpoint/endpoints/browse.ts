@@ -12,6 +12,10 @@ export interface BrowseEndpoint extends BaseEndpoint {
    * The ID to use while navigating
    */
   id: string;
+  /**
+   * Optional params, usually used to get more data of a specific kind
+   */
+  params?: string;
 }
 
 /**
@@ -19,9 +23,10 @@ export interface BrowseEndpoint extends BaseEndpoint {
  * @param content JSON
  * @returns
  */
-export function parseBrowseEndpoint(content: RawJSON): BrowseEndpoint {
+export function parse_browse_endpoint(content: RawJSON): BrowseEndpoint {
   return {
     type: EndpointType.BROWSE,
     id: content.browseId,
+    params: content.params,
   };
 }
