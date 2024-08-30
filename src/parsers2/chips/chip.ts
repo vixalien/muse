@@ -2,6 +2,7 @@ import { assertEquals } from "jsr:@std/assert";
 
 import { RawJSON } from "../types.d.ts";
 
+import { _parse_chips_list } from "./_chip_list.ts";
 import { parse_endpoint, ParseEndpointResult } from "../endpoint/mod.ts";
 import { parse_text_runs_simple } from "../runs/text_runs_simple.ts";
 
@@ -34,4 +35,8 @@ export function parse_chip(content: RawJSON): ParseChipResult {
     selected,
     navigation: parse_endpoint(chip.navigationEndpoint).endpoints,
   };
+}
+
+export function parse_chips(content: RawJSON) {
+  return _parse_chips_list(content, parse_chip);
 }
