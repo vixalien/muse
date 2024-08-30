@@ -1,13 +1,36 @@
 import { request_json } from "../../mixins/_request.ts";
 
+import { RawJSON } from "../../parsers2/types.d.ts";
 import { parse_single_column_browse_results_renderer } from "../../parsers2/tabs/mod.ts";
+import { parse_background, Thumbnail } from "../../parsers2/thumbnail/mod.ts";
+import { parse_mood_chips } from "../../parsers2/chips/mod.ts";
+import { ParseMoodChipResult } from "../../parsers2/chips/mood.ts";
+import { parse_section_list } from "../../parsers2/list/mod.ts";
 
-export async function get_home() {
+export type MoodChip = ParseMoodChipResult;
+
+export interface Home {
+  moods: MoodChip[];
+  thumbnails: Thumbnail[];
+  continuation: string | null;
+  content: RawJSON;
+}
+
+export async function get_home(): Promise<Home> {
   const json = await request_json("browse", {
     data: { browseId: "FEmusic_home" },
   });
 
+  const background = parse_background(json);
   const tab = parse_single_column_browse_results_renderer(json.contents).tab;
+  const section_list = parse_section_list(tab.content);
 
-  return tab;
+  const moods = parse_mood_chips(section_list.header);
+
+  return {
+    moods,
+    thumbnails: background.thumbnails,
+    continuation: section_list.nextContinuation,
+    content: section_list.contents,
+  };
 }
