@@ -95,7 +95,7 @@ export interface QueueTrack extends SongRuns {
   isExplicit: boolean;
   /**
    * The counterpart of the track.
-   * 
+   *
    * If this track is a video, the counterpart refers to the audio-only version
    * of the song or vice versa.
    */
@@ -123,7 +123,7 @@ export function parse_queue_track(data: any) {
     }
   }
 
-  const song_info = parse_song_runs(data.longBylineText.runs);
+  const song_info = parse_song_runs(data.longBylineText?.runs ?? []);
 
   const duration = jo(data, "lengthText.runs.0.text");
 
