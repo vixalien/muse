@@ -42,7 +42,7 @@ export async function cache_fetch(url: string, options: RequestInit) {
       await Deno.mkdir("store/cache", { recursive: true });
       await Deno.writeTextFile(
         cache_path,
-        JSON.stringify(await response.clone().json()),
+        JSON.stringify(await response.clone().json(), null, 2),
       );
     } catch {
       // not json probably: ignore
