@@ -1,5 +1,5 @@
 // ex. scripts/build_npm.ts
-import { build, emptyDir } from "https://deno.land/x/dnt@0.33.1/mod.ts";
+import { build, emptyDir } from "jsr:@deno/dnt";
 
 await emptyDir("./npm");
 
@@ -37,14 +37,13 @@ await build({
   ],
   outDir: "./npm",
   shims: {
-    // see JS docs for overview and more options
     deno: false,
   },
   packageManager: "npm",
   test: false,
   typeCheck: false,
   compilerOptions: {
-    lib: ["es2022", "dom"],
+    lib: ["ES2022"],
   },
   package: {
     // package.json properties
@@ -69,16 +68,9 @@ await build({
     bugs: {
       url: "https://github.com/vixalien/muse/issues",
     },
-    files: [
-      "/esm",
-      "/script",
-      "/types",
-      "LICENSE",
-      "README.md",
-    ],
+  },
+  postBuild() {
+    Deno.copyFileSync("LICENCE", "npm/LICENCE");
+    Deno.copyFileSync("README.md", "npm/README.md");
   },
 });
-
-// post build steps
-Deno.copyFileSync("LICENCE", "npm/LICENCE");
-Deno.copyFileSync("README.md", "npm/README.md");
