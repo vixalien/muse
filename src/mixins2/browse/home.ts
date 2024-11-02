@@ -6,6 +6,7 @@ import { parse_background, Thumbnail } from "../../parsers2/thumbnail/mod.ts";
 import { parse_mood_chips } from "../../parsers2/chips/mod.ts";
 import { ParseMoodChipResult } from "../../parsers2/chips/mood.ts";
 import { parse_section_list } from "../../parsers2/list/mod.ts";
+import { parse_music_carousel_shelf_renderers } from "../../parsers2/music_carousel/mod.ts";
 
 export type MoodChip = ParseMoodChipResult;
 
@@ -31,6 +32,6 @@ export async function get_home(): Promise<Home> {
     moods,
     thumbnails: background.thumbnails,
     continuation: section_list.nextContinuation,
-    content: section_list.contents,
+    content: parse_music_carousel_shelf_renderers(section_list.contents),
   };
 }
