@@ -16,6 +16,10 @@ export interface BrowseEndpoint extends BaseEndpoint {
    * Optional params, usually used to get more data of a specific kind
    */
   params?: string;
+  /**
+   * The type of this item
+   */
+  pageType?: string;
 }
 
 /**
@@ -28,5 +32,7 @@ export function parse_browse_endpoint(content: RawJSON): BrowseEndpoint {
     type: EndpointType.BROWSE,
     id: content.browseId,
     params: content.params,
+    pageType: content.browseEndpointContextSupportedConfigs
+      ?.browseEndpointContextMusicConfig.pageType,
   };
 }

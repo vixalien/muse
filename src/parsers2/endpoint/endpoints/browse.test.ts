@@ -29,4 +29,17 @@ describe("browseEndpoint", () => {
       }),
     ).toHaveProperty("params", "SOME_PARAMS");
   });
+
+  it("parses pageType", () => {
+    expect(
+      parse_browse_endpoint({
+        browseId: "SOME_BROWSE_ID",
+        browseEndpointContextSupportedConfigs: {
+          browseEndpointContextMusicConfig: {
+            pageType: "Page Type",
+          },
+        },
+      }),
+    ).toHaveProperty("pageType", "Page Type");
+  });
 });
