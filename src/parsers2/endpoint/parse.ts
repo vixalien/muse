@@ -10,6 +10,7 @@ export const _endpointMap = {
 
 export enum EndpointType {
   BROWSE,
+  NAVIGATION,
 }
 
 type EndpointResult<T extends KnownEndpointName> = ReturnType<
