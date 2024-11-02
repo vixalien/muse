@@ -2,6 +2,7 @@
   "tasks": {
     "example": "deno run --allow-net --allow-read --allow-write --allow-env=DEBUG ./examples/authentication.ts",
     "test": "deno test --allow-net --allow-read --allow-write --allow-env=DEBUG --fail-fast ./tests/",
+    "test2": "deno test src",
     "npm": "deno run -A ./scripts/npm.ts"
   },
   "lint": {

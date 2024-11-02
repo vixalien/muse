@@ -43,10 +43,9 @@ auth.addEventListener("requires-login", (event) => {
   resolve(auth_flow);
 });
 
-muse.get_library()
-  .then((data) => {
-    return Deno.writeTextFile(
-      "store/library.json",
-      JSON.stringify(data, null, 2),
-    );
-  });
+const data = await muse.get_home();
+
+await Deno.writeTextFile(
+  "store/home.json",
+  JSON.stringify(data, null, 2),
+);
