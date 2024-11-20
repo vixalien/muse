@@ -6,6 +6,7 @@
   },
   "lint": {
     "rules": {
+      "include": ["no-import-assertions"],
       "exclude": ["no-explicit-any"]
     }
   }
