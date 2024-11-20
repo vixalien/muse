@@ -1,4 +1,4 @@
-import CONSTANTS from "./constants-ng.json" assert { type: "json" };
+import CONSTANTS from "./constants-ng.json" with { type: "json" };
 import { RequestClient } from "./request.ts";
 import { wait } from "./util.ts";
 import { Store } from "./store.ts";

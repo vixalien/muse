@@ -1,4 +1,4 @@
-import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
+import CONSTANTS2 from "../constants-ng.json" with { type: "json" };
 
 import { get_continuations, get_sort_continuations } from "../continuations.ts";
 import {

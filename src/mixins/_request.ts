@@ -1,4 +1,4 @@
-import CONSTANTS2 from "../constants-ng.json" assert { type: "json" };
+import CONSTANTS2 from "../constants-ng.json" with { type: "json" };
 
 import { get_option, set_option } from "../setup.ts";
 

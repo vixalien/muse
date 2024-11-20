@@ -22,7 +22,7 @@ export interface FetchData {
 
 export type RequestFunction = (
   url: string,
-  options: RequestInit,
+  options: RequestInit
 ) => Promise<Response>;
 
 export abstract class RequestClient {
@@ -55,7 +55,7 @@ export class FetchClient extends RequestClient {
 
     const url = new URL(path);
 
-    (new URLSearchParams(options.params)).forEach((value, key) => {
+    new URLSearchParams(options.params).forEach((value, key) => {
       url.searchParams.set(key, value);
     });
 
@@ -72,7 +72,7 @@ export class FetchClient extends RequestClient {
       if (LOCALES.languages.findIndex((e) => e.value === lang) < 0) {
         throw new MuseError(
           ERROR_CODE.UNSUPPORTED_LANGUAGE,
-          `Unsupported locale: ${lang}`,
+          `Unsupported locale: ${lang}`
         );
       }
 
@@ -89,7 +89,7 @@ export class FetchClient extends RequestClient {
       if (LOCALES.locations.findIndex((e) => e.value === location) < 0) {
         throw new MuseError(
           ERROR_CODE.UNSUPPORTED_LOCATION,
-          `Unsupported location: ${location}`,
+          `Unsupported location: ${location}`
         );
       }
 
@@ -111,11 +111,7 @@ export class FetchClient extends RequestClient {
       }
 
       if (visitor_id) {
-        setNestedValue(
-          options.data!,
-          "context.client.visitorData",
-          visitor_id,
-        );
+        setNestedValue(options.data!, "context.client.visitorData", visitor_id);
       }
     }
 
@@ -127,8 +123,8 @@ export class FetchClient extends RequestClient {
       method: options.method,
       headers,
       body: hasData
-        ? (options.raw_data || options.data instanceof Uint8Array)
-          ? options.data as Uint8Array
+        ? options.raw_data || options.data instanceof Uint8Array
+          ? (options.data as Uint8Array)
           : JSON.stringify(options.data)
         : undefined,
       signal: options.signal,

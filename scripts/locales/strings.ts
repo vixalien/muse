@@ -5,7 +5,7 @@ import { request_json } from "../../src/mixins/_request.ts";
 import { set_option } from "../../src/mod.ts";
 import { setup } from "../../src/setup.ts";
 import { DenoFileStore } from "../../src/store.ts";
-import { j, jo, jom } from "../../src/util.ts";
+import { jo, jom } from "../../src/util.ts";
 import { cache_fetch } from "../../src/util/cache-fetch.ts";
 
 setup({
@@ -210,7 +210,7 @@ export const fetch_map: FetchMapItem[] = [
   },
 ];
 
-let base_strings = new Map();
+const base_strings = new Map();
 
 async function get_language_map() {
   const map = new Map<string, [uri: string, path: string]>();
