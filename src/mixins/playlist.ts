@@ -179,7 +179,7 @@ export async function get_playlist(
     thumbnails: j(header, THUMBNAILS),
     description: jo(header, "description", DESCRIPTION_SHELF, DESCRIPTION),
     type: run_count > 0 ? j(header, SUBTITLE) : null,
-    authors: parse_song_artists_runs(header.straplineTextOne.runs),
+    authors: parse_song_artists_runs(header.straplineTextOne?.runs),
     year: j(header, "subtitle.runs", (run_count - 1).toString(), "text"),
     trackCount: secondRuns ? secondRuns[0].text : null,
     duration: secondRuns && secondRuns.length > 2 ? secondRuns[2].text : null,
