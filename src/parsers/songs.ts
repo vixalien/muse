@@ -115,7 +115,7 @@ export interface ArtistRun {
   type: "artist" | "channel";
 }
 
-export function parse_song_artists_runs(runs) {
+export function parse_song_artists_runs(runs: any) {
   if (!runs)
     return [];
   const artists = [];
