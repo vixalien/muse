@@ -120,9 +120,8 @@ export function parse_song_artists_runs(runs: any) {
     return [];
   }
   const artists: ArtistRun[] = [];
-  const result = Array(Math.floor(runs.length / 2) + 1).fill(undefined).map((_, index) => index);
-  for (const i of result) {
-    const run = runs[i * 2];
+  for (let i = 0; i < runs.length; i += 2) {
+    const run = runs[i];
     if (run == null)
       continue;
     const page_type = jo(run, NAVIGATION_PAGE_TYPE);
