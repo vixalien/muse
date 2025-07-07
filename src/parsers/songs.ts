@@ -116,8 +116,9 @@ export interface ArtistRun {
 }
 
 export function parse_song_artists_runs(runs: any) {
-  if (!runs)
+  if (!runs) {
     return [];
+  }
   const artists: ArtistRun[] = [];
   const result = Array(Math.floor(runs.length / 2) + 1).fill(undefined).map((_, index) => index);
   for (const i of result) {
