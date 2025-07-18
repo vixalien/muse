@@ -116,26 +116,22 @@ export interface ArtistRun {
 }
 
 export function parse_song_artists_runs(runs: any) {
+  if (!runs || !Array.isArray(runs)) {
+    return [];
+  }
   const artists: ArtistRun[] = [];
-  const result = Array(Math.floor(runs.length / 2) + 1).fill(undefined).map((
-    _,
-    index,
-  ) => index);
-
-  for (const i of result) {
-    const run = runs[i * 2];
-
-    if (run == null) continue;
-
+  // Iterate through every other element in 'runs' because each artist entry is located at even indices.
+  for (let i = 0; i < runs.length; i += 2) {
+    const run = runs[i];
+    if (run === null || run === undefined)
+      continue;
     const page_type = jo(run, NAVIGATION_PAGE_TYPE);
-
     artists.push({
       name: run.text,
       id: jo(run, NAVIGATION_BROWSE_ID),
       type: page_type === "MUSIC_PAGE_TYPE_ARTIST" ? "artist" : "channel",
     });
   }
-
   return artists;
 }
 
