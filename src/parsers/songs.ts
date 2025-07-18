@@ -128,7 +128,7 @@ export function parse_song_artists_runs(runs: Run[] | undefined) {
   // Iterate through every other element in 'runs' because each artist entry is located at even indices.
   for (let i = 0; i < runs.length; i += 2) {
     const run = runs[i];
-    if (run == null)
+    if (run === null || run === undefined)
       continue;
     const page_type = jo(run, NAVIGATION_PAGE_TYPE);
     artists.push({
