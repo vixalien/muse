@@ -121,7 +121,7 @@ export interface Run {
 }
 
 export function parse_song_artists_runs(runs: Run[] | undefined) {
-  if (!runs) {
+  if (!Array.isArray(runs)) {
     return [];
   }
   const artists: ArtistRun[] = [];
