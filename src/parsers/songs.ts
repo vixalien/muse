@@ -115,7 +115,12 @@ export interface ArtistRun {
   type: "artist" | "channel";
 }
 
-export function parse_song_artists_runs(runs: any) {
+export interface Run {
+  text: string;
+  [key: string]: any; // Allow additional properties for flexibility
+}
+
+export function parse_song_artists_runs(runs: Run[] | undefined) {
   if (!runs) {
     return [];
   }
